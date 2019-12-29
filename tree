@@ -1,0 +1,57 @@
+nest_
+    _
+        do() -- sets this nest as top level branch
+        draw()
+        each() -- callback on every element
+        add()
+        is_nest_ = true
+        index (i)
+        parent (p)
+        enabled -- boolean or callback
+        load
+    
+    *
+    {} / nest_ -- table becomes nest via __newindex
+    _control
+        * -- (referenced by input and output)
+        
+        _
+            input -- inputs[0] (inp)
+            output -- outputs[0] (out)
+            inputs[] -- _input
+                input -- interface -> value (+meta)
+                    enabled -- boolean or callback
+            outputs[] -- _output
+                output -- value -> interface
+                    enabled -- boolean or callback
+            value -- {} (v)
+            meta -- {} (m)
+            event -- callback on input (args: value, meta) (e)
+            
+            is_control_ = true
+            target = _target
+            parent -- (p)
+            index -- (i)
+            set() -- set v + draw
+            get() -- get v
+            draw()
+
+_target
+    _
+    
+    {} / nest_ -- table becomes nest via __newindex
+    _control --
+
+_grid.control
+    x
+    y
+    z
+    lvl
+    offlvl
+    edge
+
+_screen.control
+    x
+    y
+    z
+    lvl
