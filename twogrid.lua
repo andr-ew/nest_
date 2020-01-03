@@ -1,4 +1,4 @@
-nest_:new({
-    mgrids.earthsea:new{size: 64},
-    mgrids.mlr:new()
+twogrids_:new({
+    earthsea:make{size: 64},
+    mlr:make()
 }).do()

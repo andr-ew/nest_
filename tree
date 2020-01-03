@@ -1,57 +1,151 @@
 nest_
     _
-        do() -- sets this nest as top level branch
-        draw()
-        each() -- callback on every element
-        add()
+        roost(nest_) -- sets self as roost, passes down
+        is_roost
+        init -- callback on roost()
+        each(self, function) -- callback on every child
+        +, +=
+        
         is_nest_ = true
         index (i)
         parent (p)
-        enabled -- boolean or callback
-        load
+        enabled -- boolean or callback (en)
+        order (o)
+        
+        groupidx = _group.index
+        metacontrol_targets = { _metacontrol }
+        
+        check(groupidx, args, metacontrols) -- pass to children
+        look(groupidx) -- pass to children, sort by z
+        draw(_group.id, method, args...) -- passed to parent (if is_roost then to _group)
+        
+        print() -- print all member keys
     
     *
     {} / nest_ -- table becomes nest via __newindex
     _control
-        * -- (referenced by input and output)
-        
-        _
-            input -- inputs[0] (inp)
-            output -- outputs[0] (out)
-            inputs[] -- _input
-                input -- interface -> value (+meta)
-                    enabled -- boolean or callback
-            outputs[] -- _output
-                output -- value -> interface
-                    enabled -- boolean or callback
-            value -- {} (v)
-            meta -- {} (m)
-            event -- callback on input (args: value, meta) (e)
-            
-            is_control_ = true
-            target = _target
-            parent -- (p)
-            index -- (i)
-            set() -- set v + draw
-            get() -- get v
-            draw()
+    _meta = {} -- properties discoverable by siblings and nephews
 
-_target
+
+_control
+    * -- (referenced by input and output)
+    value -- {} (v)
+    meta -- {} (m)
+    event -- callback on input (args: value, meta) (e)
+    order (o)
+    enabled -- boolean or callback
+
     _
-    
-    {} / nest_ -- table becomes nest via __newindex
-    _control --
+        input -- inputs[0] (inp)
+        output -- outputs[0] (out)
+        inputs[] -- _input
+            input -- interface -> value (+meta)
+                enabled -- boolean or callback
+        outputs[] -- _output
+            output -- value -> interface
+                enabled -- boolean or callback
 
-_grid.control
+        is_control_ = true
+        parent -- (p)
+        index -- (i)
+        
+        groupidx = _group.index
+        metacontrol_targets = { _metacontrol }
+        
+        check(_group.id, args, metacontrols) -- passed to input
+        look(_group.id) -- passed to output
+        draw(_group.id, method, args...) -- passed to parent
+        print() -- print all member keys
+        
+        
+        set() -- set v + draw
+        get() -- get v
+        print() -- print all member keys
+        
+_input
+    _
+        is_input
+        control
+        check(args, metacontrols) -- evaluate value change, if change pass to metacontrols
+        transform
+
+_output
+    _
+        is_output
+        control
+        look(_group.id) -- call draw() on control
+        transform
+        
+_metacontrol
+    _
+        is_metacontrol
+        pass
+    
+    targets -- append self to target.metacontrol_targets on set
+    target -- targets[0]
+
+_group -- stored in global variables & nest_api.groups
+    _
+        index
+    
+    nest_
+    _control
+    
+nest_api -- stored in global variable
+    draw() -- passed to roost
+    roost = nest_
+    init()
+    groups = { _group }
+    
+_grid
+    _
+        vport
+        enabled
+        grid -- the grid object
+        
+        check(x, y, z) -- input handler for vport, passes roost.check(self.index, {x,y,z,t}, {})
+        look() -- calls roost.look(self.index)
+        draw(method, args...) -- called by _grid.control instances
+        
+    _control
+    
+
+_grid.control / _grid.metacontrol
+    _
+        
     x
     y
-    z
     lvl
     offlvl
     edge
+    
+_screen
+    _
+        enabled
+        look() -- called by global redraw, calls roost.look(self.index)
+        draw(method, args...) -- called by _screen.control instances
+    
+    _control
 
-_screen.control
+_screen.control / _screen.metacontrol
     x
     y
-    z
     lvl
+    
+_enc
+    _
+        check(n, d) -- called by global enc(), passes roost.check(self.index, {n, d}, {})
+        
+    _control
+    
+    
+_enc.control / _enc.metacontrol
+    n
+    edge
+    
+_key
+    _
+        check(n, z) -- called by global key(), passes roost.check(self.index, {n, z}, {})
+
+_key.control / _key.metacontrol
+    n
