@@ -113,11 +113,21 @@ _grid
 _grid.control / _grid.metacontrol
     _
         
+    meta
+        time -- when edge == 0, time between last event & release
+        events -- when edge == 0, list of on keys & times
+        matrix -- value as binary matrix (also used by look)
+        real -- actual binary matrix for control
+        last -- last value
+        added -- when v is table, values added to v
+        removed -- when v is table, values removed from v
     x
     y
     lvl
     offlvl
-    edge
+    edge -- whether set v & call event() on every key down (sometimes also on key ups) or when all keys have been released
+    draw_slew -- timed linear glide between values (output only)
+    polyphony -- max number of concurrent values, -1 is infinite
     
 _screen
     _
