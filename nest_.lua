@@ -2,14 +2,14 @@ _input = {}
 function _input:new(o)
     local _ = {
         is_input = true,
+        -----------------------------addd init()
         control = nil,
         groupidx = nil,
         transform = function(v) return v end,
         handler = function(self, ...) return false end,
         check = function(self, groupidx, args)
             if(self._.groupidx == groupidx) then
-                self:handler(unpack(args))
-                return true
+                return self:handler(unpack(args))
             else return false end
         end
     }
@@ -41,10 +41,12 @@ function _output:new(o)
         groupidx = nil,
         transform = function(v) return v end,
         handler = function(self) return false end,
+        draw = function(self, ...)
+            self._.control._.draw(self._.control, self.groupidx, unpack(arg))
+        end,
         look = function(self, groupidx)
             if(self._.groupidx == groupidx) then
                 self:handler()
-                return true
             else return false end
         end
     }
@@ -70,7 +72,7 @@ end
 _control = {
     value = 0,
     meta = {},
-    event = function(s, v) end,
+    event = function(s, v, m) end,
     order = 0,
     enabled = true,
     init = function(s) end,
@@ -93,10 +95,14 @@ function _control:new(o)
         metacontrols_enabled = true,
         check = function(self, groupidx, args, metacontrols)
             for i,v in ipairs(_.inputs) do
-                if v:check(groupidx, args) then
+                local hargs = v:check(groupidx, args)
+                
+                if hargs ~= nil then
                     for i,v in ipairs(metacontrols) do
-                        v:pass(self, self.value, self.meta)
+                        v:pass(hargs)
                     end
+                    
+                    v:handler(hargs)
 
                     for i,v in ipairs(_.outputs) do
                         nest_api.groups[v.groupidx]:look()
@@ -106,7 +112,8 @@ function _control:new(o)
         end,
         look = function(self, groupidx)
             for i,v in ipairs(_.outputs) do
-                v:look(groupidx)
+                local hargs = v:look(groupidx)
+                if hargs ~= nil then v:handler(hargs) end
             end
         end,
         draw = function(self, groupidx, method, ...)
@@ -114,8 +121,10 @@ function _control:new(o)
         end,
         print = function(self) end,
         get = function(self) return self.value end,
-        set = function(self, v)
+        set = function(self, v) -----------------------~~~~~~~
             self.value = v
+            self:event(v, self.meta)
+            
             for i,v in ipairs(_.outputs) do
                 nest_api.groups[v.groupidx]:look()
             end
