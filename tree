@@ -5,22 +5,22 @@ nest_
         init -- callback on roost()
         each(self, function) -- callback on every child
         +, +=
-        
+
         is_nest_ = true
         index (i)
         parent (p)
         enabled -- boolean or callback (en)
         order (o)
-        
+
         groupidx = _group.index
         metacontrol_targets = { _metacontrol }
-        
+
         check(groupidx, args, metacontrols) -- pass to children
         look(groupidx) -- pass to children, sort by z
         draw(_group.id, method, args...) -- passed to parent (if is_roost then to _group)
-        
+
         print() -- print all member keys
-    
+
     *
     {} / nest_ -- table becomes nest via __newindex
     _control
@@ -48,20 +48,20 @@ _control
         is_control_ = true
         parent -- (p)
         index -- (i)
-        
+
         groupidx = _group.index
         metacontrol_targets = { _metacontrol }
-        
+
         check(_group.id, args, metacontrols) -- passed to input
         look(_group.id) -- passed to output
         draw(_group.id, method, args...) -- passed to parent
         print() -- print all member keys
-        
-        
+
+
         set() -- set v + draw
         get() -- get v
         print() -- print all member keys
-        
+
 _input
     _
         is_input
@@ -75,44 +75,44 @@ _output
         control
         look(_group.id) -- call draw() on control
         transform
-        
+
 _metacontrol
     _
         is_metacontrol
         pass
-    
+
     targets -- append self to target.metacontrol_targets on set
     target -- targets[0]
 
 _group -- stored in global variables & nest_api.groups
     _
         index
-    
+
     nest_
     _control
-    
+
 nest_api -- stored in global variable
     draw() -- passed to roost
     roost = nest_
     init()
     groups = { _group }
-    
+
 _grid
     _
         vport
         enabled
         grid -- the grid object
-        
+
         check(x, y, z) -- input handler for vport, passes roost.check(self.index, {x,y,z,t}, {})
         look() -- calls roost.look(self.index)
         draw(method, args...) -- called by _grid.control instances
-        
+
     _control
-    
+
 
 _grid.control / _grid.metacontrol
     _
-        
+
     meta
         last -- last value
         time -- when edge == 0, time between last event & release
@@ -122,41 +122,60 @@ _grid.control / _grid.metacontrol
         removed -- when v is table, values removed from v
     x
     y
-    lvl -- = { on, off} , when enum { lvl0, lvl1, lvl2, lvl3, etc }
+    lvl -- = { on, off } , when enum { lvl0, lvl1, lvl2, lvl3, etc }
     edge -- whether to call event() on every key down (sometimes also on key ups) or when all keys have been released
     draw_slew -- timed linear glide between values (output only)
     polyphony -- max number of concurrent values, -1 is infinite
-    
-    
+
+
+_grid.control.input
+    handlers
+        point
+            edge_mode
+                function
+        line
+            edge_mode
+                function
+        plane
+            edge_mode
+                function
+
+_grid.control.output
+    handlers
+        point
+        line_x
+        line_y
+        plane
+
 _grid.momentary
 _grid.toggle
 _grid.value
 _grid.enum
-    
+
 _screen
     _
         enabled
         look() -- called by global redraw, calls roost.look(self.index)
         draw(method, args...) -- called by _screen.control instances
-    
+
     _control
 
 _screen.control / _screen.metacontrol
     x
     y
     lvl
-    
+
 _enc
     _
         check(n, d) -- called by global enc(), passes roost.check(self.index, {n, d}, {})
-        
+
     _control
-    
-    
+
+
 _enc.control / _enc.metacontrol
     n
     edge
-    
+
 _key
     _
         check(n, z) -- called by global key(), passes roost.check(self.index, {n, z}, {})
