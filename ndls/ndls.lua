@@ -62,7 +62,7 @@ for i = 1, 4 do
                 end
             end
         },
-        rate = _grid.value:new{
+        rate = _grid.value:new{ -- _grid.glide
             x = {1, 15},
             y = i,
             v = 7,
@@ -180,5 +180,3 @@ n_.page = _grid.value:new{
     x = {14, 15},
     y = {4, 7}
 }
-
-

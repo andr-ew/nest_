@@ -13,9 +13,9 @@ function _input:new(o)
             else return false end
         end
     }
-    
+
     o = o or {}
-    
+
     if self._ ~= nil then
         setmetatable(_, self._)
         self._.__index = self._
@@ -29,7 +29,7 @@ function _input:new(o)
         elseif _.control[k] ~= nil then return _.control[k]
         else return rawget(self, k) end
     end
-    
+
     return o
 end
 
@@ -50,9 +50,9 @@ function _output:new(o)
             else return false end
         end
     }
-    
+
     o = o or {}
-    
+
     if self._ ~= nil then
         setmetatable(_, self._)
         self._.__index = self._
@@ -71,7 +71,7 @@ end
 
 _control = {
     value = 0,
-    meta = {},
+    -- meta = {},
     event = function(s, v, m) end,
     order = 0,
     enabled = true,
@@ -96,12 +96,12 @@ function _control:new(o)
         check = function(self, groupidx, args, metacontrols)
             for i,v in ipairs(_.inputs) do
                 local hargs = v:check(groupidx, args)
-                
+
                 if hargs ~= nil then
                     for i,v in ipairs(metacontrols) do
                         v:pass(hargs)
                     end
-                    
+
                     v:handler(hargs)
 
                     for i,v in ipairs(_.outputs) do
@@ -124,7 +124,7 @@ function _control:new(o)
         set = function(self, v) -----------------------~~~~~~~
             self.value = v
             self:event(v, self.meta)
-            
+
             for i,v in ipairs(_.outputs) do
                 nest_api.groups[v.groupidx]:look()
             end
@@ -132,14 +132,14 @@ function _control:new(o)
         write = function(self) end,
         read = function(self) end
     }
-    
+
     o = o or {}
-    
+
     if self._ ~= nil then
         setmetatable(_, self._)
         self._.__index = self._
     end
-    
+
     setmetatable(self.inputs, {
         _index = function(t, k)
             return _.inputs[k]
@@ -151,7 +151,7 @@ function _control:new(o)
             end
         end
     })
-    
+
     setmetatable(self.outputs, {
         _index = function(t, k)
             return _.outputs[k]
@@ -163,7 +163,7 @@ function _control:new(o)
             end
         end
     })
-    
+
     setmetatable(_.inputs, {
         _index = function(t, k)
             return rawget(t,k)
@@ -176,7 +176,7 @@ function _control:new(o)
             end
         end
     })
-    
+
     setmetatable(_.outputs, {
         _index = function(t, k)
             return _.outputs[k]
@@ -189,19 +189,19 @@ function _control:new(o)
             end
         end
     })
-    
+
     setmetatable(o, self)
-        
+
     local concat = function (n1, n2)
         for k, v in pairs(n2) do
             n1[k] = v
         end
         return n1
     end
-    
+
     self.__concat = concat
     _.__concat = concat
-        
+
     self.__tostring = function(t) end
 
     self.__index = function(t, k)
@@ -212,7 +212,7 @@ function _control:new(o)
                 else return nil end
             end
         end
-        
+
         if k == "_" then return _
         elseif k == "i" then return _.index
         elseif k == "p" then return _.parent
@@ -228,19 +228,19 @@ function _control:new(o)
         elseif findmeta(_.parent) ~= nil then return findmeta(_.parent)
         else return rawget(self, k) end
     end
-    
+
     _.inputs[1] = _input:new()
     _.outputs[1] = _output:new()
-    
+
     _.inputs[1]._.control = self
     _.outputs[1]._.control = self
-    
+
     _.inputs[1]._.groupidx = _.groupidx
     _.outputs[1]._.groupidx = _.groupidx
-    
+
     return o
 end
-    
+
 _metacontrol = _control:new()
 
 _metacontrol.targets = {}
@@ -258,7 +258,7 @@ setmetatable(_metacontrol.targets, {
 nest_ = {}
 function nest_:new(o)
     local _ = {
-        roost = function(self) 
+        roost = function(self)
             nest_api.roost = self
             self.is_roost = true
         end,
@@ -266,7 +266,7 @@ function nest_:new(o)
         do_init = function(self)
             self:init()
             table.sort(self, function(a,b) return a.order < b.order end)
-            
+
             for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
         end,
         init = function(self) end,
@@ -284,12 +284,12 @@ function nest_:new(o)
                 for i,v in ipairs(self.metacontrols) do table.insert(metacontrols, v) end
             else metacontrols = nil
             end
-            
+
             for k,v in pairs(self) do if v.is_nest or v.is_control then
                 v:check(groupidx, args, metacontrols)
             end end
         end,
-        look = function(self, groupidx) 
+        look = function(self, groupidx)
             for k,v in pairs(self) do if v.is_nest or v.is_control then
                 v:look(groupidx)
             end end
@@ -305,14 +305,14 @@ function nest_:new(o)
         write = function(self) end,
         read = function(self) end
     }
-    
+
     o = o or {}
-    
+
     if self._ ~= nil then
         setmetatable(_, self._)
         self._.__index = self._
     end
-        
+
     local function nestify(parent, index, v)
         if type(v) == "table" then
             if v.is_control then
@@ -320,14 +320,14 @@ function nest_:new(o)
             else
                 v = nest_:new(v)
             end
-            
+
             rawset(o, "index", index)
             rawset(o, "parent", parent)
         end
     end
-    
+
     setmetatable(o, self)
-    
+
     self.__index = function(t, k)
         if k == "_" then return _
         elseif k == "i" then return _.index
@@ -342,19 +342,19 @@ function nest_:new(o)
         nestify(t, k, v)
         rawset(t,k,v)
     end
-    
+
     local concat = function (n1, n2)
         for k, v in pairs(n2) do
             n1[k] = v
         end
         return n1
     end
-    
+
     self.__concat = concat
     _.__concat = concat
-    
+
     self.__tostring = function(t) end
-    
+
     for k,v in pairs(o) do nestify(o, k, v) end
 
     return o
@@ -372,7 +372,7 @@ function _group:new(o)
         look = function(self) end,
         draw = function(self, method, ...) end
     }
-    
+
     o = o or {}
 
     if self._ ~= nil then
@@ -387,19 +387,19 @@ function _group:new(o)
         elseif _[k] ~= nil then return _[k]
         else return rawget(self, k) end
     end
-    
+
     self.__newindex = function(t, k, v)
         if type(v) == "table" and v.is_control ~= nil then
             v._.group = t
             rawset(t,k,v)
         end
     end
-    
+
     return o
 end
 
 nest_api = {
-    init = function(self) 
+    init = function(self)
         for k,v in pairs(self.groups) do v:init() end
         self.roost:do_init()
     end,
@@ -410,7 +410,7 @@ setmetatable(nest_api.groups, {
     __newindex = function(t, k, v)
 --        v._.index = k -- metatable issue ?
         _G[k] = v
-                
+
         rawset(t,k,v)
     end
 })

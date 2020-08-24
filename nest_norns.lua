@@ -20,7 +20,9 @@ nest_api.groups._key = _group:new()
 _grid.control = _control:new{
     x = 0,
     y = 0,
-    lvl = { _off, _hi },
+    lvl = { _off, _hi }
+    -- depricate
+    ,
     edge = 1,
     draw_slew = 0,
     polyphony = -1,
@@ -32,6 +34,7 @@ _grid.control = _control:new{
         added = nil,
         removed = nil,
     }
+    -- depricate
 }
 
 _grid.control.input._.handlers = {
@@ -48,27 +51,27 @@ _grid.control.input._.check = function(self, groupidx, args)
     if(self._.groupidx == groupidx) then
         local contained = { x = false, y = false }
         local axis_val = { x = nil, y = nil }
-        
+
         for i,v in ipairs{"x", "y"} do
-            if type(self[v]) == "table" then 
+            if type(self[v]) == "table" then
                 if #self[v] == 1 then
                     self[v] = self[v][1]
-                    if self[v] == args[v] then 
+                    if self[v] == args[v] then
                         contained[v] = true
                     end
                 elseif #self[v] == 2 then
-                    if  self[v][1] <= args[v] and args[v] <= self[v][2] then 
+                    if  self[v][1] <= args[v] and args[v] <= self[v][2] then
                         contained[v] = true
                         axis_val[v] = args[v] - self[v][1] + 1
                     end
                 end
             else
-                if self[v] == args[v] then 
+                if self[v] == args[v] then
                     contained[v] = true
                 end
             end
         end
-        
+
         if contained.x and contained.y then
             if axis_val.x == nil and axis_val.y == nil then
                 return { "point", args.z }
@@ -99,16 +102,16 @@ end
 _grid.control.output._.look = function(self, groupidx)
     if(self._.groupidx == groupidx) then
         local has_axis = { x = false, y = false }
-        
+
         for i,v in ipairs{"x", "y"} do
-            if type(self[v]) == "table" then 
+            if type(self[v]) == "table" then
                 if #self[v] == 1 then
                 elseif #self[v] == 2 then
                     has_axis[v] = true
                 end
             end
         end
-        
+
         if has_axis.x == false and has_axis.y == false then
             return { "point" }
         elseif has_axis.x and has_axis.y then
@@ -126,7 +129,10 @@ end
 _grid.metacontrol = _metacontrol:new{
     x = 0,
     y = 0,
-    lvl = { _off, _hi },
+    lvl = { _off, _hi }
+
+    -- depricate
+    ,
     edge = 1,
     draw_slew = 0,
     polyphony = -1,
@@ -138,6 +144,7 @@ _grid.metacontrol = _metacontrol:new{
         added = nil,
         removed = nil,
     }
+    -- depricate
 }
 
 ------ refactor for edge mode granularity --------------
@@ -160,7 +167,7 @@ _grid.metacontrol.output._.handler = _grid.control.output._.handler
 _grid.metacontrol.output._.look = _grid.control.output._.look
 
 _grid.momentary = _grid.control:new()
-_grid.momentary.input.handlers = { 
+_grid.momentary.input.handlers = {
     point = {
         function(self, z)
             self.meta.last = self.value
@@ -236,7 +243,7 @@ _grid.momentary.input.handlers = {
                 self.meta.removed = x
                 self.meta.matrix[x] = 0
                 for i,v in ipairs(self.value) do
-                    if v == x then 
+                    if v == x then
                         table.remove(self.value, i)
                     end
                 end
@@ -273,7 +280,7 @@ _grid.momentary.input.handlers = {
                 if done then
                     self.meta.time = util.time() - self.meta.events[1].time
 
-                    for i = 1, rx do 
+                    for i = 1, rx do
                         self.meta.matrix[i] = {}
                         for j = 1, ry do
                             self.meta.matrix[i][j] = 0
@@ -298,7 +305,7 @@ _grid.momentary.input.handlers = {
                 if self.polyphony > -1 and #self.value > self.polyphony then
                     table.remove(self.value, 1)
                 end
-                for i = 1, rx do 
+                for i = 1, rx do
                     self.meta.matrix[i] = {}
                     for j = 1, ry do
                         self.meta.matrix[i][j] = 0
@@ -322,37 +329,37 @@ _grid.momentary.input.handlers = {
 }
 
 local ____mtrx__ = {}
-        
+
 _grid.momentary.output.handlers = {
     point = function(self)
         self:draw("led", self.x, self.y, self.lvl[self.value])
     end,
-    line_x = function(self) 
+    line_x = function(self)
         ____mtrx__ = {}
         for i = 1, self.x[2] - self.x[1] do ____mtrx__[i] = self.lvl[1] end
         for i,v in ipairs(self.value) do ____mtrx__[v] = self.lvl[2] end
         for i,v in ipairs(____mtrx__) do self:draw("led", i + self.x[1], self.y, v) end
     end,
-    line_y = function(self) 
+    line_y = function(self)
         ____mtrx__ = {}
         for i = 1, self.y[2] - self.y[1] do ____mtrx__[i] = self.lvl[1] end
         for i,v in ipairs(self.value) do ____mtrx__[v] = self.lvl[2] end
         for i,v in ipairs(____mtrx__) do self:draw("led", self.x, i + self.y[1], v) end
     end,
-    plane = function(self) 
+    plane = function(self)
         ____mtrx__ = {}
         for i = 1, self.x[2] - self.x[1] do
             ____mtrx__[i] = {}
-            for j = 1, self.y[2] - self.y[1] do 
-                ____mtrx__[i][j] = self.lvl[1] 
+            for j = 1, self.y[2] - self.y[1] do
+                ____mtrx__[i][j] = self.lvl[1]
             end
         end
-        
+
         for i,v in ipairs(self.value) do ____mtrx__[v.x][v.y] = self.lvl[2] end
-        
-        for i,v in ipairs(____mtrx__) do 
-            for j,v in ipairs(____mtrx__[i]) do 
-                self:draw("led", i + self.x[1], j + self.y[1], v) 
+
+        for i,v in ipairs(____mtrx__) do
+            for j,v in ipairs(____mtrx__[i]) do
+                self:draw("led", i + self.x[1], j + self.y[1], v)
             end
         end
     end
@@ -420,7 +427,7 @@ _grid.value.input.handlers = {
             if self.edge == 1 and z == 1 then
                 self.meta.last = self.value
                 self.value = { x = x, y = y }
-                for i = 1, rx do 
+                for i = 1, rx do
                     self.meta.matrix[i] = {}
                     for j = 1, ry do
                         self.meta.matrix[i][j] = self.value.x == i and self.value.y == j ? 1 : 0 end
@@ -443,7 +450,7 @@ _grid.value.input.handlers = {
                     self.meta.time = util.time() - self.meta.events[1].time
                     self.meta.last = self.value
                     self.value = { x, y }
-                    for i = 1, rx do 
+                    for i = 1, rx do
                         self.meta.matrix[i] = {}
                         for j = 1, ry do
                             self.meta.matrix[i][j] = self.value.x == i and self.value.y == j ? 1 : 0 end
@@ -461,17 +468,17 @@ _grid.value.output.handlers = {
     point = function(self)
         self:draw("led", self.x, self.y, self.lvl[2])
     end,
-    line_x = function(self) 
+    line_x = function(self)
         for i = self.x[1], self.x[2] do
             self:draw("led", i, self.y, self.lvl[self.value == i - self.x[1] ? 2 : 1])
         end
     end,
-    line_y = function(self) 
+    line_y = function(self)
         for i = self.y[1], self.y[2] do
             self:draw("led", self.x, i, self.lvl[self.value == i - self.y[1] ? 2 : 1])
         end
     end,
-    plane = function(self) 
+    plane = function(self)
         for i = self.x[1], self.x[2] do
             for j = self.y[1], self.y[2] do
                 self:draw("led", i, j, self.lvl[self.value.x == i - self.x[1] and self.value.y == j - self.y[1] ? 2 : 1])
@@ -501,11 +508,11 @@ for i = 1,4 do
         nest_api.roost:look(self.index)
         self.handler:refresh()
     end
-    
+
     grp.handler.key = function(...)
         grp:check(arg)
     end
-    
+
     nest_api.groups["_grid" .. tostring(i)] = grp
 end
 
