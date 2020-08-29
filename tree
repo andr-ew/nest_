@@ -162,7 +162,8 @@ _enc
 _enc.control / _enc.metacontrol
     n
 
-_enc.param.* -- param lives inside !
+_enc.param -- no internal data, linked to param instead
+    id
 
 _key
     _
@@ -170,3 +171,6 @@ _key
 
 _key.control / _key.metacontrol
     n
+
+_key.param
+    id
