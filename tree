@@ -34,8 +34,6 @@ _control
     enabled -- boolean or callback
 
     _
-        input -- inputs[0] (inp)
-        output -- outputs[0] (out)
         inputs[] -- _input
             input -- interface -> value (+meta)
                 enabled -- boolean or callback
@@ -72,7 +70,7 @@ _output
     _
         is_output
         control
-        look(_group.id) -- call draw() on control
+        look(_group.id) -- call draw() on control or group
         transform
 
 _metacontrol
@@ -89,6 +87,7 @@ _group -- stored in global variables & nest_api.groups
 
     nest_
     _control
+    _group
 
 nest_api -- stored in global variable
     draw() -- passed to roost
@@ -151,6 +150,8 @@ _screen.control / _screen.metacontrol
     x
     y
     lvl
+
+_screen.param
 
 _enc
     _
