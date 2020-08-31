@@ -2,15 +2,21 @@ _input = {}
 function _input:new(o)
     local _ = {
         is_input = true,
-        -----------------------------addd init()
         control = nil,
         groupidx = nil, ---> group, add deviceidx
+
+        --[[
+        
+        deviceidx must me a key from self.devices, defined on an elder
+
+        ]]
+
         transform = function(v) return v end,
         handler = function(self, ...) return false end,
-        check = function(self, groupidx, args)
+        check = function(self, groupidx, args) ---> update
             if(self._.groupidx == groupidx) then
 
-            -- [[
+            --[[
 
             here, to support multi-device groups like _grid & _arc (no more _grid1, grid2, ...) we'll need to pass down a deviceidx (index of group.device) & compare w/ self.deviceidx rather than self.groupidx
 
@@ -46,6 +52,13 @@ function _output:new(o)
         is_output = true,
         control = nil,
         groupidx = nil,  ---> group, add deviceidx
+
+        --[[
+        
+        deviceidx must me a key from self.devices, defined on an elder
+
+        ]]
+
         transform = function(v) return v end,
         handler = function(self) return false end, --> redraw
         draw = function(self, ...) --> throw (?)
@@ -53,19 +66,28 @@ function _output:new(o)
 
             --[[
 
-            lets say that the handler is welcome to perform draw actions straight on the device in the normal style ( screen.text() ).
+            lets say that the handler is welcome to perform draw actions straight on the device in a familiar style ( s.screen.text() ).
 
-            to allow a nest of controls to be reassigned to a different Grid or Arc objects on seprate vports, we'll establish the convention of placing:
+            to allow a nest of controls to be reassigned to a different Grid or Arc objects on seprate vports, we'll establish the convention of placing something like:
 
                 _meta = {
-                    g = grid.connect(vport)
-                    a = arc.connect(vport)
-                    deviceidx = vport
+                    devices = {
+                        grid = { Grid.vport }
+                        arc = { Arc.vport }
+                        screen = screen,
+                        g = devices.grid[1],
+                        a = devices.grid[2]
+                    },
+                    grid = devices.grid,
+                    arc = devies.arc,
+                    screen = screen,
+                    g = devices.grid[1],
+                    a = devices.arc[1]
                 }
 
-            on the parent nest or nest relevant to a particular grid/arc. in the handler, you can access the intended device like this: s.g.led()
+            on the parent nest or nest relevant to a particular device. in the handler, you can access the intended device like this: s.g:led()
 
-            the _meta assignment could be astracted as: _grid.connect(<_nest>, vport)
+            the _meta assignment could be astracted as: nest_:connect(grid.connect(), arc.connect(), screen). this also defines the device handlers to call :update_draw(deviceidx) or :draw() (fka check, look) on this nest 
 
             in special cases, this function here can be used to 'throw' args up to an elder nest. this nest would have a 'catch()' defined that takes those args & draws to a device (useful for screen UIs, probably other things)
 
@@ -99,7 +121,7 @@ end
 
 _control = {
     value = 0,
-    event = function(s, v) end,
+    event = function(s, v) end, ---> action
     order = 0,
     enabled = true,
     init = function(s) end,
@@ -107,6 +129,7 @@ _control = {
     outputs = {},
     help = function(s) end
 }
+
 function _control:new(o)
     local _ = {
         inputs = {},
@@ -156,6 +179,19 @@ function _control:new(o)
                 nest_api.groups[v.groupidx]:look()  ---> group, add deviceidx
             end
         end,
+
+        --[[
+        
+        add param = nil
+        add :link(param.id)
+            set param to param
+            set v to param.value
+            set get & set to param .get & .set
+            overwrite param.action to update self, run self.action
+        end
+
+        ]]
+
         write = function(self) end,
         read = function(self) end
     }

@@ -25,6 +25,8 @@ nest_
     _meta = {} -- properties discoverable by siblings and nephews
 
 
+CONCEPT: in place of value + eddvent, we can use a param, state is stored in param
+
 _control
     * -- (referenced by input and output)
     value -- {} (v)
@@ -52,9 +54,9 @@ _control
         look(_group.id) -- passed to output
         draw(_group.id, method, args...) -- passed to parent
         print() -- print all member keys
+        link(param.id) -- link
 
-
-        set() -- set v + draw
+        set(v, silent) -- set v + draw
         get() -- get v
         print() -- print all member keys
 
