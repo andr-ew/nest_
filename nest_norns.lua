@@ -1,15 +1,10 @@
-util = { time = function() return 0 end }
+util = { time = function() return 0 end } --rm
 
 dofile '/Users/instrument/Documents/code/nest_/nest_.lua'
 
-grid = { connect = function() return { all = function() end } end }
+grid = { connect = function() return { all = function() end } end }  --rm
 
-_off = 0
-_low = 4
-_med = 8
-_hi = 15
-
-local _grid = _group:new()
+local _grid = _group:new() -- revisit, now multiple devices for one group
 nest_api.groups._screen = _group:new()
 nest_api.groups._enc = _group:new()
 nest_api.groups._key = _group:new()
@@ -21,20 +16,6 @@ _grid.control = _control:new{
     x = 0,
     y = 0,
     lvl = { _off, _hi }
-    -- depricate
-    ,
-    edge = 1,
-    draw_slew = 0,
-    polyphony = -1,
-    meta = {
-        time = nil,
-        events = {},
-        matrix = {},
-        last = nil,
-        added = nil,
-        removed = nil,
-    }
-    -- depricate
 }
 
 _grid.control.input._.handlers = {
@@ -130,24 +111,7 @@ _grid.metacontrol = _metacontrol:new{
     x = 0,
     y = 0,
     lvl = { _off, _hi }
-
-    -- depricate
-    ,
-    edge = 1,
-    draw_slew = 0,
-    polyphony = -1,
-    meta = {
-        time = nil,
-        events = {},
-        matrix = {},
-        last = nil,
-        added = nil,
-        removed = nil,
-    }
-    -- depricate
 }
-
------- refactor for edge mode granularity --------------
 
 _grid.metacontrol.input._.handlers = {
      point = { function(self, z) end },
@@ -165,6 +129,11 @@ _grid.metacontrol.output._.handlers = {
 }
 _grid.metacontrol.output._.handler = _grid.control.output._.handler
 _grid.metacontrol.output._.look = _grid.control.output._.look
+
+
+-- revisit specific controls, meta & edge modes are depricated, so there will be more controls with less options, meta members become either extra arguments to event() and/or extra values in the control
+
+-- also jeez, these should be in nest_norns_grid.lua or something
 
 _grid.momentary = _grid.control:new()
 _grid.momentary.input.handlers = {
@@ -487,6 +456,8 @@ _grid.value.output.handlers = {
     end
 }
 
+-------------------------------------------------------------- / revisit
+
 function redraw()
     screen.clear()
     nest_api.roost:look(_screen.index)
@@ -498,6 +469,8 @@ _screen.look = redraw
 _screen.draw = function(self, method, ...)
     screen[method](unpack(arg))
 end
+
+-- revisit, now multiple devices for one group
 
 for i = 1,4 do
     local grp = _grid:new()
@@ -518,6 +491,8 @@ end
 
 _grids = { _grid1, _grid2, _grid3, _grid4 }
 _grid = _grid1
+
+-- /revisit
 
 function key()
     _key:check(arg)
