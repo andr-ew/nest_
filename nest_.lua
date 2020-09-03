@@ -3,25 +3,11 @@ function _input:new(o)
     local _ = {
         is_input = true,
         control = nil,
-        groupidx = nil, ---> group, add deviceidx
-
-        --[[
-        
-        deviceidx must me a key from self.devices, defined on an elder
-
-        ]]
-
+        deviceidx = nil,
         transform = function(v) return v end,
         handler = function(self, ...) return false end,
-        check = function(self, groupidx, args) ---> update
-            if(self._.groupidx == groupidx) then
-
-            --[[
-
-            here, to support multi-device groups like _grid & _arc (no more _grid1, grid2, ...) we'll need to pass down a deviceidx (index of group.device) & compare w/ self.deviceidx rather than self.groupidx
-
-            ]]
-
+        update = function(self, deviceidx, args)
+            if(self._.deviceidx == deviceidx) then
                 return self:handler(unpack(args))
             else return false end
         end
@@ -51,22 +37,15 @@ function _output:new(o)
     local _ = {
         is_output = true,
         control = nil,
-        groupidx = nil,  ---> group, add deviceidx
-
-        --[[
-        
-        deviceidx must me a key from self.devices, defined on an elder
-
-        ]]
-
+        deviceidx = nil,
         transform = function(v) return v end,
-        handler = function(self) return false end, --> redraw
-        draw = function(self, ...) --> throw (?)
-            self._.control._.draw(self._.control, self.groupidx, unpack(arg))
+        redraw = function(self) return false end,
+        throw = function(self, ...)
+            self._.control._.throw(self._.control, self.deviceidx, unpack(arg))
 
             --[[
 
-            lets say that the handler is welcome to perform draw actions straight on the device in a familiar style ( s.screen.text() ).
+            lets say that redraw() is welcome to perform draw actions straight on the device in a familiar style ( s.screen.text() ).
 
             to allow a nest of controls to be reassigned to a different Grid or Arc objects on seprate vports, we'll establish the convention of placing something like:
 
@@ -85,18 +64,18 @@ function _output:new(o)
                     a = devices.arc[1]
                 }
 
-            on the parent nest or nest relevant to a particular device. in the handler, you can access the intended device like this: s.g:led()
+            on the parent nest or nest relevant to a particular device. in redraw, you can access the intended device like this: s.g:led()
 
-            the _meta assignment could be astracted as: nest_:connect(grid.connect(), arc.connect(), screen). this also defines the device handlers to call :update_draw(deviceidx) or :draw() (fka check, look) on this nest 
+            the _meta assignment could be astracted as: nest_:connect(grid.connect(), arc.connect(), screen). this also defines the device handlers to call :update_throw(deviceidx) or :draw() (fka update, draw) on this nest 
 
             in special cases, this function here can be used to 'throw' args up to an elder nest. this nest would have a 'catch()' defined that takes those args & draws to a device (useful for screen UIs, probably other things)
 
             ]]
 
         end,
-        look = function(self, groupidx) --> draw
-            if(self._.groupidx == groupidx) then  ---> group, add deviceidx.deviceidx == deviceidx
-                self:handler() --> redraw
+        draw = function(self, deviceidx)
+            if(self._.deviceidx == deviceidx) then
+                self:redraw() 
             else return false end
         end
     }
@@ -121,7 +100,7 @@ end
 
 _control = {
     value = 0,
-    event = function(s, v) end, ---> action
+    action = function(s, v) end,
     order = 0,
     enabled = true,
     init = function(s) end,
@@ -140,12 +119,12 @@ function _control:new(o)
         do_init = function(self)
             self:init()
         end,
-        groupidx = nil,  ---> group, add deviceidx
+        group = nil,
         metacontrols = {},
         metacontrols_enabled = true,
-        check = function(self, groupidx, args, metacontrols)  ---> group, add deviceidx
+        update = function(self, deviceidx, args, metacontrols)
             for i,v in ipairs(_.inputs) do
-                local hargs = v:check(groupidx, args)  ---> group, add deviceidx
+                local hargs = v:update(deviceidx, args)
 
                 if hargs ~= nil then
                     for i,v in ipairs(metacontrols) do
@@ -155,28 +134,30 @@ function _control:new(o)
                     v:handler(hargs)
 
                     for i,v in ipairs(_.outputs) do
-                        nest_api.groups[v.groupidx]:look()  ---> group, add deviceidx
+                        nest_api.groups[v.deviceidx]:draw()
                     end
                 end
             end
         end,
-        look = function(self, groupidx) --> draw
+        draw = function(self, deviceidx)
             for i,v in ipairs(_.outputs) do
-                local hargs = v:look(groupidx)
+                local hargs = v:draw(deviceidx)
                 if hargs ~= nil then v:handler(hargs) end
             end
         end,
-        draw = function(self, groupidx, method, ...)  ---> throw
-            self.parent:draw(groupidx, method, unpack(arg))
+        throw = function(self, deviceidx, method, ...)
+            if self.catch and self.deviceidx = deviceidx then
+                self:catch(deviceidx, method, unpack(arg))
+            else self.parent:throw(deviceidx, method, unpack(arg)) end
         end,
         print = function(self) end,
         get = function(self) return self.value end,
         set = function(self, v) -----------------------~~~~~~~
             self.value = v
-            self:event(v, self.meta)
+            self:action(v, self.meta)
 
             for i,v in ipairs(_.outputs) do
-                nest_api.groups[v.groupidx]:look()  ---> group, add deviceidx
+                nest_api.groups[v.deviceidx]:draw()
             end
         end,
 
@@ -234,7 +215,6 @@ function _control:new(o)
         __newindex = function(t, k, v)
             if v.is_input then
                 v.control = self
-                v.groupidx = self.groupidx
                 rawset(t,k,v)
             end
         end
@@ -247,7 +227,6 @@ function _control:new(o)
         __newindex = function(t, k, v)
             if v.is_output then
                 v.control = self
-                v.groupidx = self.groupidx
                 rawset(t,k,v)
             end
         end
@@ -281,7 +260,7 @@ function _control:new(o)
         elseif k == "p" then return _.parent
         elseif k == "v" then return t.value
         elseif k == "m" then return t.meta
-        elseif k == "e" then return t.event
+        elseif k == "a" then return t.action
         elseif k == "o" then return t.order
         elseif k == "en" then return t.enabled
         elseif k == "input" then return t.inputs[1]
@@ -297,9 +276,6 @@ function _control:new(o)
 
     _.inputs[1]._.control = self
     _.outputs[1]._.control = self
-
-    _.inputs[1]._.groupidx = _.groupidx
-    _.outputs[1]._.groupidx = _.groupidx
 
     return o
 end
@@ -339,33 +315,26 @@ function nest_:new(o)
         parent = nil,
         enabled = true,
         order = 0,
-        groupidx = nil, ---> group, add deviceidx
+        group = nil,
         metacontrols = {},
         metacontrols_enabled = true,
-        check = function(self, groupidx, args, metacontrols)  ---> group, add deviceidx
+        update = function(self, deviceidx, args, metacontrols)
             if self.metacontrols_enabled and metacontrols ~= nil then
                 for i,v in ipairs(self.metacontrols) do table.insert(metacontrols, v) end
             else metacontrols = nil
             end
 
             for k,v in pairs(self) do if v.is_nest or v.is_control then
-                v:check(groupidx, args, metacontrols)  ---> group, add deviceidx
+                v:update(deviceidx, args, metacontrols)
             end end
         end,
-        look = function(self, groupidx)  ---> group, add deviceidx, -> draw
+        draw = function(self, deviceidx)  
             for k,v in pairs(self) do if v.is_nest or v.is_control then
-                v:look(groupidx)
+                v:draw(deviceidx)
             end end
         end,
-        draw = function(self, groupidx, method, ...) ---> group, add deviceidx, -> throw
-
-            --rm
-            if self.is_roost then
-                nest_api.groups[groupidx]:draw(method, unpack(arg))  ---> group, add deviceidx
-            else
-            -- /rm
-                self.parent:draw(groupidx, method, unpack(arg))  ---> group, add deviceidx
-            end
+        throw = function(self, deviceidx, method, ...)
+            self.parent:throw(deviceidx, method, unpack(arg))
         end,
         print = function(self) end,
         write = function(self) end,
@@ -431,14 +400,13 @@ function _group:new(o)
     local _ = {
         index = nil,
         is_group = true,
-        init = function(self) nest_api:look(self.index) end,
-        check = function(self, args)
-            nest_api.roost:check(self.index, args, {})
+        group = nil,
+        init = function(self) nest_api:draw(self.index) end,
+        update = function(self, args)
+            nest_api.roost:update(self.index, args, {})
         end,
-        look = function(self) end, --> draw
-        draw = function(self, method, ...) end -- rm
-        -- add devices = {}
-        -- add group (!) for nesting fun
+        draw = function(self) end,
+        devices = {}
     }
 
     o = o or {}

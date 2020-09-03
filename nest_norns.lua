@@ -16,21 +16,6 @@ _grid.control = _control:new{
     x = 0,
     y = 0,
     lvl = { _off, _hi }
-
-    -- rm
-    ,
-    edge = 1,
-    draw_slew = 0,
-    polyphony = -1,
-    meta = {
-        time = nil,
-        events = {},
-        matrix = {},
-        last = nil,
-        added = nil,
-        removed = nil,
-    }
-    -- /rm
 }
 
 _grid.control.input._.handlers = {
@@ -126,21 +111,6 @@ _grid.metacontrol = _metacontrol:new{
     x = 0,
     y = 0,
     lvl = { _off, _hi }
-
-    -- rm
-    ,
-    edge = 1,
-    draw_slew = 0,
-    polyphony = -1,
-    meta = {
-        time = nil,
-        events = {},
-        matrix = {},
-        last = nil,
-        added = nil,
-        removed = nil,
-    }
-    -- /rm
 }
 
 _grid.metacontrol.input._.handlers = {
