@@ -24,9 +24,10 @@ function _input:new(o)
 
     self.__index = function(t, k)
         if k == "_" then return _
+        elseif rawget(self, k) ~= nil then return rawget(self, k)
         elseif _[k] ~= nil then return _[k]
         elseif _.control[k] ~= nil then return _.control[k]
-        else return rawget(self, k) end
+        else return nil end
     end
 
     return o
@@ -49,24 +50,22 @@ function _output:new(o)
 
             to allow a nest of controls to be reassigned to a different Grid or Arc objects on seprate vports, we'll establish the convention of placing something like:
 
-                _meta = {
-                    devices = {
-                        grid = { Grid.vport }
-                        arc = { Arc.vport }
-                        screen = screen,
-                        g = devices.grid[1],
-                        a = devices.grid[2]
-                    },
-                    grid = devices.grid,
-                    arc = devies.arc,
+            _meta = {
+                devices = {
                     screen = screen,
                     g = devices.grid[1],
-                    a = devices.arc[1]
-                }
+                    a = devices.grid[2]
+                },
+                screen = screen,
+                g = devices.grid[1],
+                a = devices.arc[1]
+            }
 
             on the parent nest or nest relevant to a particular device. in redraw, you can access the intended device like this: s.g:led()
 
-            the _meta assignment could be astracted as: nest_:connect(grid.connect(), arc.connect(), screen). this also defines the device handlers to call :update_throw(deviceidx) or :draw() (fka update, draw) on this nest 
+            the _meta assignment could be astracted as: nest_:connect(grid.connect(), arc.connect(), screen). this also defines the device handlers to call :update_draw(deviceidx) or :draw() (fka update, draw) on this nest 
+
+:connect { g = grid.connect() }
 
             in special cases, this function here can be used to 'throw' args up to an elder nest. this nest would have a 'catch()' defined that takes those args & draws to a device (useful for screen UIs, probably other things)
 
@@ -91,9 +90,10 @@ function _output:new(o)
 
     self.__index = function(t, k)
         if k == "_" then return _
+        elseif rawget(self, k) ~= nil then return rawget(self, k)
         elseif _[k] ~= nil then return _[k]
         elseif _.control[k] ~= nil then return _.control[k]
-        else return rawget(self, k) end
+        else return nil end
     end
     return o
 end
@@ -134,7 +134,7 @@ function _control:new(o)
                     v:handler(hargs)
 
                     for i,v in ipairs(_.outputs) do
-                        nest_api.groups[v.deviceidx]:draw()
+                        self.roost:draw(v.deviceidx)
                     end
                 end
             end
@@ -157,7 +157,7 @@ function _control:new(o)
             self:action(v, self.meta)
 
             for i,v in ipairs(_.outputs) do
-                nest_api.groups[v.deviceidx]:draw()
+                self.roost:draw(v.deviceidx)
             end
         end,
 
@@ -250,6 +250,7 @@ function _control:new(o)
         local findmeta = function(nest)
             if nest.is_nest then
                 if nest._meta ~= nil and nest._meta[k] ~= nil then return nest._meta[k]
+                if nest._._meta ~= nil and nest._._meta[k] ~= nil then return nest._._meta[k]
                 elseif nest.parent ~= nil then return findmeta(nest.parent)
                 else return nil end
             end
@@ -259,16 +260,16 @@ function _control:new(o)
         elseif k == "i" then return _.index
         elseif k == "p" then return _.parent
         elseif k == "v" then return t.value
-        elseif k == "m" then return t.meta
         elseif k == "a" then return t.action
         elseif k == "o" then return t.order
         elseif k == "en" then return t.enabled
         elseif k == "input" then return t.inputs[1]
         elseif k == "output" then return t.outputs[1]
         elseif k == "target" then return t.targets[1]
+        elseif rawget(self, k) ~= nil then return rawget(self, k)
         elseif _[k] ~= nil then return _[k]
         elseif findmeta(_.parent) ~= nil then return findmeta(_.parent)
-        else return rawget(self, k) end
+        else return nil end
     end
 
     _.inputs[1] = _input:new()
@@ -298,18 +299,25 @@ nest_ = {}
 function nest_:new(o)
     local _ = {
         roost = function(self)
-            nest_api.roost = self
-            self.is_roost = true
+            self._._meta = { roost = self } -- secret meta
+            self:do_init()
         end,
-        is_roost = false,
         do_init = function(self)
             self:init()
             table.sort(self, function(a,b) return a.order < b.order end)
 
             for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
         end,
+        connect = function(self, devices)
+            self:roost()
+            
+            local m = self._._meta
+            m.devies = devices
+            setmetatable(m, m.devices)
+            m.devices.__index = m.devices
+        end,
         init = function(self) end,
-        each = function(slef, cb) end,
+        each = function(self, cb) end,
         is_nest = true,
         index = nil,
         parent = nil,
@@ -369,8 +377,9 @@ function nest_:new(o)
         elseif k == "p" then return _.parent
         elseif k == "o" then return _.order
         elseif k == "en" then return _.enabled
+        elseif rawget(self, k) ~= nil then return rawget(self, k)
         elseif _[k] ~= nil then return _[k]
-        else return rawget(self, k) end
+        else return nil end
     end
 
     self.__newindex = function(t, k, v)
@@ -401,12 +410,7 @@ function _group:new(o)
         index = nil,
         is_group = true,
         group = nil,
-        init = function(self) nest_api:draw(self.index) end,
-        update = function(self, args)
-            nest_api.roost:update(self.index, args, {})
-        end,
-        draw = function(self) end,
-        devices = {}
+        device = nil
     }
 
     o = o or {}
@@ -420,8 +424,9 @@ function _group:new(o)
 
     self.__index = function(t, k)
         if k == "_" then return _
+        elseif rawget(self, k) ~= nil then return rawget(self, k)
         elseif _[k] ~= nil then return _[k]
-        else return rawget(self, k) end
+        else return nil end
     end
 
     self.__newindex = function(t, k, v)
@@ -433,20 +438,3 @@ function _group:new(o)
 
     return o
 end
-
-nest_api = {
-    init = function(self)
-        for k,v in pairs(self.groups) do v:init() end
-        self.roost:do_init()
-    end,
-    groups = {}
-}
-
-setmetatable(nest_api.groups, {
-    __newindex = function(t, k, v)
---        v._.index = k -- metatable issue ?
-        _G[k] = v
-
-        rawset(t,k,v)
-    end
-})
