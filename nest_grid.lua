@@ -1,4 +1,6 @@
-nest_api.group._grid = _group:new()
+local _grid = _group:new()
+
+_grid.deviceidx = 'grid'
 
 _grid.control = _control:new{
     x = 0,
@@ -443,3 +445,5 @@ _grid.value.output.redraws = {
         end
     end
 }
+
+return _grid

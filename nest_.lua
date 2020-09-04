@@ -30,7 +30,7 @@ function _input:new(o)
         else return nil end
     end
 
-    return o
+    return o, _
 end
 
 _output = {}
@@ -95,7 +95,7 @@ function _output:new(o)
         elseif _.control[k] ~= nil then return _.control[k]
         else return nil end
     end
-    return o
+    return o, _
 end
 
 _control = {
@@ -111,18 +111,18 @@ _control = {
 
 function _control:new(o)
     local _ = {
-        inputs = {},
-        outputs = {},
+--        inputs = {},
+--        outputs = {},
         is_control = true,
         index = nil,
         parent = self,
         do_init = function(self)
             self:init()
         end,
-        group = nil,
-        metacontrols = {},
+        deviceidx = nil,
+        metacontrols = {}, ----- rm
         metacontrols_enabled = true,
-        update = function(self, deviceidx, args, metacontrols)
+        update = function(self, deviceidx, args, metacontrols) -- metacontrols arg -> self.metacontrols
             for i,v in ipairs(_.inputs) do
                 local hargs = v:update(deviceidx, args)
 
@@ -184,6 +184,7 @@ function _control:new(o)
         self._.__index = self._
     end
 
+--[[
     setmetatable(self.inputs, {
         _index = function(t, k)
             return _.inputs[k]
@@ -191,6 +192,7 @@ function _control:new(o)
         __newindex = function(t, k, v)
             if v.is_input then
                 v.control = self
+                v.deviceidx = self.deviceidx
                 _.inputs[k] = v
             end
         end
@@ -203,10 +205,13 @@ function _control:new(o)
         __newindex = function(t, k, v)
             if v.is_output then
                 v.control = self
+                v.deviceidx = self.deviceidx
                 _.outputs[k] = v
             end
         end
     })
+
+    -- i'm not sure if _.inputs, _.outputs need to be a thing, seems like a public member would  do the trick  ? ? ?
 
     setmetatable(_.inputs, {
         _index = function(t, k)
@@ -215,6 +220,7 @@ function _control:new(o)
         __newindex = function(t, k, v)
             if v.is_input then
                 v.control = self
+                v.deviceidx = self.deviceidx
                 rawset(t,k,v)
             end
         end
@@ -222,17 +228,39 @@ function _control:new(o)
 
     setmetatable(_.outputs, {
         _index = function(t, k)
-            return _.outputs[k]
+            return rawget(t,k)
         end,
         __newindex = function(t, k, v)
             if v.is_output then
                 v.control = self
+                v.deviceidx = self.deviceidx
+                rawset(t,k,v)
+            end
+        end
+    })
+]]
+    -- also maybe the above member metatables should go at the bottom & refer to o rather than self
+    setmetatable(o, self)
+
+    setmetatable(o.inputs, {
+        __newindex = function(t, k, v)
+            if v.is_input then
+                v._.control = o
+                v._.deviceidx = o._.deviceidx
                 rawset(t,k,v)
             end
         end
     })
 
-    setmetatable(o, self)
+    setmetatable(o.outputs, {
+        __newindex = function(t, k, v)
+            if v.is_output then
+                v._.control = so
+                v._.deviceidx = o._.deviceidx
+                rawset(t,k,v)
+            end
+        end
+    })
 
     local concat = function (n1, n2)
         for k, v in pairs(n2) do
@@ -272,15 +300,30 @@ function _control:new(o)
         else return nil end
     end
 
-    _.inputs[1] = _input:new()
-    _.outputs[1] = _output:new()
+    if o.inputs[1] == nil then o.inputs[1] = _input:new() end
+    if o.outputs[1] == nil then o.outputs[1] = _output:new() end
+    for i,v in ipairs(o.inputs) do
+        v._.control = o
+        v._.deviceidx = o._.deviceidx -- might not work :/
+    end
+    for i,v in ipairs(o.outputs) do
+        v._.control = o
+        v._.deviceidx = o._.deviceidx
+    end
 
+--[[
     _.inputs[1]._.control = self
     _.outputs[1]._.control = self
+    _.inputs[1]._.deviceidx = self
+    _.outputs[1]._.deviceidx = self
+]]
 
-    return o
+    return o, _
 end
 
+-- pretty unsure if I'm doing this inheritence properly, feel like this needs to happen in the :new function
+
+--[[
 _metacontrol = _control:new()
 
 _metacontrol.targets = {}
@@ -289,17 +332,57 @@ _metacontrol._.pass = function(self, control, value, meta) end
 
 setmetatable(_metacontrol.targets, {
     __newindex = function(t, k, v)
-        if v.is_nest or v.is_control then table.insert(v.metacontrols, t)
+        local mt
+        if v.is:_nest then
+            if v._._meta == nil then v._._meta = {} end
+            if v._._meta.metacontrols == nil then v._._meta.metacontrols = {} end
+            mt = v._._meta.metacontrols
+        elseif v.is_control then 
+            if v._.metacontrols == nil then v._.metacontrols = {} end
+            mt = v.metacontrols
         end
+
+        table.insert(mt, _metacontrol)
         rawset(t,k,v)
     end
 })
+
+]]
+
+_metacontrol = {
+    targets = {} 
+}
+function _metacontrol:new(o)
+    local _ = nil
+    o, _ = _control:new(o)
+    
+    _.is_metacontrol = true
+    _.pass = function(self, control, value, meta) end
+    
+    setmetatable(self.targets, {
+        __newindex = function(t, k, v)
+            local mt
+            if v.is:_nest then
+                if v._._meta == nil then v._._meta = {} end
+                if v._._meta.metacontrols == nil then v._._meta.metacontrols = {} end
+                mt = v._._meta.metacontrols
+            elseif v.is_control then 
+                if v._.metacontrols == nil then v._.metacontrols = {} end
+                mt = v.metacontrols
+            end
+
+            table.insert(mt, self)
+            rawset(t,k,v)
+        end
+    })
+end
 
 nest_ = {}
 function nest_:new(o)
     local _ = {
         roost = function(self)
-            self._._meta = { roost = self } -- secret meta
+            if self._._meta == nil then self._._meta = {}
+            self._._meta.roost = self  -- secret meta
             self:do_init()
         end,
         do_init = function(self)
@@ -315,6 +398,14 @@ function nest_:new(o)
             m.devies = devices
             setmetatable(m, m.devices)
             m.devices.__index = m.devices
+
+                        
+            local update = function()
+                
+            end
+
+            for k,v in pairs(m.devices) do
+            end
         end,
         init = function(self) end,
         each = function(self, cb) end,
@@ -323,10 +414,9 @@ function nest_:new(o)
         parent = nil,
         enabled = true,
         order = 0,
-        group = nil,
-        metacontrols = {},
+        metacontrols = {}, ----------------------------------rm
         metacontrols_enabled = true,
-        update = function(self, deviceidx, args, metacontrols)
+        update = function(self, deviceidx, args, metacontrols) -- rm metacontrols arg
             if self.metacontrols_enabled and metacontrols ~= nil then
                 for i,v in ipairs(self.metacontrols) do table.insert(metacontrols, v) end
             else metacontrols = nil
@@ -401,7 +491,7 @@ function nest_:new(o)
 
     for k,v in pairs(o) do nestify(o, k, v) end
 
-    return o
+    return o, _
 end
 
 _group = {}
@@ -409,8 +499,7 @@ function _group:new(o)
     local _ = {
         index = nil,
         is_group = true,
-        group = nil,
-        device = nil
+        deviceidx = nil
     }
 
     o = o or {}
@@ -430,11 +519,19 @@ function _group:new(o)
     end
 
     self.__newindex = function(t, k, v)
-        if type(v) == "table" and v._ ~= nil then
-            v._.group = t
-            rawset(t,k,v)
+        if type(v) == "table" and v.is_control then
+            v._.deviceidx = _.deviceidx
+                        
+            for i,w in ipairs(v.inputs) do
+                w._.deviceidx = _.deviceidx 
+            end
+            for i,w in ipairs(v.outputs) do
+                w._.deviceidx = _.deviceidx
+            end
         end
+        
+        rawset(t,k,v)
     end
 
-    return o
+    return o, _
 end
