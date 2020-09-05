@@ -8,8 +8,8 @@ function _input:new(o)
         handler = function(self, ...) return false end,
         update = function(self, deviceidx, args)
             if(self._.deviceidx == deviceidx) then
-                return self:handler(unpack(args))
-            else return false end
+                return args
+            else return nil end
         end
     }
 
@@ -103,7 +103,7 @@ function _control:new(o)
                             w:pass(v.handler, hargs)
                         end
                     end
-                    v:handler(hargs)
+                    v:handler(unpack(hargs))
                 end
             end
 
@@ -124,12 +124,16 @@ function _control:new(o)
         end,
         print = function(self) end,
         get = function(self) return self.value end,
-        set = function(self, v)
+        set = function(self, v, silent)
             self.value = v
-            self:action(v, self.meta)
+            silent = silent or false
 
-            for i,v in ipairs(_.outputs) do
-                self.roost:draw(v.deviceidx)
+            if not silent then
+                self:action(v, self.meta)
+
+                if d then for i,v in ipairs(self.outputs) do
+                    self.device_redraws[deviceidx]()
+                end end
             end
         end,
 
@@ -244,7 +248,7 @@ function _metacontrol:new(o)
 
     this means multiple .index + parent's will need to be supported (nice to have anyway), set the registry as parents[0], indicies[0]
 
-    what if devices acessed the registry instead of high nest ????? nah ?
+    devices could even be connected to the registry. now that is a thought.
 
      ]]
     _.metacontrols_disabled = true
@@ -281,24 +285,7 @@ function nest_:new(o)
 
             for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
         end,
-        connect = function(self, devices)
-            self:roost()
-            
-            local m = self._._meta
-            m.devices = devices
-            setmetatable(m, m.devices)
-            m.devices.__index = m.devices
-                        
-            local update = function()
-                
-            end
-
-            m.device_redraws = {}
-
-            for k,v in pairs(m.devices) do
-                -- set handlers to update(), add redraws to m.device_redraws() -----------
-            end
-        end,
+        connect = function(self, devices) end,
         init = function(self) end,
         each = function(self, cb) end,
         is_nest = true,
