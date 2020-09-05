@@ -1,7 +1,5 @@
 local _grid = _group:new()
 
-_grid.deviceidx = 'grid'
-
 _grid.control = _control:new{
     x = 0,
     y = 0,
@@ -18,7 +16,7 @@ _grid.control.input._.handler = function(self, k, ...)
     self._.handlers[k][self.edge + 1](self, unpack(arg))
 end
 
-_grid.control.input._.check = function(self, deviceidx, args)
+_grid.control.input._.update = function(self, deviceidx, args)
     if(self._.deviceidx == deviceidx) then
         local contained = { x = false, y = false }
         local axis_val = { x = nil, y = nil }
@@ -109,7 +107,7 @@ _grid.metacontrol.input._.handlers = {
     plane = { function(self, x, y, z) end }
 }
 _grid.metacontrol.input._.handler = _grid.control.input._.handler
-_grid.metacontrol.input._.check = _grid.control.input._.check
+_grid.metacontrol.input._.update = _grid.control.input._.update
 
 _grid.metacontrol.output._.redraws = {
     point = function(self) end,
