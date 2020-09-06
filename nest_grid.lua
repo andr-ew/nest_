@@ -130,8 +130,6 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
     outputs = { _grid.muxcntrl.output:new() }
 }
 
--- revisit specific controls, meta & edge modes are depricated, so there will be more controls with less options, meta members become either extra arguments to event() and/or extra values in the control
-
 _grid.momentary = _grid.muxcntrl:new()
 _grid.momentary.input.handlers = {
     point = {
@@ -142,39 +140,42 @@ _grid.momentary.input.handlers = {
     }
 }
 
-local ____mtrx__ = {}
+local lvl = function(self, i)
+    local x = self.lvl
+    -- come back later and understand or not understand ? :)
+    return (type(x) == 'number') and ((i > 1) and 0 or x) or (x[i] or x[i-1] or ((i > 1) and 0 or x[1]))
+end
 
--- check these but they're probably fine
 _grid.momentary.output.redraws = {
     point = function(self)
-        self:draw("led", self.x, self.y, self.lvl[self.value])
+        self.g:led(self.x, self.y, lvl(self, self.v * 2 + 1))
     end,
     line_x = function(self)
-        ____mtrx__ = {}
-        for i = 1, self.x[2] - self.x[1] do ____mtrx__[i] = self.lvl[1] end
-        for i,v in ipairs(self.value) do ____mtrx__[v] = self.lvl[2] end
-        for i,v in ipairs(____mtrx__) do self:draw("led", i + self.x[1], self.y, v) end
+        local mtrx = {}
+        for i = 1, self.x[2] - self.x[1] do mtrx[i] = lvl(self, 3) end
+        for i,v in ipairs(self.value) do mtrx[v] = lvl(self, 1) end
+        for i,v in ipairs(mtrx) do self.g:led(i + self.x[1] - 1, self.y, v) end
     end,
     line_y = function(self)
-        ____mtrx__ = {}
-        for i = 1, self.y[2] - self.y[1] do ____mtrx__[i] = self.lvl[1] end
-        for i,v in ipairs(self.value) do ____mtrx__[v] = self.lvl[2] end
-        for i,v in ipairs(____mtrx__) do self:draw("led", self.x, i + self.y[1], v) end
+        local mtrx = {}
+        for i = 1, self.y[2] - self.y[1] do mtrx[i] = lvl(self, 3) end
+        for i,v in ipairs(self.value) do mtrx[v] = lvl(self, 1) end
+        for i,v in ipairs(mtrx) do self.g:led(self.x, i + self.y[1] - 1, v) end
     end,
     plane = function(self)
-        ____mtrx__ = {}
+        local mtrx = {}
         for i = 1, self.x[2] - self.x[1] do
-            ____mtrx__[i] = {}
+            mtrx[i] = {}
             for j = 1, self.y[2] - self.y[1] do
-                ____mtrx__[i][j] = self.lvl[1]
+                mtrx[i][j] = lvl(self, 3)
             end
         end
 
-        for i,v in ipairs(self.value) do ____mtrx__[v.x][v.y] = self.lvl[2] end
+        for i,v in ipairs(self.value) do mtrx[v.x][v.y] = lvl(self, 1) end
 
-        for i,v in ipairs(____mtrx__) do
-            for j,v in ipairs(____mtrx__[i]) do
-                self:draw("led", i + self.x[1], j + self.y[1], v)
+        for i,w in ipairs(mtrx) do
+            for j,v in ipairs(w) do
+                self.g:led(i + self.x[1] - 1, j + self.y[1] - 1, v)
             end
         end
     end
@@ -191,22 +192,28 @@ _grid.value.input.handlers = {
 }
 _grid.value.output.redraws = {
     point = function(self)
-        self:draw("led", self.x, self.y, self.lvl[2])
+        self.g:led(self.x, self.y, lvl(self, 1))
     end,
     line_x = function(self)
         for i = self.x[1], self.x[2] do
-            self:draw("led", i, self.y, self.lvl[self.value == i - self.x[1] ? 2 : 1])
+            self.g:led(i, self.y, lvl(self, (self.value == i - self.x[1]) and 1 or 3))
         end
     end,
     line_y = function(self)
         for i = self.y[1], self.y[2] do
-            self:draw("led", self.x, i, self.lvl[self.value == i - self.y[1] ? 2 : 1])
+            self.g:led(self.x, i, lvl(self, (self.value == i - self.y[1]) and 1 or 3))
         end
     end,
     plane = function(self)
         for i = self.x[1], self.x[2] do
             for j = self.y[1], self.y[2] do
-                self:draw("led", i, j, self.lvl[self.value.x == i - self.x[1] and self.value.y == j - self.y[1] ? 2 : 1])
+                self.g:led(
+                    i, j, 
+                    lvl(
+                        self, 
+                        ((self.value.x == i - self.x[1]) and (self.value.y == j - self.y[1])) and 1 or 3
+                    )
+                )
             end
         end
     end
