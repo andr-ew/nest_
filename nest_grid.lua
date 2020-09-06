@@ -1,47 +1,77 @@
 local _grid = _group:new()
+_grid.deviceidx = 'g'
 
-_grid.control = _control:new{
-    x = 0,
-    y = 0,
-    lvl = { 0, 15 }
+_grid.control = _control:new {
+    v = 0,
+    x = 1,
+    y = 1,
+    lvl = 15,
+    inputs = { _input:new() },
+    outputs = { _output:new() }
 }
 
-_grid.control.input._.handlers = {
+
+local input_contained = function(self)
+    local contained = { x = false, y = false }
+    local axis_val = { x = nil, y = nil }
+
+    for i,v in ipairs{"x", "y"} do
+        if type(self[v]) == "table" then
+            if #self[v] == 1 then
+                self[v] = self[v][1]
+                if self[v] == args[v] then
+                    contained[v] = true
+                end
+            elseif #self[v] == 2 then
+                if  self[v][1] <= args[v] and args[v] <= self[v][2] then
+                    contained[v] = true
+                    axis_val[v] = args[v] - self[v][1] + 1
+                end
+            end
+        else
+            if self[v] == args[v] then
+                contained[v] = true
+            end
+        end
+    end
+
+    return contained.x and contained.y, axis_val
+end
+
+_grid.control.input._.update = function(self, deviceidx, args)
+    if(self._.deviceidx == deviceidx) then
+        if input_contained(self) then
+            return args
+        else return nil end
+    else return nil end
+end
+
+_grid.metacontrol = _metacontrol:new {
+    v = 0,
+    x = 1,
+    y = 1,
+    lvl = 15,
+    inputs = { _grid.control.input:new() },
+    outputs = { _grid.control.output:new() }
+}
+
+_grid.muxcntrl = _grid.control:new()
+
+_grid.muxcntrl.input._.handlers = {
     point = { function(self, z) end },
     line = { function(self, v, z) end },
     plane = { function(self, x, y, z) end }
 }
 
-_grid.control.input._.handler = function(self, k, ...)
-    self._.handlers[k][self.edge + 1](self, unpack(arg))
+_grid.muxcntrl.input._.handler = function(self, k, ...)
+    self._.handlers[k](self, unpack(arg))
 end
 
-_grid.control.input._.update = function(self, deviceidx, args)
+_grid.muxcntrl.input._.update = function(self, deviceidx, args)
     if(self._.deviceidx == deviceidx) then
-        local contained = { x = false, y = false }
-        local axis_val = { x = nil, y = nil }
+        local contained, axis_val = input_contained(self)        
 
-        for i,v in ipairs{"x", "y"} do
-            if type(self[v]) == "table" then
-                if #self[v] == 1 then
-                    self[v] = self[v][1]
-                    if self[v] == args[v] then
-                        contained[v] = true
-                    end
-                elseif #self[v] == 2 then
-                    if  self[v][1] <= args[v] and args[v] <= self[v][2] then
-                        contained[v] = true
-                        axis_val[v] = args[v] - self[v][1] + 1
-                    end
-                end
-            else
-                if self[v] == args[v] then
-                    contained[v] = true
-                end
-            end
-        end
-
-        if contained.x and contained.y then
+        if contained then
             if axis_val.x == nil and axis_val.y == nil then
                 return { "point", args.z }
             elseif axis_val.x ~= nil and axis_val.y ~= nil then
@@ -57,18 +87,18 @@ _grid.control.input._.update = function(self, deviceidx, args)
     else return nil end
 end
 
-_grid.control.output._.redraws = {
+_grid.muxcntrl.output._.redraws = {
     point = function(self) end,
     line_x = function(self) end,
     line_y = function(self) end,
     plane = function(self) end
 }
 
-_grid.control.output._.redraw = function(self, k, ...)
+_grid.muxcntrl.output._.redraw = function(self, k, ...)
     self._.redraws[k](self, unpack(arg))
 end
 
-_grid.control.output._.draw = function(self, deviceidx)
+_grid.muxcntrl.output._.draw = function(self, deviceidx)
     if(self._.deviceidx == deviceidx) then
         local has_axis = { x = false, y = false }
 
@@ -95,35 +125,16 @@ _grid.control.output._.draw = function(self, deviceidx)
     else return nil end
 end
 
-_grid.metacontrol = _metacontrol:new{
-    x = 0,
-    y = 0,
-    lvl = { _off, _hi }
+_grid.muxmetacntrl = _grid.metacontrol:new {
+    inputs = { _grid.muxcntrl.input:new() }
+    outputs = { _grid.muxcntrl.output:new() }
 }
-
-_grid.metacontrol.input._.handlers = {
-    point = { function(self, z) end },
-    line = { function(self, v, z) end },
-    plane = { function(self, x, y, z) end }
-}
-_grid.metacontrol.input._.handler = _grid.control.input._.handler
-_grid.metacontrol.input._.update = _grid.control.input._.update
-
-_grid.metacontrol.output._.redraws = {
-    point = function(self) end,
-    line_x = function(self) end,
-    line_y = function(self) end,
-    plane = function(self) end
-}
-_grid.metacontrol.output._.redraw = _grid.control.output._.redraw
-_grid.metacontrol.output._.draw = _grid.control.output._.draw
-
 
 -- revisit specific controls, meta & edge modes are depricated, so there will be more controls with less options, meta members become either extra arguments to event() and/or extra values in the control
 
 -- also jeez, these should be in nest_norns_grid.lua or something
 
-_grid.momentary = _grid.control:new()
+_grid.momentary = _grid.muxcntrl:new()
 _grid.momentary.input.handlers = {
     point = {
         function(self, z)
@@ -322,7 +333,7 @@ _grid.momentary.output.redraws = {
     end
 }
 
-_grid.value = _grid.control:new()
+_grid.value = _grid.muxcntrl:new()
 _grid.value.input.handlers = {
     point = {
         function(self, x, z)

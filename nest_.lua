@@ -3,9 +3,8 @@ function _input:new(o)
     local _ = {
         is_input = true,
         control = nil,
-        deviceidx = nil,
-        transform = function(v) return v end,
-        handler = function(self, ...) return false end,
+--        transform = function(v) return v end,
+--        handler = function(self, ...) return false end,
         update = function(self, deviceidx, args)
             if(self._.deviceidx == deviceidx) then
                 return args
@@ -38,9 +37,8 @@ function _output:new(o)
     local _ = {
         is_output = true,
         control = nil,
-        deviceidx = nil,
-        transform = function(v) return v end,
-        redraw = function(self) end,
+--        transform = function(v) return v end,
+--        redraw = function(self) end,
         throw = function(self, ...)
             self._.control._.throw(self._.control, self.deviceidx, unpack(arg))
         end,
@@ -118,7 +116,7 @@ function _control:new(o)
             end
         end,
         throw = function(self, deviceidx, method, ...)
-            if self.catch and self.deviceidx = deviceidx then
+            if self.catch and self.deviceidx == deviceidx then
                 self:catch(deviceidx, method, unpack(arg))
             else self.parent:throw(deviceidx, method, unpack(arg)) end
         end,
@@ -203,6 +201,7 @@ function _control:new(o)
             end
         end
 
+        -- rename nickname keys in o, maybe make a central table lookup
         if k == "_" then return _
         elseif k == "i" then return _.index
         elseif k == "p" then return _.parent
@@ -219,8 +218,6 @@ function _control:new(o)
         else return nil end
     end
 
-    if o.inputs[1] == nil then o.inputs[1] = _input:new() end
-    if o.outputs[1] == nil then o.outputs[1] = _output:new() end
     for i,v in ipairs(o.inputs) do
         v._.control = o
         v._.deviceidx = o._.deviceidx
@@ -253,7 +250,7 @@ function _metacontrol:new(o)
      ]]
     _.metacontrols_disabled = true
     
-    setmetatable(self.targets, {
+    setmetatable(o.targets, {
         __newindex = function(t, k, v)
             local mt
             if v.is:_nest then
@@ -274,11 +271,6 @@ end
 nest_ = {}
 function nest_:new(o)
     local _ = {
-        roost = function(self)
-            if self._._meta == nil then self._._meta = {} end
-            self._._meta.roost = self  
-            self:do_init()
-        end,
         do_init = function(self)
             self:init()
             table.sort(self, function(a,b) return a.order < b.order end)
@@ -333,6 +325,7 @@ function nest_:new(o)
 
     setmetatable(o, self)
 
+    -- rename nickname keys in o
     self.__index = function(t, k)
         if k == "_" then return _
         elseif k == "i" then return _.index
