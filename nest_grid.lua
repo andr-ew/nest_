@@ -132,172 +132,19 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
 
 -- revisit specific controls, meta & edge modes are depricated, so there will be more controls with less options, meta members become either extra arguments to event() and/or extra values in the control
 
--- also jeez, these should be in nest_norns_grid.lua or something
-
 _grid.momentary = _grid.muxcntrl:new()
 _grid.momentary.input.handlers = {
     point = {
-        function(self, z)
-            self.meta.last = self.value
-            self.value = z
-            self.meta.matrix[1] = self.value
-            self:event(z, self.meta)
-        end,
-        function(self, z)
-            if z == 0 then
-                self.meta.time = util.time() - self.meta.events[1]
-                self.meta.last = self.value
-                self.value = z
-                self.meta.matrix[1] = self.value
-                self:event(z, self.meta)
-                self.meta.events = {}
-            else
-                self.value = z
-                self.meta.events[1] = util.time()
-            end
-        end
     },
     line = {
-        function(self, x, z, r)
-            if z == 1 then
-                self.meta.last = self.value
-                self.meta.added = x
-                table.insert(self.value, x)
-                if self.polyphony > -1 and #self.value > self.polyphony then
-                    table.remove(self.value, 1)
-                end
-
-                table.insert(self.meta.events, { x = x, z = 1, time = util.time() })
-            else
-                self.meta.last = self.value
-                self.meta.removed = x
-                for i,v in ipairs(self.value) do
-                    if v == x then table.remove(self.value, i) end
-                end
-
-                local done = true
-                for i,v in ipairs(self.meta.events) do
-                    if v.x == x then v.z = 0 end
-                    if v.z == 1 then done = false end
-                end
-
-                if done then
-                    self.meta.time = util.time() - self.meta.events[1].time
-                    for i = 1, r do self.meta.matrix[i] = 0 end
-
-                    local ev = {}
-                    for i,v in ipairs(self.meta.events) do
-                        ev[i] = v.x
-                        self.meta.matrix[v.x] = 1
-                    end
-                    self:event(ev, self.meta)
-                    self.meta.events = {}
-                end
-            end
-        end,
-        function(self, x, z, r)
-            if z == 1 then
-                self.meta.last = self.value
-                self.meta.added = x
-                table.insert(self.value, x)
-                if self.polyphony > -1 and #self.value > self.polyphony then
-                    table.remove(self.value, 1)
-                end
-                for i = 1, r do self.meta.matrix[i] = 0 end
-                for i,v in ipairs(self.value) do self.meta.matrix[v] = 1
-                self:event(self.value, self.meta)
-            else
-                self.meta.last = self.value
-                self.meta.removed = x
-                self.meta.matrix[x] = 0
-                for i,v in ipairs(self.value) do
-                    if v == x then
-                        table.remove(self.value, i)
-                    end
-                end
-                self:event(self.value, self.meta)
-            end
-        end
     },
     plane = {
-        function(self, x, y, z, rx, ry)
-            if z == 1 then
-                self.meta.last = self.value
-                self.meta.added = { x = x, y = y }
-                table.insert(self.value, x)
-                if self.polyphony > -1 and #self.value > self.polyphony then
-                    table.remove(self.value, 1)
-                end
-
-                table.insert(self.meta.events, { x = x, y = y, z = 1, time = util.time() })
-            else
-                self.meta.last = self.value
-                self.meta.removed = { x = x, y = y }
-                for i,v in ipairs(self.value) do
-                    if v.x == x and v.y == y then
-                        table.remove(self.value, i)
-                    end
-                end
-
-                local done = true
-                for i,v in ipairs(self.meta.events) do
-                    if v.x == x and v.y == y then v.z = 0 end
-                    if v.z == 1 then done = false end
-                end
-
-                if done then
-                    self.meta.time = util.time() - self.meta.events[1].time
-
-                    for i = 1, rx do
-                        self.meta.matrix[i] = {}
-                        for j = 1, ry do
-                            self.meta.matrix[i][j] = 0
-                        end
-                    end
-
-                    local ev = {}
-                    for i,v in ipairs(self.meta.events) do
-                        ev[i] = { x = v.x, y = v.x }
-                        self.meta.matrix[v.x][v.y] = 1
-                    end
-                    self:event(ev, self.meta)
-                    self.meta.events = {}
-                end
-            end
-        end,
-        function(self, x, y, z, rx, ry)
-            if z == 1 then
-                self.meta.last = self.value
-                self.meta.added = { x = x, y = y }
-                table.insert(self.value, { x = x, y = y })
-                if self.polyphony > -1 and #self.value > self.polyphony then
-                    table.remove(self.value, 1)
-                end
-                for i = 1, rx do
-                    self.meta.matrix[i] = {}
-                    for j = 1, ry do
-                        self.meta.matrix[i][j] = 0
-                    end
-                end
-                for i,v in ipairs(self.value) do self.meta.matrix[v.x][v.y] = 1
-                self:event(self.value, self.meta)
-            else
-                self.meta.last = self.value
-                self.meta.matrix[x][y] = 0
-                self.meta.removed = { x = x, y = y }
-                for i,v in ipairs(self.value) do
-                    if v.x == x and v.y == y then
-                        table.remove(self.value, i)
-                    end
-                end
-                self:event(self.value, self.meta)
-            end
-        end
     }
 }
 
 local ____mtrx__ = {}
 
+-- check these but they're probably fine
 _grid.momentary.output.redraws = {
     point = function(self)
         self:draw("led", self.x, self.y, self.lvl[self.value])
@@ -336,100 +183,10 @@ _grid.momentary.output.redraws = {
 _grid.value = _grid.muxcntrl:new()
 _grid.value.input.handlers = {
     point = {
-        function(self, x, z)
-            if z == 0 then
-                self.meta.time = util.time() - self.meta.events[1]
-                self.value = x
-                self:event(self.value, self.meta)
-                self.meta.events = {}
-            else
-                self.meta.events[1] = util.time()
-            end
-        end,
-        function(self, x, z)
-            if z == 1 then
-                self.value = x
-                self.meta.matrix[1] = 1
-                self:event(self.value, self.meta)
-            elseif z == 0 then
-                self.meta.time = util.time() - self.meta.events[1]
-                self.value = x
-                self:event(self.value, self.meta)
-                self.meta.events = {}
-            end
-        end
     },
     line = {
-        function(self, x, z, r)
-            if z == 1 then
-        --            self.value = v
-                table.insert(self.meta.events, { x = x, z = 1, time = util.time() })
-            else
-                local done = true
-                for i,v in ipairs(self.meta.events) do
-                    if v.x == x then v.z = 0 end
-                    if v.z == 1 then done = false end
-                end
-
-                if done then
-                    self.meta.time = util.time() - self.meta.events[1].time
-                    self.meta.last = self.value
-                    self.value = v
-                    for i = 1, r do self.meta.matrix[i] = self.value == i ? 1 : 0 end
-                    self:event(v, self.meta)
-                    self.meta.events = {}
-                end
-            end
-        end,
-        function(self, x, z, r)
-            if z == 1 then
-                self.meta.last = self.value
-                self.value = x
-                for i = 1, r do self.meta.matrix[i] = self.value == i ? 1 : 0 end
-                self:event(x, self.meta)
-            end
-        end
     },
     plane = {
-        function(self, x, y, z, rx, ry)
-            if self.edge == 1 and z == 1 then
-                self.meta.last = self.value
-                self.value = { x = x, y = y }
-                for i = 1, rx do
-                    self.meta.matrix[i] = {}
-                    for j = 1, ry do
-                        self.meta.matrix[i][j] = self.value.x == i and self.value.y == j ? 1 : 0 end
-                    end
-                end
-                self:event(self.value, self.meta)
-            end
-        end,
-        function(self, x, y, z, rx, ry)
-            if z == 1 then
-                table.insert(self.meta.events, { x = x, y = y, z = 1, time = util.time() })
-            else
-                local done = true
-                for i,v in ipairs(self.meta.events) do
-                    if v.x == x and v.y == y then v.z = 0 end
-                    if v.z == 1 then done = false end
-                end
-
-                if done then
-                    self.meta.time = util.time() - self.meta.events[1].time
-                    self.meta.last = self.value
-                    self.value = { x, y }
-                    for i = 1, rx do
-                        self.meta.matrix[i] = {}
-                        for j = 1, ry do
-                            self.meta.matrix[i][j] = self.value.x == i and self.value.y == j ? 1 : 0 end
-                        end
-                    end
-
-                    self:event(x, y, self.meta)
-                    self.meta.events = {}
-                end
-            end
-        end
     }
 }
 _grid.value.output.redraws = {
