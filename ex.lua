@@ -14,4 +14,5 @@ n = nest_:new {
             print(v.x, v.y)
         end
     }
-}
+}:connect { g = grid.connect() }
+

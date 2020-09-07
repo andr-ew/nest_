@@ -25,7 +25,7 @@ local input_contained = function(self)
             elseif #self[v] == 2 then
                 if  self[v][1] <= args[v] and args[v] <= self[v][2] then
                     contained[v] = true
-                    axis_val[v] = args[v] - self[v][1] + 1
+                    axis_val[v] = args[v] - self[v][1]
                 end
             end
         else
@@ -73,14 +73,16 @@ _grid.muxcntrl.input._.update = function(self, deviceidx, args)
 
         if contained then
             if axis_val.x == nil and axis_val.y == nil then
-                return { "point", args.z }
+                return { "point", args[1], args[2], args[3] }
             elseif axis_val.x ~= nil and axis_val.y ~= nil then
-                return { "plane", axis_val.x, axis_val.y, args.z, self.x[2] -  self.x[1], self.y[2] -  self.y[1] }
+                if type(self.v) ~= 'table' then self.v = {} end
+                return { "plane", args[1], args[2], args[3] }
             else
+                if type(self.v) ~= 'table' then self.v = {} end
                 if axis_val.x ~= nil then
-                    return { "line", axis_val.x, args.z, self.x[2] -  self.x[1] }
+                    return { "line", args[1], args[2], args[3] }
                 elseif axis_val.y ~= nil then
-                    return { "line", axis_val.y, args.z, self.y[2] -  self.y[1] }
+                    return { "line", args[2], args[1], args[3] }
                 end
             end
         else return nil end
@@ -130,14 +132,44 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
     outputs = { _grid.muxcntrl.output:new() }
 }
 
+tab = require 'tabutil'
+
 _grid.momentary = _grid.muxcntrl:new()
 _grid.momentary.input.handlers = {
-    point = {
-    },
-    line = {
-    },
-    plane = {
-    }
+    point = function(self, x, y, z)
+        self.v = z
+        local t = nil
+        if z > 0 then self._.time = util.time()
+        else t = util.time() - self._.time end
+        self:action(self.v, t)
+    end,
+    line = function(self, x, y, z)
+        local v = x - self.x[1]
+        if z > 0 and not tab.contains(self.v, v) then
+            table.insert(self.v, v)
+            self:action(self.v, v, nil) -- v, added, removed
+        else
+            local k = tab.key(self.v, v)
+            if k then  
+                table.remove(self.v, k)
+                self:action(self.v,  nil, v)
+            end
+        end
+    end,
+    plane = function(self, x, y, z) 
+        local v = { x = x - self.x[1], y = y - self.y[1] }
+        if z > 0 then
+            table.insert(self.v, v)
+            self:action(self.v, v, nil)
+        else
+            for i,w in ipairs(self.v) do
+                if w.x == v.x and w.y == v.y then 
+                    table.remove(self.v, i)
+                    self.action(self.v, nil, v)
+                end
+            end
+        end
+    end
 }
 
 local lvl = function(self, i)
@@ -171,7 +203,7 @@ _grid.momentary.output.redraws = {
             end
         end
 
-        for i,v in ipairs(self.value) do mtrx[v.x][v.y] = lvl(self, 1) end
+        for i,v in ipairs(self.v) do mtrx[v.x][v.y] = lvl(self, 1) end
 
         for i,w in ipairs(mtrx) do
             for j,v in ipairs(w) do
@@ -183,12 +215,9 @@ _grid.momentary.output.redraws = {
 
 _grid.value = _grid.muxcntrl:new()
 _grid.value.input.handlers = {
-    point = {
-    },
-    line = {
-    },
-    plane = {
-    }
+    point = function(self, x, y, z) end,
+    line = function(self, x, y, z) end,
+    plane = function(self, x, y, z) end
 }
 _grid.value.output.redraws = {
     point = function(self)
