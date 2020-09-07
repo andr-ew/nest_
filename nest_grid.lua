@@ -51,6 +51,7 @@ _grid.metacontrol = _metacontrol:new {
     x = 1,
     y = 1,
     lvl = 15,
+    limit = nil,
     inputs = { _grid.control.input:new() },
     outputs = { _grid.control.output:new() }
 }
@@ -145,22 +146,26 @@ _grid.momentary.input.handlers = {
     end,
     line = function(self, x, y, z)
         local v = x - self.x[1]
-        if z > 0 and not tab.contains(self.v, v) then
+        if z > 0 then
+            local rem = nil
             table.insert(self.v, v)
-            self:action(self.v, v, nil) -- v, added, removed
+            if self.limit and #self.v > self.limit then rem = table.remove(self.v, 1) end
+            self:action(self.v, v, rem) -- v, added, removed
         else
             local k = tab.key(self.v, v)
             if k then  
                 table.remove(self.v, k)
-                self:action(self.v,  nil, v)
+                self:action(self.v, nil, v)
             end
         end
     end,
     plane = function(self, x, y, z) 
         local v = { x = x - self.x[1], y = y - self.y[1] }
         if z > 0 then
+            local rem = nil
             table.insert(self.v, v)
-            self:action(self.v, v, nil)
+            if self.limit and #self.v > self.limit then rem = table.remove(self.v, 1) end
+            self:action(self.v, v, rem)
         else
             for i,w in ipairs(self.v) do
                 if w.x == v.x and w.y == v.y then 
@@ -215,9 +220,23 @@ _grid.momentary.output.redraws = {
 
 _grid.value = _grid.muxcntrl:new()
 _grid.value.input.handlers = {
-    point = function(self, x, y, z) end,
-    line = function(self, x, y, z) end,
-    plane = function(self, x, y, z) end
+    point = function(self, x, y, z) 
+        if z > 0 then self:action(self.v) end
+    end,
+    line = function(self, x, y, z) 
+        if z > 0 then
+            local last = self.v
+            self.v = x - x[1]
+            self:action(self.v, last)
+        end
+    end,
+    plane = function(self, x, y, z) 
+        if z > 0 then
+            local last = self.v
+            self.v = { x = x - x[1], y = y - y[1] }
+            self:action(self.v, last)
+        end
+    end
 }
 _grid.value.output.redraws = {
     point = function(self)
