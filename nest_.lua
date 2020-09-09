@@ -68,6 +68,9 @@ function _output:new(o)
     return o, _
 end
 
+-- refactor to use short names internally
+-- x, y, v, lvl, a, en, ctrl 
+
 _control = {
     value = 0,
     action = function(s, v) end,

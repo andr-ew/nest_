@@ -1,6 +1,9 @@
 local _grid = _group:new()
 _grid.deviceidx = 'g'
 
+-- refactor to use short names internally
+-- x, y, v, lvl, a, en, ctrl 
+
 _grid.control = _control:new {
     v = 0,
     x = 1,
@@ -9,7 +12,6 @@ _grid.control = _control:new {
     inputs = { _input:new() },
     outputs = { _output:new() }
 }
-
 
 local input_contained = function(self)
     local contained = { x = false, y = false }
@@ -56,19 +58,19 @@ _grid.metacontrol = _metacontrol:new {
     outputs = { _grid.control.output:new() }
 }
 
-_grid.muxcntrl = _grid.control:new()
+_grid.muxctrl = _grid.control:new()
 
-_grid.muxcntrl.input._.handlers = {
+_grid.muxctrl.input._.handlers = {
     point = { function(self, z) end },
     line = { function(self, v, z) end },
     plane = { function(self, x, y, z) end }
 }
 
-_grid.muxcntrl.input._.handler = function(self, k, ...)
+_grid.muxctrl.input._.handler = function(self, k, ...)
     self._.handlers[k](self, unpack(arg))
 end
 
-_grid.muxcntrl.input._.update = function(self, deviceidx, args)
+_grid.muxctrl.input._.update = function(self, deviceidx, args)
     if(self._.deviceidx == deviceidx) then
         local contained, axis_val = input_contained(self)        
 
@@ -90,18 +92,18 @@ _grid.muxcntrl.input._.update = function(self, deviceidx, args)
     else return nil end
 end
 
-_grid.muxcntrl.output._.redraws = {
+_grid.muxctrl.output._.redraws = {
     point = function(self) end,
     line_x = function(self) end,
     line_y = function(self) end,
     plane = function(self) end
 }
 
-_grid.muxcntrl.output._.redraw = function(self, k, ...)
+_grid.muxctrl.output._.redraw = function(self, k, ...)
     self._.redraws[k](self, unpack(arg))
 end
 
-_grid.muxcntrl.output._.draw = function(self, deviceidx)
+_grid.muxctrl.output._.draw = function(self, deviceidx)
     if(self._.deviceidx == deviceidx) then
         local has_axis = { x = false, y = false }
 
@@ -129,13 +131,14 @@ _grid.muxcntrl.output._.draw = function(self, deviceidx)
 end
 
 _grid.muxmetacntrl = _grid.metacontrol:new {
-    inputs = { _grid.muxcntrl.input:new() }
-    outputs = { _grid.muxcntrl.output:new() }
+    inputs = { _grid.muxctrl.input:new() }
+    outputs = { _grid.muxctrl.output:new() }
 }
 
 tab = require 'tabutil'
 
-_grid.momentary = _grid.muxcntrl:new()
+-- add support for limit = { high, low }, low counts will be stored but will not call action()
+_grid.momentary = _grid.muxctrl:new()
 _grid.momentary.input.handlers = {
     point = function(self, x, y, z)
         self.v = z
@@ -218,7 +221,7 @@ _grid.momentary.output.redraws = {
     end
 }
 
-_grid.value = _grid.muxcntrl:new()
+_grid.value = _grid.muxctrl:new()
 _grid.value.input.handlers = {
     point = function(self, x, y, z) 
         if z > 0 then self:action(self.v) end
