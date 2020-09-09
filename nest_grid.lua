@@ -1,9 +1,6 @@
 local _grid = _group:new()
 _grid.deviceidx = 'g'
 
--- refactor to use short names internally
--- x, y, v, lvl, a, en, ctrl 
-
 _grid.control = _control:new {
     v = 0,
     x = 1,
@@ -13,25 +10,25 @@ _grid.control = _control:new {
     outputs = { _output:new() }
 }
 
-local input_contained = function(self)
+local input_contained = function(s)
     local contained = { x = false, y = false }
     local axis_val = { x = nil, y = nil }
 
     for i,v in ipairs{"x", "y"} do
-        if type(self[v]) == "table" then
-            if #self[v] == 1 then
-                self[v] = self[v][1]
-                if self[v] == args[v] then
+        if type(s[v]) == "table" then
+            if #s[v] == 1 then
+                s[v] = s[v][1]
+                if s[v] == args[v] then
                     contained[v] = true
                 end
-            elseif #self[v] == 2 then
-                if  self[v][1] <= args[v] and args[v] <= self[v][2] then
+            elseif #s[v] == 2 then
+                if  s[v][1] <= args[v] and args[v] <= s[v][2] then
                     contained[v] = true
-                    axis_val[v] = args[v] - self[v][1]
+                    axis_val[v] = args[v] - s[v][1]
                 end
             end
         else
-            if self[v] == args[v] then
+            if s[v] == args[v] then
                 contained[v] = true
             end
         end
@@ -40,9 +37,9 @@ local input_contained = function(self)
     return contained.x and contained.y, axis_val
 end
 
-_grid.control.input._.update = function(self, deviceidx, args)
-    if(self._.deviceidx == deviceidx) then
-        if input_contained(self) then
+_grid.control.inputs[1]._.update = function(s, deviceidx, args)
+    if(s._.deviceidx == deviceidx) then
+        if input_contained(s) then
             return args
         else return nil end
     else return nil end
@@ -54,34 +51,34 @@ _grid.metacontrol = _metacontrol:new {
     y = 1,
     lvl = 15,
     limit = nil,
-    inputs = { _grid.control.input:new() },
-    outputs = { _grid.control.output:new() }
+    inputs = { _grid.control.inputs[1]:new() },
+    outputs = { _grid.control.outputs[1]:new() }
 }
 
 _grid.muxctrl = _grid.control:new()
 
-_grid.muxctrl.input._.handlers = {
-    point = { function(self, z) end },
-    line = { function(self, v, z) end },
-    plane = { function(self, x, y, z) end }
+_grid.muxctrl.inputs[1]._.handlers = {
+    point = { function(s, z) end },
+    line = { function(s, v, z) end },
+    plane = { function(s, x, y, z) end }
 }
 
-_grid.muxctrl.input._.handler = function(self, k, ...)
-    self._.handlers[k](self, unpack(arg))
+_grid.muxctrl.inputs[1]._.handler = function(s, k, ...)
+    s._.handlers[k](s, unpack(arg))
 end
 
-_grid.muxctrl.input._.update = function(self, deviceidx, args)
-    if(self._.deviceidx == deviceidx) then
-        local contained, axis_val = input_contained(self)        
+_grid.muxctrl.inputs[1]._.update = function(s, deviceidx, args)
+    if(s._.deviceidx == deviceidx) then
+        local contained, axis_val = input_contained(s)        
 
         if contained then
             if axis_val.x == nil and axis_val.y == nil then
                 return { "point", args[1], args[2], args[3] }
             elseif axis_val.x ~= nil and axis_val.y ~= nil then
-                if type(self.v) ~= 'table' then self.v = {} end
+                if type(s.v) ~= 'table' then s.v = {} end
                 return { "plane", args[1], args[2], args[3] }
             else
-                if type(self.v) ~= 'table' then self.v = {} end
+                if type(s.v) ~= 'table' then s.v = {} end
                 if axis_val.x ~= nil then
                     return { "line", args[1], args[2], args[3] }
                 elseif axis_val.y ~= nil then
@@ -92,25 +89,25 @@ _grid.muxctrl.input._.update = function(self, deviceidx, args)
     else return nil end
 end
 
-_grid.muxctrl.output._.redraws = {
-    point = function(self) end,
-    line_x = function(self) end,
-    line_y = function(self) end,
-    plane = function(self) end
+_grid.muxctrl.outputs[1]._.redraws = {
+    point = function(s) end,
+    line_x = function(s) end,
+    line_y = function(s) end,
+    plane = function(s) end
 }
 
-_grid.muxctrl.output._.redraw = function(self, k, ...)
-    self._.redraws[k](self, unpack(arg))
+_grid.muxctrl.outputs[1]._.redraw = function(s, k, ...)
+    s._.redraws[k](s, unpack(arg))
 end
 
-_grid.muxctrl.output._.draw = function(self, deviceidx)
-    if(self._.deviceidx == deviceidx) then
+_grid.muxctrl.outputs[1]._.draw = function(s, deviceidx)
+    if(s._.deviceidx == deviceidx) then
         local has_axis = { x = false, y = false }
 
         for i,v in ipairs{"x", "y"} do
-            if type(self[v]) == "table" then
-                if #self[v] == 1 then
-                elseif #self[v] == 2 then
+            if type(s[v]) == "table" then
+                if #s[v] == 1 then
+                elseif #s[v] == 2 then
                     has_axis[v] = true
                 end
             end
@@ -131,138 +128,138 @@ _grid.muxctrl.output._.draw = function(self, deviceidx)
 end
 
 _grid.muxmetacntrl = _grid.metacontrol:new {
-    inputs = { _grid.muxctrl.input:new() }
-    outputs = { _grid.muxctrl.output:new() }
+    inputs = { _grid.muxctrl.inputs[1]:new() }
+    outputs = { _grid.muxctrl.outputs[1]:new() }
 }
 
 tab = require 'tabutil'
 
--- add support for limit = { high, low }, low counts will be stored but will not call action()
+-- add support for limit = { high, low }, low counts will be stored but will not call a()
 _grid.momentary = _grid.muxctrl:new()
-_grid.momentary.input.handlers = {
-    point = function(self, x, y, z)
-        self.v = z
+_grid.momentary.inputs[1].handlers = {
+    point = function(s, x, y, z)
+        s.v = z
         local t = nil
-        if z > 0 then self._.time = util.time()
-        else t = util.time() - self._.time end
-        self:action(self.v, t)
+        if z > 0 then s._.time = util.time()
+        else t = util.time() - s._.time end
+        s:a(s.v, t)
     end,
-    line = function(self, x, y, z)
-        local v = x - self.x[1]
+    line = function(s, x, y, z)
+        local v = x - s.x[1]
         if z > 0 then
             local rem = nil
-            table.insert(self.v, v)
-            if self.limit and #self.v > self.limit then rem = table.remove(self.v, 1) end
-            self:action(self.v, v, rem) -- v, added, removed
+            table.insert(s.v, v)
+            if s.limit and #s.v > s.limit then rem = table.remove(s.v, 1) end
+            s:a(s.v, v, rem) -- v, added, removed
         else
-            local k = tab.key(self.v, v)
+            local k = tab.key(s.v, v)
             if k then  
-                table.remove(self.v, k)
-                self:action(self.v, nil, v)
+                table.remove(s.v, k)
+                s:a(s.v, nil, v)
             end
         end
     end,
-    plane = function(self, x, y, z) 
-        local v = { x = x - self.x[1], y = y - self.y[1] }
+    plane = function(s, x, y, z) 
+        local v = { x = x - s.x[1], y = y - s.y[1] }
         if z > 0 then
             local rem = nil
-            table.insert(self.v, v)
-            if self.limit and #self.v > self.limit then rem = table.remove(self.v, 1) end
-            self:action(self.v, v, rem)
+            table.insert(s.v, v)
+            if s.limit and #s.v > s.limit then rem = table.remove(s.v, 1) end
+            s:a(s.v, v, rem)
         else
-            for i,w in ipairs(self.v) do
+            for i,w in ipairs(s.v) do
                 if w.x == v.x and w.y == v.y then 
-                    table.remove(self.v, i)
-                    self.action(self.v, nil, v)
+                    table.remove(s.v, i)
+                    s.a(s.v, nil, v)
                 end
             end
         end
     end
 }
 
-local lvl = function(self, i)
-    local x = self.lvl
+local lvl = function(s, i)
+    local x = s.lvl
     -- come back later and understand or not understand ? :)
     return (type(x) == 'number') and ((i > 1) and 0 or x) or (x[i] or x[i-1] or ((i > 1) and 0 or x[1]))
 end
 
-_grid.momentary.output.redraws = {
-    point = function(self)
-        self.g:led(self.x, self.y, lvl(self, self.v * 2 + 1))
+_grid.momentary.outputs[1].redraws = {
+    point = function(s)
+        s.g:led(s.x, s.y, lvl(s, s.v * 2 + 1))
     end,
-    line_x = function(self)
+    line_x = function(s)
         local mtrx = {}
-        for i = 1, self.x[2] - self.x[1] do mtrx[i] = lvl(self, 3) end
-        for i,v in ipairs(self.value) do mtrx[v] = lvl(self, 1) end
-        for i,v in ipairs(mtrx) do self.g:led(i + self.x[1] - 1, self.y, v) end
+        for i = 1, s.x[2] - s.x[1] do mtrx[i] = lvl(s, 3) end
+        for i,v in ipairs(s.v) do mtrx[v] = lvl(s, 1) end
+        for i,v in ipairs(mtrx) do s.g:led(i + s.x[1] - 1, s.y, v) end
     end,
-    line_y = function(self)
+    line_y = function(s)
         local mtrx = {}
-        for i = 1, self.y[2] - self.y[1] do mtrx[i] = lvl(self, 3) end
-        for i,v in ipairs(self.value) do mtrx[v] = lvl(self, 1) end
-        for i,v in ipairs(mtrx) do self.g:led(self.x, i + self.y[1] - 1, v) end
+        for i = 1, s.y[2] - s.y[1] do mtrx[i] = lvl(s, 3) end
+        for i,v in ipairs(s.v) do mtrx[v] = lvl(s, 1) end
+        for i,v in ipairs(mtrx) do s.g:led(s.x, i + s.y[1] - 1, v) end
     end,
-    plane = function(self)
+    plane = function(s)
         local mtrx = {}
-        for i = 1, self.x[2] - self.x[1] do
+        for i = 1, s.x[2] - s.x[1] do
             mtrx[i] = {}
-            for j = 1, self.y[2] - self.y[1] do
-                mtrx[i][j] = lvl(self, 3)
+            for j = 1, s.y[2] - s.y[1] do
+                mtrx[i][j] = lvl(s, 3)
             end
         end
 
-        for i,v in ipairs(self.v) do mtrx[v.x][v.y] = lvl(self, 1) end
+        for i,v in ipairs(s.v) do mtrx[v.x][v.y] = lvl(s, 1) end
 
         for i,w in ipairs(mtrx) do
             for j,v in ipairs(w) do
-                self.g:led(i + self.x[1] - 1, j + self.y[1] - 1, v)
+                s.g:led(i + s.x[1] - 1, j + s.y[1] - 1, v)
             end
         end
     end
 }
 
 _grid.value = _grid.muxctrl:new()
-_grid.value.input.handlers = {
-    point = function(self, x, y, z) 
-        if z > 0 then self:action(self.v) end
+_grid.value.inputs[1].handlers = {
+    point = function(s, x, y, z) 
+        if z > 0 then s:a(s.v) end
     end,
-    line = function(self, x, y, z) 
+    line = function(s, x, y, z) 
         if z > 0 then
-            local last = self.v
-            self.v = x - x[1]
-            self:action(self.v, last)
+            local last = s.v
+            s.v = x - x[1]
+            s:a(s.v, last)
         end
     end,
-    plane = function(self, x, y, z) 
+    plane = function(s, x, y, z) 
         if z > 0 then
-            local last = self.v
-            self.v = { x = x - x[1], y = y - y[1] }
-            self:action(self.v, last)
+            local last = s.v
+            s.v = { x = x - x[1], y = y - y[1] }
+            s:a(s.v, last)
         end
     end
 }
-_grid.value.output.redraws = {
-    point = function(self)
-        self.g:led(self.x, self.y, lvl(self, 1))
+_grid.value.outputs[1].redraws = {
+    point = function(s)
+        s.g:led(s.x, s.y, lvl(s, 1))
     end,
-    line_x = function(self)
-        for i = self.x[1], self.x[2] do
-            self.g:led(i, self.y, lvl(self, (self.value == i - self.x[1]) and 1 or 3))
+    line_x = function(s)
+        for i = s.x[1], s.x[2] do
+            s.g:led(i, s.y, lvl(s, (s.v == i - s.x[1]) and 1 or 3))
         end
     end,
-    line_y = function(self)
-        for i = self.y[1], self.y[2] do
-            self.g:led(self.x, i, lvl(self, (self.value == i - self.y[1]) and 1 or 3))
+    line_y = function(s)
+        for i = s.y[1], s.y[2] do
+            s.g:led(s.x, i, lvl(s, (s.v == i - s.y[1]) and 1 or 3))
         end
     end,
-    plane = function(self)
-        for i = self.x[1], self.x[2] do
-            for j = self.y[1], self.y[2] do
-                self.g:led(
+    plane = function(s)
+        for i = s.x[1], s.x[2] do
+            for j = s.y[1], s.y[2] do
+                s.g:led(
                     i, j, 
                     lvl(
-                        self, 
-                        ((self.value.x == i - self.x[1]) and (self.value.y == j - self.y[1])) and 1 or 3
+                        s, 
+                        ((s.v.x == i - s.x[1]) and (s.v.y == j - s.y[1])) and 1 or 3
                     )
                 )
             end

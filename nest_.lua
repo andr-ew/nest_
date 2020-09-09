@@ -23,7 +23,7 @@ function _input:new(o)
 
     self.__index = function(t, k)
         if k == "_" then return _
-        elseif rawget(self, k) ~= nil then return rawget(self, k)
+        elseif self[k] ~= nil then return self[k]
         elseif _[k] ~= nil then return _[k]
         elseif _.control[k] ~= nil then return _.control[k]
         else return nil end
@@ -60,7 +60,7 @@ function _output:new(o)
 
     self.__index = function(t, k)
         if k == "_" then return _
-        elseif rawget(self, k) ~= nil then return rawget(self, k)
+        elseif self[k] ~= nil then return self[k]
         elseif _[k] ~= nil then return _[k]
         elseif _.control[k] ~= nil then return _.control[k]
         else return nil end
@@ -68,14 +68,11 @@ function _output:new(o)
     return o, _
 end
 
--- refactor to use short names internally
--- x, y, v, lvl, a, en, ctrl 
-
 _control = {
-    value = 0,
-    action = function(s, v) end,
+    v = 0,
+    a = function(s, v) end,
     order = 0,
-    enabled = true,
+    en = true,
     init = function(s) end,
     inputs = {},
     outputs = {},
@@ -85,8 +82,8 @@ _control = {
 function _control:new(o)
     local _ = {
         is_control = true,
-        index = nil,
-        parent = self,
+        k = nil,
+        p = self,
         do_init = function(self)
             self:init()
         end,
@@ -121,16 +118,16 @@ function _control:new(o)
         throw = function(self, deviceidx, method, ...)
             if self.catch and self.deviceidx == deviceidx then
                 self:catch(deviceidx, method, unpack(arg))
-            else self.parent:throw(deviceidx, method, unpack(arg)) end
+            else self.p:throw(deviceidx, method, unpack(arg)) end
         end,
         print = function(self) end,
-        get = function(self) return self.value end,
+        get = function(self) return self.v end,
         set = function(self, v, silent)
-            self.value = v
+            self.v = v
             silent = silent or false
 
             if not silent then
-                self:action(v, self.meta)
+                self:a(v, self.meta)
 
                 if d then for i,v in ipairs(self.outputs) do
                     self.device_redraws[deviceidx]()
@@ -143,9 +140,9 @@ function _control:new(o)
         add param = nil
         add :link(param.id)
             set param to param
-            set v to param.value
+            set v to param.v
             set get & set to param .get & .set
-            overwrite param.action to update self, run self.action
+            overwrite param.a to update self, run self.a
         end
 
         ]]
@@ -199,25 +196,19 @@ function _control:new(o)
             if nest.is_nest then
                 if nest._meta ~= nil and nest._meta[k] ~= nil then return nest._meta[k]
                 if nest._._meta ~= nil and nest._._meta[k] ~= nil then return nest._._meta[k]
-                elseif nest.parent ~= nil then return findmeta(nest.parent)
+                elseif nest.p ~= nil then return findmeta(nest.p)
                 else return nil end
             end
         end
 
         -- rename nickname keys in o, maybe make a central table lookup
         if k == "_" then return _
-        elseif k == "i" then return _.index
-        elseif k == "p" then return _.parent
-        elseif k == "v" then return t.value
-        elseif k == "a" then return t.action
-        elseif k == "o" then return t.order
-        elseif k == "en" then return t.enabled
         elseif k == "input" then return t.inputs[1]
         elseif k == "output" then return t.outputs[1]
         elseif k == "target" then return t.targets[1]
-        elseif rawget(self, k) ~= nil then return rawget(self, k)
+        elseif self[k] ~= nil then return self[k]
         elseif _[k] ~= nil then return _[k]
-        elseif findmeta(_.parent) ~= nil then return findmeta(_.parent)
+        elseif findmeta(_.p) ~= nil then return findmeta(_.p)
         else return nil end
     end
 
@@ -246,7 +237,7 @@ function _metacontrol:new(o)
 
     passing the function will work but not for recall, create the global registry_ nest as a lookup & absolute identifier for all controls
 
-    this means multiple .index + parent's will need to be supported (nice to have anyway), set the registry as parents[0], indicies[0]
+    this means multiple .k + p's will need to be supported (nice to have anyway), set the registry as ps[0], indicies[0]
 
     devices could even be connected to the registry. now that is a thought.
 
@@ -284,9 +275,9 @@ function nest_:new(o)
         init = function(self) end,
         each = function(self, cb) end,
         is_nest = true,
-        index = nil,
-        parent = nil,
-        enabled = true,
+        k = nil,
+        p = nil,
+        en = true,
         order = 0,
         update = function(self, deviceidx, args)
             for k,v in pairs(self) do if v.is_nest or v.is_control then
@@ -299,7 +290,7 @@ function nest_:new(o)
             end end
         end,
         throw = function(self, deviceidx, method, ...)
-            self.parent:throw(deviceidx, method, unpack(arg))
+            self.p:throw(deviceidx, method, unpack(arg))
         end,
         print = function(self) end,
         write = function(self) end,
@@ -313,7 +304,7 @@ function nest_:new(o)
         self._.__index = self._
     end
 
-    local function nestify(parent, index, v)
+    local function nestify(p, k, v)
         if type(v) == "table" then
             if v.is_control then
             elseif v.is_nest then
@@ -321,21 +312,16 @@ function nest_:new(o)
                 v = nest_:new(v)
             end
 
-            rawset(o, "index", index)
-            rawset(o, "parent", parent)
+            rawset(o, "k", k)
+            rawset(o, "p", p)
         end
     end
 
     setmetatable(o, self)
 
-    -- rename nickname keys in o
     self.__index = function(t, k)
         if k == "_" then return _
-        elseif k == "i" then return _.index
-        elseif k == "p" then return _.parent
-        elseif k == "o" then return _.order
-        elseif k == "en" then return _.enabled
-        elseif rawget(self, k) ~= nil then return rawget(self, k)
+        elseif self[k] ~= nil then return self[k]
         elseif _[k] ~= nil then return _[k]
         else return nil end
     end
@@ -365,7 +351,7 @@ end
 _group = {}
 function _group:new(o)
     local _ = {
-        index = nil,
+        k = nil,
         is_group = true,
         deviceidx = nil
     }
@@ -381,7 +367,7 @@ function _group:new(o)
 
     self.__index = function(t, k)
         if k == "_" then return _
-        elseif rawget(self, k) ~= nil then return rawget(self, k)
+        elseif self[k] ~= nil then return self[k]
         elseif _[k] ~= nil then return _[k]
         else return nil end
     end
