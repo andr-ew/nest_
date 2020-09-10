@@ -14,20 +14,20 @@ function _input:new(o)
 
     o = o or {}
 
-    if self._ ~= nil then
-        setmetatable(_, self._)
-        self._.__index = self._
+    if o._ ~= nil then
+        setmetatable(o._, _)
+        o._.__index = _
     end
 
-    setmetatable(o, self)
-
-    self.__index = function(t, k)
-        if k == "_" then return _
-        elseif self[k] ~= nil then return self[k]
-        elseif _[k] ~= nil then return _[k]
-        elseif _.control[k] ~= nil then return _.control[k]
-        else return nil end
-    end
+    setmetatable(o, {
+        __index = function(t, k)
+            if k == "_" then return _
+            elseif self[k] ~= nil then return self[k]
+            elseif _[k] ~= nil then return _[k]
+            elseif _.control[k] ~= nil then return _.control[k]
+            else return nil end
+        end
+    })
 
     return o
 end
@@ -51,20 +51,21 @@ function _output:new(o)
 
     o = o or {}
 
-    if self._ ~= nil then
-        setmetatable(_, self._)
-        self._.__index = self._
+    if o._ ~= nil then
+        setmetatable(o._, _)
+        o._.__index = _
     end
 
-    setmetatable(o, self)
-
-    self.__index = function(t, k)
-        if k == "_" then return _
-        elseif self[k] ~= nil then return self[k]
-        elseif _[k] ~= nil then return _[k]
-        elseif _.control[k] ~= nil then return _.control[k]
-        else return nil end
-    end
+    setmetatable(o, {
+        __index = function(t, k)
+            if k == "_" then return _
+            elseif self[k] ~= nil then return self[k]
+            elseif _[k] ~= nil then return _[k]
+            elseif _.control[k] ~= nil then return _.control[k]
+            else return nil end
+        end
+    })
+    
     return o
 end
 
@@ -153,11 +154,10 @@ function _control:new(o)
 
     o = o or {}
 
-    if self._ ~= nil then
-        setmetatable(_, self._)
-        self._.__index = self._
+    if o._ ~= nil then
+        setmetatable(o._, _)
+        o._.__index = _
     end
-    setmetatable(o, self)
 
     setmetatable(o.inputs or self.inputs, {
         __newindex = function(t, k, v)
@@ -186,31 +186,35 @@ function _control:new(o)
         return n1
     end
 
-    self.__concat = concat
-    _.__concat = concat
-
-    self.__tostring = function(t) end
-
-    self.__index = function(t, k)
-        local findmeta = function(nest)
-            if nest.is_nest then
-                if nest._meta ~= nil and nest._meta[k] ~= nil then return nest._meta[k]
-                elseif nest._._meta ~= nil and nest._._meta[k] ~= nil then return nest._._meta[k]
-                elseif nest.p ~= nil then return findmeta(nest.p)
-                else return nil end
+    setmetatable(o, {
+        __concat = concat,
+        __tostring = function(t) end,
+        __index = function(t, k)
+            local findmeta = function(nest)
+                if nest.is_nest then
+                    if nest._meta ~= nil and nest._meta[k] ~= nil then return nest._meta[k]
+                    elseif nest._._meta ~= nil and nest._._meta[k] ~= nil then return nest._._meta[k]
+                    elseif nest.p ~= nil then return findmeta(nest.p)
+                    else return nil end
+                end
             end
-        end
 
-        -- rename nickname keys in o, maybe make a central table lookup
-        if k == "_" then return _
-        elseif k == "input" then return t.inputs[1]
-        elseif k == "output" then return t.outputs[1]
-        elseif k == "target" then return t.targets[1]
-        elseif self[k] ~= nil then return self[k]
-        elseif _[k] ~= nil then return _[k]
-        elseif findmeta(_.p) ~= nil then return findmeta(_.p)
-        else return nil end
-    end
+            -- rename nickname keys in o, maybe make a central table lookup
+            if k == "_" then return _
+            elseif k == "input" then return t.inputs[1]
+            elseif k == "output" then return t.outputs[1]
+            elseif k == "target" then return t.targets[1]
+            elseif self[k] ~= nil then return self[k]
+            --[[
+                stack overflow here, perhaps metatable can't equal self ? research inheritance a little more
+            ]]
+            elseif _[k] ~= nil then return _[k]
+            elseif findmeta(_.p) ~= nil then return findmeta(_.p)
+            else return nil end
+        end
+    })
+
+    --_.__concat = concat
 
     for i,v in ipairs(o.inputs) do
         v._.control = o
@@ -332,6 +336,8 @@ function nest_:new(o)
         throw = function(self, deviceidx, method, ...)
             self.p:throw(deviceidx, method, unpack(arg))
         end,
+        set = function(self, tv) end, --table set
+        get = function(self) end,
         print = function(self) end,
         write = function(self) end,
         read = function(self) end
@@ -339,9 +345,9 @@ function nest_:new(o)
 
     o = o or {}
 
-    if self._ ~= nil then
-        setmetatable(_, self._)
-        self._.__index = self._
+    if o._ ~= nil then
+        setmetatable(o._, _)
+        o._.__index = _
     end
 
     local function nestify(p, k, v)
@@ -357,19 +363,20 @@ function nest_:new(o)
         end
     end
 
-    setmetatable(o, self)
-
-    self.__index = function(t, k)
-        if k == "_" then return _
-        elseif self[k] ~= nil then return self[k]
-        elseif _[k] ~= nil then return _[k]
-        else return nil end
-    end
-
-    self.__newindex = function(t, k, v)
-        nestify(t, k, v)
-        rawset(t,k,v)
-    end
+    setmetatable(o, {
+        __index = function(t, k)
+            if k == "_" then return _
+            elseif self[k] ~= nil then return self[k]
+            elseif _[k] ~= nil then return _[k]
+            else return nil end
+        end,
+        __newindex = function(t, k, v)
+            nestify(t, k, v)
+            rawset(t,k,v)
+        end,
+        __concat = concat,
+        __tostring = function(t) end
+    })
 
     local concat = function (n1, n2)
         for k, v in pairs(n2) do
@@ -378,10 +385,7 @@ function nest_:new(o)
         return n1
     end
 
-    self.__concat = concat
-    _.__concat = concat
-
-    self.__tostring = function(t) end
+    --_.__concat = concat
 
     for k,v in pairs(o) do nestify(o, k, v) end
 
@@ -399,32 +403,31 @@ function _group:new(o)
 
     o = o or {}
 
-    if self._ ~= nil then
-        setmetatable(_, self._)
-        self._.__index = self._
+    if o._ ~= nil then
+        setmetatable(o._, _)
+        o._.__index = _
     end
 
-    setmetatable(o, self)
-
-    self.__index = function(t, k)
-        if k == "_" then return _
-        elseif self[k] ~= nil then return self[k]
-        elseif _[k] ~= nil then return _[k]
-        else return nil end
-    end
-
-    self.__newindex = function(t, k, v)
-        if type(v) == "table" and v.is_control then
-            for i,w in ipairs(v.inputs) do
-                w._.deviceidx = _.deviceidx 
+    setmetatable(o, {
+        __index = function(t, k)
+            if k == "_" then return _
+            elseif self[k] ~= nil then return self[k]
+            elseif _[k] ~= nil then return _[k]
+            else return nil end
+        end,
+        __newindex = function(t, k, v)
+            if type(v) == "table" and v.is_control then
+                for i,w in ipairs(v.inputs) do
+                    w._.deviceidx = _.deviceidx 
+                end
+                for i,w in ipairs(v.outputs) do
+                    w._.deviceidx = _.deviceidx
+                end
             end
-            for i,w in ipairs(v.outputs) do
-                w._.deviceidx = _.deviceidx
-            end
+            
+            rawset(t,k,v)
         end
-        
-        rawset(t,k,v)
-    end
+    })
 
     return o
 end
