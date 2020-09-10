@@ -40,7 +40,7 @@ function _output:new(o)
 --        transform = function(v) return v end,
 --        redraw = function(self) end,
         throw = function(self, ...)
-            self._.control._.throw(self._.control, self.deviceidx, unpack(arg))
+            self._.control._.throw(self._.control, self.deviceidx, ...)
         end,
         draw = function(self, deviceidx)
             if(self._.deviceidx == deviceidx) then
@@ -84,7 +84,7 @@ function _control:new(o)
     local _ = {
         is_control = true,
         k = nil,
-        p = self,
+        p = nil,
         do_init = function(self)
             self:init()
         end,
@@ -102,7 +102,7 @@ function _control:new(o)
                             w:pass(v.handler, hargs)
                         end
                     end
-                    v:handler(unpack(hargs))
+                    v:handler(table.unpack(hargs))
                 end
             end
 
@@ -113,13 +113,13 @@ function _control:new(o)
         draw = function(self, deviceidx)
             for i,v in ipairs(self.outputs) do
                 local rdargs = v:draw(deviceidx)
-                if rdargs ~= nil then v:redraw(rdargs) end
+                if rdargs ~= nil then v:redraw(table.unpack(rdargs)) end
             end
         end,
         throw = function(self, deviceidx, method, ...)
             if self.catch and self.deviceidx == deviceidx then
-                self:catch(deviceidx, method, unpack(arg))
-            else self.p:throw(deviceidx, method, unpack(arg)) end
+                self:catch(deviceidx, method, ...)
+            else self.p:throw(deviceidx, method, ...) end
         end,
         print = function(self) end,
         get = function(self) return self.v end,
@@ -191,7 +191,7 @@ function _control:new(o)
         __tostring = function(t) end,
         __index = function(t, k)
             local findmeta = function(nest)
-                if nest.is_nest then
+                if nest and nest.is_nest then
                     if nest._meta ~= nil and nest._meta[k] ~= nil then return nest._meta[k]
                     elseif nest._._meta ~= nil and nest._._meta[k] ~= nil then return nest._._meta[k]
                     elseif nest.p ~= nil then return findmeta(nest.p)
@@ -294,7 +294,7 @@ function nest_:new(o)
                     m.device_redraws[kk] = function() self:draw(kk) end
                     v[(kk == 'g') and 'key' or 'delta'] = function(...)
                         m[kk]:all(0)
-                        self:update(kk, arg)
+                        self:update(kk, {...})
                         m.device_redraws[kk]()
                         m[kk]:refresh()
                     end
@@ -302,9 +302,9 @@ function nest_:new(o)
                     local kk = k
                     v.event = function(data) self:update(kk, data) end
                 elseif k == 'enc' then
-                    v = function(...) self:update('enc', arg) end
+                    v = function(...) self:update('enc', {...}) end
                 elseif k == 'key' then
-                    v = function(...) self:update('key', arg) end
+                    v = function(...) self:update('key', {...}) end
                 elseif k == 'screen' then
                     m.device_redraws.screen = redraw
                     redraw = function()
@@ -315,9 +315,11 @@ function nest_:new(o)
                 else print('nest_.connect: invalid device key. valid options are g, a, m, h, screen, enc, key')
                 end
             end
+            
+            return self
         end,
-        init = function(self) end,
-        each = function(self, cb) end,
+        init = function(self) return self end,
+        each = function(self, cb) return self end,
         is_nest = true,
         k = nil,
         p = nil,
@@ -334,7 +336,7 @@ function nest_:new(o)
             end end
         end,
         throw = function(self, deviceidx, method, ...)
-            self.p:throw(deviceidx, method, unpack(arg))
+            self.p:throw(deviceidx, method, ...)
         end,
         set = function(self, tv) end, --table set
         get = function(self) end,
@@ -357,9 +359,11 @@ function nest_:new(o)
             else
                 v = nest_:new(v)
             end
-
-            rawset(o, "k", k)
-            rawset(o, "p", p)
+            
+            if v._ then
+                rawset(v._, "k", k)
+                rawset(v._, "p", p)
+            end
         end
     end
 

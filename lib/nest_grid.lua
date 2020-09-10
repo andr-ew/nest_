@@ -10,7 +10,7 @@ _grid.control = _control:new {
     outputs = { _output:new() }
 }
 
-local input_contained = function(s)
+local input_contained = function(s, args)
     local contained = { x = false, y = false }
     local axis_val = { x = nil, y = nil }
 
@@ -39,7 +39,7 @@ end
 
 _grid.control.inputs[1]._.update = function(s, deviceidx, args)
     if(s._.deviceidx == deviceidx) then
-        if input_contained(s) then
+        if input_contained(s, args) then
             return args
         else return nil end
     else return nil end
@@ -64,12 +64,12 @@ _grid.muxctrl.inputs[1]._.handlers = {
 }
 
 _grid.muxctrl.inputs[1]._.handler = function(s, k, ...)
-    s._.handlers[k](s, unpack(arg))
+    s._.handlers[k](s, ...)
 end
 
 _grid.muxctrl.inputs[1]._.update = function(s, deviceidx, args)
     if(s._.deviceidx == deviceidx) then
-        local contained, axis_val = input_contained(s)        
+        local contained, axis_val = input_contained(s, args)        
 
         if contained then
             if axis_val.x == nil and axis_val.y == nil then
@@ -96,8 +96,8 @@ _grid.muxctrl.outputs[1]._.redraws = {
     plane = function(s) end
 }
 
-_grid.muxctrl.outputs[1]._.redraw = function(s, k, ...)
-    s._.redraws[k](s, unpack(arg))
+_grid.muxctrl.outputs[1]._.redraw = function(s, k)
+    s._.redraws[k](s)
 end
 
 _grid.muxctrl.outputs[1]._.draw = function(s, deviceidx)
