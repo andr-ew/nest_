@@ -1,15 +1,28 @@
 ```
-nest_
+nest_ {
+    _control {
+        
+    }
+    ...
+}
 
-_control
-
---------------
-
-_group
-
-_input
-
-_output
-
-
+_group {
+    _control {
+        v
+        a
+        en
+        order
+        init
+        inputs
+            _input {
+            }
+            ...
+        outputs
+            _output {
+            }
+            ...
+        ...
+    }
+    ...
+}
 ```
