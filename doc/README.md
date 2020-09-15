@@ -1,4 +1,21 @@
 ```
+_control {
+    v
+    a
+    en
+    order
+    init
+    inputs
+        _input {
+        }
+        ...
+    outputs
+        _output {
+        }
+        ...
+    ...
+}
+
 nest_ {
     _control {
         
@@ -8,20 +25,6 @@ nest_ {
 
 _group {
     _control {
-        v
-        a
-        en
-        order
-        init
-        inputs
-            _input {
-            }
-            ...
-        outputs
-            _output {
-            }
-            ...
-        ...
     }
     ...
 }
