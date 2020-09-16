@@ -50,7 +50,6 @@ _grid.metacontrol = _metacontrol:new {
     x = 1,
     y = 1,
     lvl = 15,
-    limit = nil,
     inputs = { _grid.control.inputs[1]:new() },
     outputs = { _grid.control.outputs[1]:new() }
 }
@@ -134,8 +133,9 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
 
 tab = require 'tabutil'
 
--- add support for limit = { high, low }, low counts will be stored but will not call a()
-_grid.momentary = _grid.muxctrl:new()
+-- add support for limit = { high, low }, low presses must be stored somehow but will not change v or call a(). the t sent tracks from the first key down
+
+_grid.momentary = _grid.muxctrl:new({ limit = nil })
 _grid.momentary.inputs[1].handlers = {
     point = function(s, x, y, z)
         s.v = z
@@ -218,6 +218,7 @@ _grid.momentary.outputs[1].redraws = {
     end
 }
 
+-- if limit then actions fire on key up
 _grid.value = _grid.muxctrl:new()
 _grid.value.inputs[1].handlers = {
     point = function(s, x, y, z) 

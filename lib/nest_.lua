@@ -420,7 +420,7 @@ function _group:new(o)
             else return nil end
         end,
         __newindex = function(t, k, v)
-            if type(v) == "table" and v.is_control then
+            if type(v) == "table" and v.is_control or v.is_group then
                 for i,w in ipairs(v.inputs) do
                     w._.deviceidx = _.deviceidx 
                 end
