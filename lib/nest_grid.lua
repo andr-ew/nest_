@@ -133,9 +133,9 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
 
 tab = require 'tabutil'
 
--- add support for limit = { high, low }, low presses must be stored somehow but will not change v or call a(). the t sent tracks from the first key down
+-- add support for count = { high, low }, low presses must be stored somehow but will not change v or call a(). the t sent tracks from the first key down
 
-_grid.momentary = _grid.muxctrl:new({ limit = nil })
+_grid.momentary = _grid.muxctrl:new({ count = nil })
 _grid.momentary.inputs[1].handlers = {
     point = function(s, x, y, z)
         s.v = z
@@ -149,7 +149,7 @@ _grid.momentary.inputs[1].handlers = {
         if z > 0 then
             local rem = nil
             table.insert(s.v, v)
-            if s.limit and #s.v > s.limit then rem = table.remove(s.v, 1) end
+            if s.count and #s.v > s.count then rem = table.remove(s.v, 1) end
             s:a(s.v, v, rem) -- v, added, removed
         else
             local k = tab.key(s.v, v)
@@ -164,7 +164,7 @@ _grid.momentary.inputs[1].handlers = {
         if z > 0 then
             local rem = nil
             table.insert(s.v, v)
-            if s.limit and #s.v > s.limit then rem = table.remove(s.v, 1) end
+            if s.count and #s.v > s.count then rem = table.remove(s.v, 1) end
             s:a(s.v, v, rem)
         else
             for i,w in ipairs(s.v) do
@@ -218,7 +218,7 @@ _grid.momentary.outputs[1].redraws = {
     end
 }
 
--- if limit then actions fire on key up
+-- if count then actions fire on key up
 _grid.value = _grid.muxctrl:new()
 _grid.value.inputs[1].handlers = {
     point = function(s, x, y, z) 
