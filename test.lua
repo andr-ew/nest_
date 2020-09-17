@@ -12,3 +12,7 @@ n = nest_:new {
         v = 0
     }
 } :connect { g = grid.connect() } 
+
+_grid.t = _control:new()
+_grid.t.inputs[1] = _input:new()
+print("deviceidx: ", _grid.t.inputs[1] and _grid.t.inputs[1]._.deviceidx or "nil index")

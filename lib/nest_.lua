@@ -24,8 +24,13 @@ function _input:new(o)
             if k == "_" then return _
             elseif self[k] ~= nil then return self[k]
             elseif _[k] ~= nil then return _[k]
-            elseif _.control[k] ~= nil then return _.control[k]
+            elseif _.control and _.control[k] ~= nil then return _.control[k]
             else return nil end
+        end,
+        __newindex = function(t,k,v)
+            if _[k] ~= nil then rawset(_,k,v) 
+            elseif _.control and _.control[k] ~= nil then rawset(_.control,k,v) 
+            else rawset(t,k,v) end
         end
     })
 
@@ -44,7 +49,7 @@ function _output:new(o)
         end,
         draw = function(self, deviceidx)
             if(self._.deviceidx == deviceidx) then
-                return true 
+                return {}
             else return nil end
         end
     }
@@ -61,8 +66,13 @@ function _output:new(o)
             if k == "_" then return _
             elseif self[k] ~= nil then return self[k]
             elseif _[k] ~= nil then return _[k]
-            elseif _.control[k] ~= nil then return _.control[k]
+            elseif _.control and _.control[k] ~= nil then return _.control[k]
             else return nil end
+        end,
+        __newindex = function(t,k,v)
+            if _[k] ~= nil then rawset(_,k,v) 
+            elseif _.control and _.control[k] ~= nil then rawset(_.control,k,v) 
+            else rawset(t,k,v) end
         end
     })
     
@@ -82,9 +92,15 @@ _control = {
 
 function _control:new(o)
     local _ = {
+        --[[
+
+        big change: these secret members should really only exist for nest_ & _group (for clean indexing, the only places that matters), otherwise it messes up the object oriented behavior for inputs, outputs, controls. also, remove the underscores for these classes, that helps illustrate the difference !
+
+        ]]
         is_control = true,
         k = nil,
         p = nil,
+        deviceidx = nil, --- store the group here instead, that seems cleaner. deviceidx is for input/output (we need to kind of steer clear of duplicate keys because of the upward indexing stuff with the secret table removed)
         do_init = function(self)
             self:init()
         end,
@@ -102,7 +118,8 @@ function _control:new(o)
                             w:pass(v.handler, hargs)
                         end
                     end
-                    v:handler(table.unpack(hargs))
+
+                    if v.handler then v:handler(table.unpack(hargs)) end
                 end
             end
 
@@ -113,7 +130,7 @@ function _control:new(o)
         draw = function(self, deviceidx)
             for i,v in ipairs(self.outputs) do
                 local rdargs = v:draw(deviceidx)
-                if rdargs ~= nil then v:redraw(table.unpack(rdargs)) end
+                if rdargs ~= nil and v.redraw then v:redraw(table.unpack(rdargs)) end
             end
         end,
         throw = function(self, deviceidx, method, ...)
@@ -154,28 +171,52 @@ function _control:new(o)
 
     o = o or {}
 
+    --setmetatable(_, { __index = self._ }) ----------- ?
+
+    --[[
     if o._ ~= nil then
         setmetatable(o._, _)
         o._.__index = _
+    end
+    ]]
+
+    o.inputs = o.inputs or {}
+    o.outputs = o.outputs or {}
+
+    for i,v in ipairs(self.inputs) do
+        o.inputs[i] = o.inputs[i] or v:new()
+    end
+    for i,v in ipairs(self.outputs) do
+        o.outputs[i] = o.inputs[i] or v:new()
+    end
+    for i,v in ipairs(o.inputs) do
+        v._.control = o
+        v._.deviceidx = v._.deviceidx or _.deviceidx
+    end
+    for i,v in ipairs(o.outputs) do
+        v._.control = o
+        v._.deviceidx = v._.deviceidx or _.deviceidx
     end
 
     setmetatable(o.inputs or self.inputs, {
         __newindex = function(t, k, v)
             if v.is_input then
-                v._.control = o
-                v._.deviceidx = o._.deviceidx
-                rawset(t,k,v)
+                v._.control = t
+                if v._.deviceidx == nil then v._.deviceidx  = _.deviceidx end
             end
+            
+            rawset(t,k,v)
         end
     })
 
     setmetatable(o.outputs or self.inputs, {
         __newindex = function(t, k, v)
             if v.is_output then
-                v._.control = so
-                v._.deviceidx = o._.deviceidx
-                rawset(t,k,v)
+                v._.control = t
+                if v._.deviceidx == nil then v._.deviceidx  = _.deviceidx end
             end
+
+            rawset(t,k,v)
         end
     })
 
@@ -205,25 +246,15 @@ function _control:new(o)
             elseif k == "output" then return t.outputs[1]
             elseif k == "target" then return t.targets[1]
             elseif self[k] ~= nil then return self[k]
-            --[[
-                stack overflow here, perhaps metatable can't equal self ? research inheritance a little more
-            ]]
             elseif _[k] ~= nil then return _[k]
             elseif findmeta(_.p) ~= nil then return findmeta(_.p)
             else return nil end
+        end,
+        __newindex = function(t,k,v)
+            if _[k] ~= nil then rawset(_,k,v) 
+            else rawset(t,k,v) end
         end
     })
-
-    --_.__concat = concat
-
-    for i,v in ipairs(o.inputs) do
-        v._.control = o
-        v._.deviceidx = o._.deviceidx
-    end
-    for i,v in ipairs(o.outputs) do
-        v._.control = o
-        v._.deviceidx = o._.deviceidx
-    end
 
     return o
 end
@@ -238,16 +269,14 @@ function _metacontrol:new(o)
     o._.pass = function(self, f, args) end
     --[[
 
-    passing the function will work but not for recall, create the global registry_ nest as a lookup & absolute identifier for all controls
+    passing the function will work but not for recall
 
-    this means multiple .k + p's will need to be supported (nice to have anyway), set the registry as ps[0], indicies[0]
-
-    devices could even be connected to the registry. now that is a thought.
-
-     ]]
+    ]]
     o._.metacontrols_disabled = true
+
+    o.targets = self.targets or {}
     
-    setmetatable(o.targets or self.targets, {
+    setmetatable(o.targets, {
         __newindex = function(t, k, v)
             local mt
             if v.is_nest then
@@ -375,8 +404,11 @@ function nest_:new(o)
             else return nil end
         end,
         __newindex = function(t, k, v)
-            nestify(t, k, v)
-            rawset(t,k,v)
+            if _[k] ~= nil then rawset(_,k,v) 
+            else
+                nestify(t, k, v)
+                rawset(t,k,v)
+            end
         end,
         __concat = concat,
         __tostring = function(t) end
@@ -389,8 +421,6 @@ function nest_:new(o)
         return n1
     end
 
-    --_.__concat = concat
-
     for k,v in pairs(o) do nestify(o, k, v) end
 
     return o
@@ -402,7 +432,7 @@ function _group:new(o)
     local _ = {
         k = nil,
         is_group = true,
-        deviceidx = nil
+        deviceidx = ""
     }
 
     o = o or {}
@@ -420,16 +450,21 @@ function _group:new(o)
             else return nil end
         end,
         __newindex = function(t, k, v)
-            if type(v) == "table" and v.is_control or v.is_group then
-                for i,w in ipairs(v.inputs) do
-                    w._.deviceidx = _.deviceidx 
+            if _[k] ~= nil then rawset(_,k,v) 
+            else
+                if type(v) == "table" and v.is_control then
+                    v._.deviceidx = _.deviceidx 
+                   
+                    for i,w in ipairs(v.inputs) do
+                        w._.deviceidx = w._.deviceidx or _.deviceidx
+                    end
+                    for i,w in ipairs(v.outputs) do
+                        w._.deviceidx = w._.deviceidx or _.deviceidx
+                    end
                 end
-                for i,w in ipairs(v.outputs) do
-                    w._.deviceidx = _.deviceidx
-                end
+                
+                rawset(t,k,v)
             end
-            
-            rawset(t,k,v)
         end
     })
 
