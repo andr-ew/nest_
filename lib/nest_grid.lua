@@ -1,3 +1,46 @@
+--[[
+
+new object style ?? I don't think it's ideal actually
+
+_grid.control = {}
+_grid.control:new = function()
+    o = control:new(self)
+    
+    o.v = 0
+    o.x = 1
+    o.y = 1
+    o.lvl = 15
+    o.inputs[1] = input:new()
+    o.outputs[1] = output:new()
+    
+    o.inputs[1].handlers = {
+    }
+    o.outputs[1].redraws = {
+    }
+    
+    function o:handler() end
+    function o:redraw() end
+    
+    return o
+end
+
+_grid.muxcontrol = {}
+_grid.muxcontrol:new = function()
+    o = _grid.control:new(self)
+    
+    o.input[1].handlers = {
+        
+    }
+    
+    o.output[1].redraws = {
+        
+    }
+
+    return o
+end
+
+]]
+
 local _grid = _group:new()
 _grid.deviceidx = 'g'
 
