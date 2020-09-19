@@ -37,8 +37,8 @@ local input_contained = function(s, args)
     return contained.x and contained.y, axis_val
 end
 
-_grid.control.inputs[1]._.update = function(s, deviceidx, args)
-    if(s._.deviceidx == deviceidx) then
+_grid.control.input.update = function(s, deviceidx, args)
+    if(s.deviceidx == deviceidx) then
         if input_contained(s, args) then
             return args
         else return nil end
@@ -50,24 +50,24 @@ _grid.metacontrol = _metacontrol:new {
     x = 1,
     y = 1,
     lvl = 15,
-    inputs = { _grid.control.inputs[1]:new() },
-    outputs = { _grid.control.outputs[1]:new() }
+    inputs = { _grid.control.input:new() },
+    outputs = { _grid.control.output:new() }
 }
 
 _grid.muxctrl = _grid.control:new()
 
-_grid.muxctrl.inputs[1]._.handlers = {
+_grid.muxctrl.input.handlers = {
     point = { function(s, z) end },
     line = { function(s, v, z) end },
     plane = { function(s, x, y, z) end }
 }
 
-_grid.muxctrl.inputs[1]._.handler = function(s, k, ...)
-    s._.handlers[k](s, ...)
+_grid.muxctrl.input.handler = function(s, k, ...)
+    s.handlers[k](s, ...)
 end
 
-_grid.muxctrl.inputs[1]._.update = function(s, deviceidx, args)
-    if(s._.deviceidx == deviceidx) then
+_grid.muxctrl.input.update = function(s, deviceidx, args)
+    if(s.deviceidx == deviceidx) then
         local contained, axis_val = input_contained(s, args)        
 
         if contained then
@@ -88,19 +88,19 @@ _grid.muxctrl.inputs[1]._.update = function(s, deviceidx, args)
     else return nil end
 end
 
-_grid.muxctrl.outputs[1]._.redraws = {
+_grid.muxctrl.output.redraws = {
     point = function(s) end,
     line_x = function(s) end,
     line_y = function(s) end,
     plane = function(s) end
 }
 
-_grid.muxctrl.outputs[1]._.redraw = function(s, k)
-    s._.redraws[k](s)
+_grid.muxctrl.output.redraw = function(s, k)
+    s.redraws[k](s)
 end
 
-_grid.muxctrl.outputs[1]._.draw = function(s, deviceidx)
-    if(s._.deviceidx == deviceidx) then
+_grid.muxctrl.output.draw = function(s, deviceidx)
+    if(s.deviceidx == deviceidx) then
         local has_axis = { x = false, y = false }
 
         for i,v in ipairs{"x", "y"} do
@@ -127,8 +127,8 @@ _grid.muxctrl.outputs[1]._.draw = function(s, deviceidx)
 end
 
 _grid.muxmetacntrl = _grid.metacontrol:new {
-    inputs = { _grid.muxctrl.inputs[1]:new() },
-    outputs = { _grid.muxctrl.outputs[1]:new() }
+    inputs = { _grid.muxctrl.input:new() },
+    outputs = { _grid.muxctrl.output:new() }
 }
 
 tab = require 'tabutil'
@@ -136,12 +136,12 @@ tab = require 'tabutil'
 -- add support for count = { high, low }, low presses must be stored somehow but will not change v or call a(). the t sent tracks from the first key down
 
 _grid.momentary = _grid.muxctrl:new({ count = nil })
-_grid.momentary.inputs[1].handlers = {
+_grid.momentary.input.handlers = {
     point = function(s, x, y, z)
         s.v = z
         local t = nil
-        if z > 0 then s._.time = util.time()
-        else t = util.time() - s._.time end
+        if z > 0 then s.time = util.time()
+        else t = util.time() - s.time end
         s:a(s.v, t)
     end,
     line = function(s, x, y, z)
@@ -183,7 +183,7 @@ local lvl = function(s, i)
     return (type(x) == 'number') and ((i > 1) and 0 or x) or (x[i] or x[i-1] or ((i > 1) and 0 or x[1]))
 end
 
-_grid.momentary.outputs[1].redraws = {
+_grid.momentary.output.redraws = {
     point = function(s)
         s.g:led(s.x, s.y, lvl(s, s.v * 2 + 1))
     end,
@@ -220,7 +220,7 @@ _grid.momentary.outputs[1].redraws = {
 
 -- if count then actions fire on key up
 _grid.value = _grid.muxctrl:new()
-_grid.value.inputs[1].handlers = {
+_grid.value.input.handlers = {
     point = function(s, x, y, z) 
         if z > 0 then s:a(s.v) end
     end,
@@ -239,7 +239,7 @@ _grid.value.inputs[1].handlers = {
         end
     end
 }
-_grid.value.outputs[1].redraws = {
+_grid.value.output.redraws = {
     point = function(s)
         s.g:led(s.x, s.y, lvl(s, 1))
     end,
@@ -256,13 +256,7 @@ _grid.value.outputs[1].redraws = {
     plane = function(s)
         for i = s.x[1], s.x[2] do
             for j = s.y[1], s.y[2] do
-                s.g:led(
-                    i, j, 
-                    lvl(
-                        s, 
-                        ((s.v.x == i - s.x[1]) and (s.v.y == j - s.y[1])) and 1 or 3
-                    )
-                )
+                s.g:led(i, j, lvl(s, ((s.v.x == i - s.x[1]) and (s.v.y == j - s.y[1])) and 1 or 3))
             end
         end
     end
