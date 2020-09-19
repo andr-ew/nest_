@@ -13,7 +13,7 @@ function _input:new(o)
     setmetatable(o, {
         __index = function(t, k)
             if self[k] ~= nil then return self[k]
-            elseif t.control ~= nil then return t.control[k]
+            elseif rawget(t, "control") and t.control[k] then return t.control[k]
             else return nil end
         end    
     })
@@ -43,13 +43,13 @@ function _output:new(o)
     setmetatable(o, {
         __index = function(t, k)
             if self[k] ~= nil then return self[k]
-            elseif t.control ~= nil then return t.control[k]
+            elseif rawget(t, 'control') and t.control[k] then return t.control[k]
             else return nil end
         end    
     })
 
-    o.is_output = true,
-    o.control = o.control or nil,
+    o.is_output = true
+    o.control = o.control or nil
     o.deviceidx = nil
     
     return o
@@ -124,7 +124,9 @@ _control = {
     ]]
 
     write = function(self) end,
-    read = function(self) end
+    read = function(self) end,
+    inputs = {},
+    outputs = {}
 }
 
 function _control:new(o)
@@ -180,11 +182,11 @@ function _control:new(o)
     end
     for i,v in ipairs(o.inputs) do
         v.control = o
-        v.deviceidx = v.deviceidx or o.group.deviceidx
+        v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
     end
     for i,v in ipairs(o.outputs) do
         v.control = o
-        v.deviceidx = v.deviceidx or o.group.deviceidx
+        v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
     end
 
     setmetatable(o.inputs, {
@@ -212,7 +214,7 @@ function _control:new(o)
     return o
 end
 
-_metacontrol = {
+_metacontrol = _control:new {
     pass = function(self, f, args) end
     --[[
 
