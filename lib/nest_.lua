@@ -9,33 +9,37 @@ we'll throw in the generally useful members of nest_ (k, p, print(), pathi, ...)
 ]]
 
 local _cat_ = {}
-function cat:new(o)
-    local function catify() 
+function cat:new(o, clone_type)
+    local _ = {
+    }
+
+    local function clonetotype(t, k, v, typ) 
 
     end
 
-    local _ = {
-        __index = function(self) return function(t, k)
-            if k == "_" then return _
-            elseif self[k] ~= nil then return self[k]
-            elseif _[k] ~= nil then return _[k]
-            else return nil end
-        end end,
-        __newindex = function(self) return function(t, k, v)
-            if _[k] ~= nil then rawset(_,k,v) 
-            else
-                catify(t, k, v)
-                rawset(t,k,v)
-            end
-        end end
-    }
+    local index = function(self) return function(t, k)
+        if k == "_" then return _
+        elseif self[k] ~= nil then return self[k]
+        elseif _[k] ~= nil then return _[k]
+        else return nil end
+    end end
+
+    local newindex = function(self) return function(t, k, v)
+        if _[k] ~= nil then rawset(_,k,v) 
+        else
+            clonetotype(t, k, v, clone_type)
+            rawset(t,k,v)
+        end
+    end end
 
     o = o or {}
-    setmetatable(o, { __index = _.__index(self), __newindex = _.__newindex(self) })
+    clone_type = clone_type or _cat_
+
+    setmetatable(o, { __index = index(self), __newindex = newindex(self) })
     
-    for k,v in pairs(o) do catify(o, k, v) end
+    for k,v in pairs(o) do clonetotype(o, k, v, clone_type) end
     
-    return o
+    return o, index, newindex
 end
 
 
