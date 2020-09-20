@@ -7,6 +7,7 @@ _grid = include 'lib/nest_grid'
 
 ----[[
 n = nest_:new {
+    _meta = { foo = 'bar' }, -- no work !
     v = _grid.value:new {
         x = { 1, 2 },
         y = 1,

@@ -1,3 +1,5 @@
+tab = require 'tabutil'
+
 local _grid = _group:new()
 _grid.deviceidx = 'g'
 
@@ -10,9 +12,11 @@ _grid.control = _control:new {
     outputs = { _output:new() }
 }
 
-local input_contained = function(s, args)
+local input_contained = function(s, inargs)
     local contained = { x = false, y = false }
     local axis_val = { x = nil, y = nil }
+
+    local args = { x = inargs[1], y = inargs[2] }
 
     for i,v in ipairs{"x", "y"} do
         if type(s[v]) == "table" then
@@ -131,7 +135,6 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
     outputs = { _grid.muxctrl.output:new() }
 }
 
-tab = require 'tabutil'
 
 -- add support for count = { high, low }, low presses must be stored somehow but will not change v or call a(). the t sent tracks from the first key down
 
@@ -227,14 +230,14 @@ _grid.value.input.handlers = {
     line = function(s, x, y, z) 
         if z > 0 then
             local last = s.v
-            s.v = x - x[1]
+            s.v = x - s.x[1]
             s:a(s.v, last)
         end
     end,
     plane = function(s, x, y, z) 
         if z > 0 then
             local last = s.v
-            s.v = { x = x - x[1], y = y - y[1] }
+            s.v = { x = x - s.x[1], y = y - s.y[1] }
             s:a(s.v, last)
         end
     end

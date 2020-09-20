@@ -1,3 +1,44 @@
+--[[
+
+this is gonna be a base object for all the types on this page that is gonna try & impliment concatenative programming. all prototypes of cat will have proprer, immutable copies of the tables in the parent rather than delegated pointers, so changes to prototype members will never propogate up the type tree
+
+to do this, all table members and sub-members must be turned into _cat_s!. (via recursive function). be careful though, this might mess up outside objects. then, cat:new() new will manually assign k = k.new and k:new() or k to all members in self (from prototype to self)
+
+we'll throw in the generally useful members of nest_ (k, p, print(), pathi, ...) as the only instance of a secret table (_) so we don't mess up the keying
+
+]]
+
+local _cat_ = {}
+function cat:new(o)
+    local function catify() 
+
+    end
+
+    local _ = {
+        __index = function(self) return function(t, k)
+            if k == "_" then return _
+            elseif self[k] ~= nil then return self[k]
+            elseif _[k] ~= nil then return _[k]
+            else return nil end
+        end end,
+        __newindex = function(self) return function(t, k, v)
+            if _[k] ~= nil then rawset(_,k,v) 
+            else
+                catify(t, k, v)
+                rawset(t,k,v)
+            end
+        end end
+    }
+
+    o = o or {}
+    setmetatable(o, { __index = _.__index(self), __newindex = _.__newindex(self) })
+    
+    for k,v in pairs(o) do catify(o, k, v) end
+    
+    return o
+end
+
+
 _input = {
     transform = nil,
     handler = nil,
@@ -141,15 +182,15 @@ function _control:new(o)
 
     setmetatable(o, {
         __concat = concat,
-        __tostring = function(t) end,
+        __tostring = function(t) return 'control' end,
         __index = function(t, k)
-            local findmeta = function(nest)
+            local findmeta = function(nest) ------------- no work !
                 if nest and nest.is_nest then
                     if nest._meta ~= nil and nest._meta[k] ~= nil then return nest._meta[k]
                     elseif nest._._meta ~= nil and nest._._meta[k] ~= nil then return nest._._meta[k]
-                    elseif nest.p ~= nil then return findmeta(nest.p)
+                    elseif rawget(nest, p) ~= nil then return findmeta(rawget(nest, p))
                     else return nil end
-                end
+                else return nil end
             end
 
             -- rename nickname keys in o, maybe make a central table lookup
@@ -157,8 +198,7 @@ function _control:new(o)
             elseif k == "output" then return t.outputs[1]
             elseif k == "target" then return t.targets[1]
             elseif self[k] ~= nil then return self[k]
-            elseif findmeta(p) ~= nil then return findmeta(p)
-            else return nil end
+            else return findmeta(rawget(t, p)) end
         end
     })
 
@@ -252,6 +292,15 @@ end
 
 nest_ = {}
 function nest_:new(o)
+    --[[
+
+    so actually members from the supertype are not picked up by pairs() (duh) which means the secret table is kinda pointless but also means we should probably alter new() to act more 'immutable' by new-ing nest table members of the supertype into the prototype, in the style of inputs{}, outputs{} (also kinda like nestify(), any plain tables should become nest_'s in order to propogate the behaviors
+
+    fwiw, we could even consider adding this behavior to _control, too.
+
+    at this point, nest_ is staring to resemble a blank object with a special / weird object oriented behavior. if we want to extend these behaviors to _control, _input, _output, we might want to restructure these types as prototypes of _nest, ot create a shared supertype which defines only the object oriented behaviors (_cat_ !)
+        
+    ]]
     local _ = {
         do_init = function(self)
             self:init()
@@ -332,15 +381,11 @@ function nest_:new(o)
 
     local function nestify(p, k, v)
         if type(v) == "table" then
-            if v.is_control then
-            elseif v.is_nest then
+            if v.is_control then v.p = p
+            elseif v.is_nest then v._.p = p
             else
                 v = nest_:new(v)
-            end
-            
-            if v._ then
-                rawset(v._, "k", k)
-                rawset(v._, "p", p)
+                v._.p = p
             end
         end
     end
@@ -367,7 +412,7 @@ function nest_:new(o)
             end
         end,
         __concat = concat,
-        __tostring = function(t) end
+        __tostring = function(t) return 'nest_' end
     })
 
     for k,v in pairs(o) do nestify(o, k, v) end
