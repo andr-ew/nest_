@@ -17,31 +17,49 @@ function cat:new(o, clone_type)
 
     end
 
-    local index = function(self) return function(t, k)
+    local index = function(self, t, k)
         if k == "_" then return _
         elseif self[k] ~= nil then return self[k]
         elseif _[k] ~= nil then return _[k]
         else return nil end
-    end end
+    end
 
-    local newindex = function(self) return function(t, k, v)
+    local newindex = function(self, t, k, v)
         if _[k] ~= nil then rawset(_,k,v) 
         else
             clonetotype(t, k, v, clone_type)
             rawset(t,k,v)
         end
-    end end
+    end
 
     o = o or {}
     clone_type = clone_type or _cat_
 
-    setmetatable(o, { __index = index(self), __newindex = newindex(self) })
+    setmetatable(o, { 
+        __index = function(t, k) return index(self, t, k) end, 
+        __newindex = function(t, k, v) return newindex(self, t, k, v) end 
+    })
     
     for k,v in pairs(o) do clonetotype(o, k, v, clone_type) end
     
     return o, index, newindex
 end
 
+--test
+subcat = {}
+function subcat:new(o)
+    local _, index, newindex
+    o, _, index, newindex = _cat_:new(o, _cat_)
+
+    _.is_subcat = true
+
+    setmetatable(o, {
+        __index = function(t, k) return index(self, t, k) end,
+        __newindex = function(t, k, v) return newindex(self, t, k, v) end
+    })
+
+    return o
+end
 
 _input = {
     transform = nil,
