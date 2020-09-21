@@ -9,7 +9,7 @@ we'll throw in the generally useful members of nest_ (k, p, print(), pathi, ...)
 ]]
 
 local _cat_ = {}
-function cat:new(o, clone_type)
+function _cat_:new(o, clone_type)
     local _ = {
     }
 
@@ -220,7 +220,7 @@ function _control:new(o)
             elseif k == "output" then return t.outputs[1]
             elseif k == "target" then return t.targets[1]
             elseif self[k] ~= nil then return self[k]
-            else return findmeta(rawget(t, p)) end
+            else return findmeta(rawget(t, 'p')) end
         end
     })
 
