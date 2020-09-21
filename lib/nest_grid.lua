@@ -78,10 +78,8 @@ _grid.muxctrl.input.update = function(s, deviceidx, args)
             if axis_val.x == nil and axis_val.y == nil then
                 return { "point", args[1], args[2], args[3] }
             elseif axis_val.x ~= nil and axis_val.y ~= nil then
-                if type(s.v) ~= 'table' then s.v = {} end
                 return { "plane", args[1], args[2], args[3] }
             else
-                if type(s.v) ~= 'table' then s.v = {} end
                 if axis_val.x ~= nil then
                     return { "line", args[1], args[2], args[3] }
                 elseif axis_val.y ~= nil then
@@ -137,6 +135,8 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
 
 
 -- add support for count = { high, low }, low presses must be stored somehow but will not change v or call a(). the t sent tracks from the first key down
+
+-- use init() to ensure v has initialized properly
 
 _grid.momentary = _grid.muxctrl:new({ count = nil })
 _grid.momentary.input.handlers = {

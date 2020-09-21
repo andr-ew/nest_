@@ -11,10 +11,22 @@ we'll throw in the generally useful members of nest_ (k, p, print(), pathi, ...)
 local _cat_ = {}
 function _cat_:new(o, clone_type)
     local _ = {
+        is_cat = true,
+        p = nil,
+        k = nil
     }
 
-    local function clonetotype(t, k, v, typ) 
-
+    local function formattype(t, k, v, typ) 
+        if type(v) == "table" then
+            if v._.is_cat then 
+                v._.p = t
+                v._.k = k
+            else
+                v = typ:new(v)
+                v._.p = t
+                v._.k = k
+            end
+        end
     end
 
     local index = function(self, t, k)
@@ -27,7 +39,7 @@ function _cat_:new(o, clone_type)
     local newindex = function(self, t, k, v)
         if _[k] ~= nil then rawset(_,k,v) 
         else
-            clonetotype(t, k, v, clone_type)
+            formattype(t, k, v, clone_type)
             rawset(t,k,v)
         end
     end
@@ -40,7 +52,13 @@ function _cat_:new(o, clone_type)
         __newindex = function(t, k, v) return newindex(self, t, k, v) end 
     })
     
-    for k,v in pairs(o) do clonetotype(o, k, v, clone_type) end
+    for k,v in pairs(o) do formattype(o, k, v, clone_type) end
+
+    for k,v in pairs(self) do 
+        if type(v) == "function" then
+        elseif type(v) == "table" then o[k] = v.is_cat and v:new() or v
+        else rawset(o,k,v) end 
+    end
     
     return o, index, newindex
 end
