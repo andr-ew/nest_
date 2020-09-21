@@ -8,7 +8,7 @@ we'll throw in the generally useful members of nest_ (k, p, print(), pathi, ...)
 
 ]]
 
-local _cat_ = {}
+_cat_ = {}
 function _cat_:new(o, clone_type)
     local _ = {
         is_cat = true,
@@ -18,7 +18,7 @@ function _cat_:new(o, clone_type)
 
     local function formattype(t, k, v, typ) 
         if type(v) == "table" then
-            if v._.is_cat then 
+            if v.is_cat then 
                 v._.p = t
                 v._.k = k
             else
@@ -55,16 +55,18 @@ function _cat_:new(o, clone_type)
     for k,v in pairs(o) do formattype(o, k, v, clone_type) end
 
     for k,v in pairs(self) do 
-        if type(v) == "function" then
-        elseif type(v) == "table" then o[k] = v.is_cat and v:new() or v
-        else rawset(o,k,v) end 
+        if not rawget(o, k) then
+            if type(v) == "function" then
+            elseif type(v) == "table" then rawset(o, k, v.is_cat and v:new() or v)
+            else rawset(o,k,v) end 
+        end
     end
     
     return o, index, newindex
 end
 
 --test
-subcat = {}
+local subcat = {}
 function subcat:new(o)
     local _, index, newindex
     o, _, index, newindex = _cat_:new(o, _cat_)
@@ -80,6 +82,9 @@ function subcat:new(o)
 end
 
 _input = {
+    is_input = true,
+    control = nil,
+    deviceidx = nil,
     transform = nil,
     handler = nil,
     update = function(self, deviceidx, args)
@@ -99,9 +104,6 @@ function _input:new(o)
         end    
     })
 
-    o.is_input = true
-    o.control = o.control or nil
-    o.deviceidx = nil
 
     return o
 end

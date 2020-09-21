@@ -19,3 +19,12 @@ n = nest_:new {
         v = {}
     }
 } :connect { g = grid.connect() } 
+
+cc = _cat_:new {
+    a = 1,
+    b = { 'ep', 'bo' }
+}
+
+ccc = cc:new {
+    c = 4
+}
