@@ -3,10 +3,10 @@ function r()
 end
 
 include 'lib/nest_'
-_grid = include 'lib/nest_grid'
+--_grid = include 'lib/nest_grid'
 
+--[[
 n = nest_:new {
-    _meta = { foo = 'bar' },
     --welp, this is very wrong, new inheritance model maybe will fix hehe
     v = _grid.value:new {
         x = { 1, 2 },
@@ -19,12 +19,4 @@ n = nest_:new {
         v = {}
     }
 } :connect { g = grid.connect() } 
-
-cc = _cat_:new {
-    a = 1,
-    b = { 'ep', 'bo' }
-}
-
-ccc = cc:new {
-    c = 4
-}
+]]

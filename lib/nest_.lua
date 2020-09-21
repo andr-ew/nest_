@@ -2,23 +2,23 @@
 
 this is gonna be a base object for all the types on this page that is gonna try & impliment concatenative programming. all prototypes of cat will have proprer, immutable copies of the tables in the parent rather than delegated pointers, so changes to prototype members will never propogate up the type tree
 
-to do this, all table members and sub-members must be turned into _cat_s!. (via recursive function). be careful though, this might mess up outside objects. then, cat:new() new will manually assign k = k.new and k:new() or k to all members in self (from prototype to self)
+to do this, all table members and sub-members must be turned into _obj_s!. (via recursive function). be careful though, this might mess up outside objects. then, cat:new() new will manually assign k = k.new and k:new() or k to all members in self (from prototype to self)
 
 we'll throw in the generally useful members of nest_ (k, p, print(), pathi, ...) as the only instance of a secret table (_) so we don't mess up the keying
 
 ]]
 
-_cat_ = {}
-function _cat_:new(o, clone_type)
+_obj_ = {}
+function _obj_:new(o, clone_type)
     local _ = {
-        is_cat = true,
+        is_obj = true,
         p = nil,
         k = nil
     }
 
     local function formattype(t, k, v, typ) 
         if type(v) == "table" then
-            if v.is_cat then 
+            if v.is_obj then 
                 v._.p = t
                 v._.k = k
             else
@@ -45,7 +45,7 @@ function _cat_:new(o, clone_type)
     end
 
     o = o or {}
-    clone_type = clone_type or _cat_
+    clone_type = clone_type or _obj_
 
     setmetatable(o, { 
         __index = function(t, k) return index(self, t, k) end, 
@@ -57,28 +57,12 @@ function _cat_:new(o, clone_type)
     for k,v in pairs(self) do 
         if not rawget(o, k) then
             if type(v) == "function" then
-            elseif type(v) == "table" then rawset(o, k, v.is_cat and v:new() or v)
+            elseif type(v) == "table" then rawset(o, k, v.is_obj and v:new() or v)
             else rawset(o,k,v) end 
         end
     end
     
-    return o, index, newindex
-end
-
---test
-local subcat = {}
-function subcat:new(o)
-    local _, index, newindex
-    o, _, index, newindex = _cat_:new(o, _cat_)
-
-    _.is_subcat = true
-
-    setmetatable(o, {
-        __index = function(t, k) return index(self, t, k) end,
-        __newindex = function(t, k, v) return newindex(self, t, k, v) end
-    })
-
-    return o
+    return o, _, index, newindex
 end
 
 _input = {
@@ -93,22 +77,29 @@ _input = {
         else return nil end
     end
 }
+
 function _input:new(o)
-    o = o or {}
+    local _, index, newindex
+    o, _, index, newindex = _obj_.new(self, o, _obj_)
 
     setmetatable(o, {
-        __index = function(t, k)
-            if self[k] ~= nil then return self[k]
-            elseif rawget(t, "control") and t.control[k] then return t.control[k]
-            else return nil end
-        end    
-    })
+        __index = function(t, k) 
+            local cat_i = index(self, t, k) 
 
+            if cat_i then return cat_i
+            elseif rawget(t, 'control') and t.control[k] then return t.control[k]
+            else return nil end
+        end,
+        __newindex = function(t, k, v) return newindex(self, t, k, v) end
+    })
 
     return o
 end
 
 _output = {
+    is_output = true,
+    control = nil,
+    deviceidx = nil,
     transform = nil,
     redraw = nil,
     throw = function(self, ...)
@@ -120,23 +111,8 @@ _output = {
         else return nil end
     end
 }
-function _output:new(o)
-    o = o or {}
 
-    setmetatable(o, {
-        __index = function(t, k)
-            if self[k] ~= nil then return self[k]
-            elseif rawget(t, 'control') and t.control[k] then return t.control[k]
-            else return nil end
-        end    
-    })
-
-    o.is_output = true
-    o.control = o.control or nil
-    o.deviceidx = nil
-    
-    return o
-end
+_output.new = _input.new
 
 _control = {
     a = function(s, v) end,
@@ -212,7 +188,7 @@ _control = {
     outputs = {}
 }
 
-function _control:new(o)
+function _control:new(o) -----------------------------------------------------> obj things
     o = o or {}
 
     local concat = function (n1, n2)
@@ -226,7 +202,7 @@ function _control:new(o)
         __concat = concat,
         __tostring = function(t) return 'control' end,
         __index = function(t, k)
-            local findmeta = function(nest) ------------- no work !
+            local findmeta = function(nest)
                 if nest and nest.is_nest then
                     if nest._meta ~= nil and nest._meta[k] ~= nil then return nest._meta[k]
                     elseif nest._._meta ~= nil and nest._._meta[k] ~= nil then return nest._._meta[k]
@@ -340,7 +316,7 @@ function nest_:new(o)
 
     fwiw, we could even consider adding this behavior to _control, too.
 
-    at this point, nest_ is staring to resemble a blank object with a special / weird object oriented behavior. if we want to extend these behaviors to _control, _input, _output, we might want to restructure these types as prototypes of _nest, ot create a shared supertype which defines only the object oriented behaviors (_cat_ !)
+    at this point, nest_ is staring to resemble a blank object with a special / weird object oriented behavior. if we want to extend these behaviors to _control, _input, _output, we might want to restructure these types as prototypes of _nest, ot create a shared supertype which defines only the object oriented behaviors (_obj_ !)
         
     ]]
     local _ = {
