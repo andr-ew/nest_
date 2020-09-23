@@ -3,6 +3,22 @@ function r()
 end
 
 include 'lib/nest_'
+tab = require 'tabutil'
+
+i = _input:new()
+c = _control:new{ inputs = { i } } -- stack overflow
+
+--[[
+c = _control:new {
+    v = 1,
+    inputs = {
+        _input:new { foo = "bar" }
+    }
+}
+cc = c:new { v = 2 }
+cc.input.foo = 'bingo'
+]]
+
 --_grid = include 'lib/nest_grid'
 
 --[[

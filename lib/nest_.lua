@@ -8,6 +8,12 @@ we'll throw in the generally useful members of nest_ (k, p, print(), pathi, ...)
 
 ]]
 
+--[[
+
+the clone abilities are working for normal _obj_ memebers but it's not deep copying the heiarchy for tables. they are becoming _obj_s but the table is not actually being copied
+
+]]
+
 _obj_ = {}
 function _obj_:new(o, clone_type)
     local _ = {
@@ -16,56 +22,60 @@ function _obj_:new(o, clone_type)
         k = nil
     }
 
-    local function formattype(t, k, v, typ) 
+    local function formattype(t, k, v) 
         if type(v) == "table" then
             if v.is_obj then 
                 v._.p = t
                 v._.k = k
             else
-                v = typ:new(v)
+                v = clone_type:new(v)
                 v._.p = t
                 v._.k = k
             end
         end
-    end
 
-    local index = function(self, t, k)
-        if k == "_" then return _
-        elseif self[k] ~= nil then return self[k]
-        elseif _[k] ~= nil then return _[k]
-        else return nil end
-    end
-
-    local newindex = function(self, t, k, v)
-        if _[k] ~= nil then rawset(_,k,v) 
-        else
-            formattype(t, k, v, clone_type)
-            rawset(t,k,v)
-        end
+        return v
     end
 
     o = o or {}
     clone_type = clone_type or _obj_
 
-    setmetatable(o, { 
-        __index = function(t, k) return index(self, t, k) end, 
-        __newindex = function(t, k, v) return newindex(self, t, k, v) end 
+    setmetatable(o, {
+        __index = function(t, k)
+            if k == "_" then return _
+            elseif self[k] ~= nil then return self[k] --------- stack overflow :/
+            elseif _[k] ~= nil then return _[k]
+            else return nil end
+        end,
+        __newindex = function(t, k, v)
+            if _[k] ~= nil then rawset(_,k,v) 
+            else rawset(t, k, formattype(t, k, v)) end
+        end,
+        __concat = function (n1, n2)
+            for k, v in pairs(n2) do
+                n1[k] = v
+            end
+            return n1
+        end--,
+        --__tostring = function(t) return '_obj_' end
     })
     
-    for k,v in pairs(o) do formattype(o, k, v, clone_type) end
+    for k,v in pairs(o) do formattype(o, k, v) end
 
     for k,v in pairs(self) do 
         if not rawget(o, k) then
             if type(v) == "function" then
-            elseif type(v) == "table" then rawset(o, k, v.is_obj and v:new() or v)
+            elseif type(v) == "table" then
+                local clone = formattype(self, k, v):new()
+                rawset(o, k, formattype(o, k, clone))
             else rawset(o,k,v) end 
         end
     end
     
-    return o, _, index, newindex
+    return o
 end
 
-_input = {
+_input = _obj_:new {
     is_input = true,
     control = nil,
     deviceidx = nil,
@@ -79,24 +89,23 @@ _input = {
 }
 
 function _input:new(o)
-    local _, index, newindex
-    o, _, index, newindex = _obj_.new(self, o, _obj_)
+    o = _obj_.new(self, o, _obj_)
+    
+    local mt = getmetatable(o)
+    local mti = mt.__index
 
-    setmetatable(o, {
-        __index = function(t, k) 
-            local cat_i = index(self, t, k) 
+    mt.__index = function(t, k) 
+        local i = mti(t, k) 
 
-            if cat_i then return cat_i
-            elseif rawget(t, 'control') and t.control[k] then return t.control[k]
-            else return nil end
-        end,
-        __newindex = function(t, k, v) return newindex(self, t, k, v) end
-    })
+        if i then return i
+        elseif rawget(t, 'control') and t.control[k] then return t.control[k]
+        else return nil end
+    end
 
     return o
 end
 
-_output = {
+_output = _obj_:new {
     is_output = true,
     control = nil,
     deviceidx = nil,
@@ -114,7 +123,12 @@ _output = {
 
 _output.new = _input.new
 
-_control = {
+_control = _obj_:new {
+    is_control = true,
+    v = 0,
+    order = 0,
+    en = true,
+    group = nil,
     a = function(s, v) end,
     init = function(s) end,
     help = function(s) end,
@@ -188,106 +202,75 @@ _control = {
     outputs = {}
 }
 
-function _control:new(o) -----------------------------------------------------> obj things
-    o = o or {}
+function _control:new(o)
+    o = _obj_.new(self, o, _obj_)
+    local _ = o._    
 
-    local concat = function (n1, n2)
-        for k, v in pairs(n2) do
-            n1[k] = v
-        end
-        return n1
-    end
+    local mt = getmetatable(o)
+    local mti = mt.__index
 
-    setmetatable(o, {
-        __concat = concat,
-        __tostring = function(t) return 'control' end,
-        __index = function(t, k)
-            local findmeta = function(nest)
-                if nest and nest.is_nest then
-                    if nest._meta ~= nil and nest._meta[k] ~= nil then return nest._meta[k]
-                    elseif nest._._meta ~= nil and nest._._meta[k] ~= nil then return nest._._meta[k]
-                    elseif rawget(nest, p) ~= nil then return findmeta(rawget(nest, p))
-                    else return nil end
+    mt.__index = function(t, k) 
+        local findmeta = function(nest)
+            if nest and nest.is_nest then
+                if nest._meta ~= nil and nest._meta[k] ~= nil then return nest._meta[k]
+                elseif nest._._meta ~= nil and nest._._meta[k] ~= nil then return nest._._meta[k]
+                elseif nest._.p ~= nil then return findmeta(nest._.p)
                 else return nil end
-            end
-
-            -- rename nickname keys in o, maybe make a central table lookup
-            if k == "input" then return t.inputs[1]
-            elseif k == "output" then return t.outputs[1]
-            elseif k == "target" then return t.targets[1]
-            elseif self[k] ~= nil then return self[k]
-            else return findmeta(rawget(t, 'p')) end
+            else return nil end
         end
-    })
 
-    o.is_control = true
-
-    o.v = o.v or 0
-    o.order = o.order or 0
-    o.en = o.en or true
-    o.k = nil
-    o.p = nil
-    o.group = nil
-
-    o.inputs = o.inputs or o.input and { o.input } or {}
-    o.outputs = o.outputs or o.output and { o.output } or {}
-
-    for i,v in ipairs(self.inputs) do
-        o.inputs[i] = o.inputs[i] or v:new()
+        local i = mti(t, k) 
+        if i then return i
+        elseif k == "input" then return t.inputs[1]
+        elseif k == "output" then return t.outputs[1]
+        elseif k == "target" then return t.targets[1]
+        else return findmeta(_.p) end
     end
-    for i,v in ipairs(self.outputs) do
-        o.outputs[i] = o.inputs[i] or v:new()
-    end
-    for i,v in ipairs(o.inputs) do
-        v.control = o
-        v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
-    end
-    for i,v in ipairs(o.outputs) do
-        v.control = o
-        v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
-    end
+    mt.__tostring = function(t) return '_control' end
 
-    setmetatable(o.inputs, {
-        __newindex = function(t, k, v)
-            if v.is_input then
+    for i,k in ipairs { "input", "output" } do
+        local l = o[k .. 's']
+        
+        if o[k] then 
+            l[1] = o[k]
+            o[k] = nil
+        end
+
+        for i,v in ipairs(l) do
+            v.control = o
+            v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
+        end
+
+        local lmt = getmetatable(l)
+        local lmtn = lmt.__newindex
+
+        l.__newindex = function(t, kk, v)
+            if v['is_' .. k] then
                 v.control = t
-                if v.deviceidx == nil then v.deviceidx  = o.group.deviceidx end
+                v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
             end
             
-            rawset(t,k,v)
+            lmtn(t, kk, v)
         end
-    })
-
-    setmetatable(o.outputs, {
-        __newindex = function(t, k, v)
-            if v.is_output then
-                v.control = t
-                if v.deviceidx == nil then v.deviceidx  = o.group.deviceidx end
-            end
-
-            rawset(t,k,v)
-        end
-    })
+    end
 
     return o
 end
 
 _metacontrol = _control:new {
-    pass = function(self, f, args) end
+    pass = function(self, f, args) end,
     --[[
 
     passing the function will work but not for recall
 
     ]]
+    targets = {}
 }
+
 function _metacontrol:new(o)
     o = _control.new(self, o)
     
-    o.is_metacontrol = true
-    o.targets = o.targets or {} 
-
-    o.targets = o.targets or {}
-    
+    --[[
     setmetatable(o.targets, {
         __newindex = function(t, k, v)
             local mt
@@ -304,6 +287,7 @@ function _metacontrol:new(o)
             rawset(t,k,v)
         end
     })
+    ]]
 
     return o
 end
