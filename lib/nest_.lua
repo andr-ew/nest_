@@ -1,20 +1,9 @@
---[[
 
-this is gonna be a base object for all the types on this page that is gonna try & impliment concatenative programming. all prototypes of cat will have proprer, immutable copies of the tables in the parent rather than delegated pointers, so changes to prototype members will never propogate up the type tree
+-- _obj_ is a base object for all the types on this page that impliments concatenative programming. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
 
-to do this, all table members and sub-members must be turned into _obj_s!. (via recursive function). be careful though, this might mess up outside objects. then, cat:new() new will manually assign k = k.new and k:new() or k to all members in self (from prototype to self)
-
-we'll throw in the generally useful members of nest_ (k, p, print(), pathi, ...) as the only instance of a secret table (_) so we don't mess up the keying
-
-]]
-
---[[
-
-the clone abilities are working for normal _obj_ memebers but it's not deep copying the heiarchy for tables. they are becoming _obj_s but the table is not actually being copied
-
-]]
-
-_obj_ = {}
+_obj_ = {
+    print = function(self) print(tostring(self)) end
+}
 function _obj_:new(o, clone_type)
     local _ = {
         is_obj = true,
@@ -43,7 +32,7 @@ function _obj_:new(o, clone_type)
     setmetatable(o, {
         __index = function(t, k)
             if k == "_" then return _
-            elseif self[k] ~= nil then return self[k] --------- stack overflow :/
+            elseif self[k] ~= nil then return self[k]
             elseif _[k] ~= nil then return _[k]
             else return nil end
         end,
@@ -99,7 +88,6 @@ function _input:new(o)
 
         if i then return i
         elseif rawget(t, 'control') and rawget(t, 'control')[k] then return rawget(t, 'control')[k]
-        --elseif rawget(t, 'control') and rawget(rawget(t, 'control'), k) then return rawget(rawget(t, 'control'), k) -- this screws things up if we need to call functions inherited into control :/ but it stops the line 46 stack overflow
         else return nil end
     end
 
@@ -226,12 +214,11 @@ function _control:new(o)
         elseif k == "output" then return t.outputs[1]
         elseif k == "target" then return t.targets[1]
         else return findmeta(_.p) end
---        else return nil end
     end
 
     --mt.__tostring = function(t) return '_control' end
 
-    for i,k in ipairs { "input", "output" } do
+    for i,k in ipairs { "input", "output" } do -- lost on i/o table overwrite, fix in mt.__newindex
         local l = o[k .. 's']
         
         if o[k] then 
@@ -274,195 +261,145 @@ _metacontrol = _control:new {
 
 function _metacontrol:new(o)
     o = _control.new(self, o)
-    
-    --[[
-    setmetatable(o.targets, {
-        __newindex = function(t, k, v)
-            local mt
-            if v.is_nest then
-                if v._._meta == nil then v._._meta = {} end
-                if v._._meta.metacontrols == nil then v._._meta.metacontrols = {} end
-                mt = v._._meta.metacontrols
-            elseif v.is_control then 
-                if v.metacontrols == nil then v.metacontrols = {} end
-                mt = v.metacontrols
-            end
 
-            table.insert(mt, self)
-            rawset(t,k,v)
+    local mt = getmetatable(o)
+    mt.__tostring = function() return '_metacontrol' end
+
+    local tmt = getmetatable(o.targets)
+    local tmtn = mt.__newindex
+
+    tmt.__newindex = function(t, k, v)
+        tmtn(t, k, v)
+
+        local mct
+        if v.is_nest then
+            if v._._meta == nil then v._._meta = {} end
+            if v._._meta.metacontrols == nil then v._._meta.metacontrols = {} end
+            mct = v._._meta.metacontrols
+        elseif v.is_control then 
+            if v.metacontrols == nil then v.metacontrols = {} end
+            mct = v.metacontrols
         end
-    })
-    ]]
+
+        table.insert(mct, o)
+    end
 
     return o
 end
 
-nest_ = {}
-function nest_:new(o)
-    --[[
+nest_ = _obj_:new {
+    do_init = function(self)
+        self:init()
+        table.sort(self, function(a,b) return a.order < b.order end)
 
-    so actually members from the supertype are not picked up by pairs() (duh) which means the secret table is kinda pointless but also means we should probably alter new() to act more 'immutable' by new-ing nest table members of the supertype into the prototype, in the style of inputs{}, outputs{} (also kinda like nestify(), any plain tables should become nest_'s in order to propogate the behaviors
+        for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
+    end,
+    connect = function(self, devices)
+        self:do_init()
 
-    fwiw, we could even consider adding this behavior to _control, too.
+        if self._._meta == nil then self._._meta = {} end
+        local m = self._._meta
 
-    at this point, nest_ is staring to resemble a blank object with a special / weird object oriented behavior. if we want to extend these behaviors to _control, _input, _output, we might want to restructure these types as prototypes of _nest, ot create a shared supertype which defines only the object oriented behaviors (_obj_ !)
+        m.devices = devices
+        setmetatable(m, m.devices)
+        m.devices.__index = m.devices
+
+        m.device_redraws = {}
+
+        for k,v in pairs(m.devices) do
+            if k == 'g' or k == 'a' then
+                local kk = k
+                m.device_redraws[kk] = function() self:draw(kk) end
+                v[(kk == 'g') and 'key' or 'delta'] = function(...)
+                    m[kk]:all(0)
+                    self:update(kk, {...})
+                    m.device_redraws[kk]()
+                    m[kk]:refresh()
+                end
+            elseif k == 'm' or k == 'h' then
+                local kk = k
+                v.event = function(data) self:update(kk, data) end
+            elseif k == 'enc' then
+                v = function(...) self:update('enc', {...}) end
+            elseif k == 'key' then
+                v = function(...) self:update('key', {...}) end
+            elseif k == 'screen' then
+                m.device_redraws.screen = redraw
+                redraw = function()
+                    screen.clear()
+                    self:draw('screen')
+                    screen.update()
+                end
+            else print('nest_.connect: invalid device key. valid options are g, a, m, h, screen, enc, key')
+            end
+        end
         
-    ]]
-    local _ = {
-        do_init = function(self)
-            self:init()
-            table.sort(self, function(a,b) return a.order < b.order end)
+        return self
+    end,
+    init = function(self) return self end,
+    each = function(self, cb) return self end,
+    update = function(self, deviceidx, args)
+        for k,v in pairs(self) do if v.is_nest or v.is_control then
+            v:update(deviceidx, args )
+        end end
+    end,
+    draw = function(self, deviceidx)  
+        for k,v in pairs(self) do if v.is_nest or v.is_control then
+            v:draw(deviceidx)
+        end end
+    end,
+    throw = function(self, deviceidx, method, ...)
+        self.p:throw(deviceidx, method, ...)
+    end,
+    set = function(self, tv) end, --table set nest = { nest = { control = value } }
+    get = function(self) end,
+    write = function(self) end,
+    read = function(self) end
+}
 
-            for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
-        end,
-        connect = function(self, devices)
-            self:do_init()
+function nest_:new(o)
+    o = _obj_.new(self, o, nest_)
+    local _ = o._ 
 
-            if self._._meta == nil then self._._meta = {} end
-            local m = self._._meta
+    _.is_nest = true
+    _.en = true
+    _.order = 0
 
-            m.devices = devices
-            setmetatable(m, m.devices)
-            m.devices.__index = m.devices
-
-            m.device_redraws = {}
-
-            for k,v in pairs(m.devices) do
-                if k == 'g' or k == 'a' then
-                    local kk = k
-                    m.device_redraws[kk] = function() self:draw(kk) end
-                    v[(kk == 'g') and 'key' or 'delta'] = function(...)
-                        m[kk]:all(0)
-                        self:update(kk, {...})
-                        m.device_redraws[kk]()
-                        m[kk]:refresh()
-                    end
-                elseif k == 'm' or k == 'h' then
-                    local kk = k
-                    v.event = function(data) self:update(kk, data) end
-                elseif k == 'enc' then
-                    v = function(...) self:update('enc', {...}) end
-                elseif k == 'key' then
-                    v = function(...) self:update('key', {...}) end
-                elseif k == 'screen' then
-                    m.device_redraws.screen = redraw
-                    redraw = function()
-                        screen.clear()
-                        self:draw('screen')
-                        screen.update()
-                    end
-                else print('nest_.connect: invalid device key. valid options are g, a, m, h, screen, enc, key')
-                end
-            end
-            
-            return self
-        end,
-        init = function(self) return self end,
-        each = function(self, cb) return self end,
-        is_nest = true,
-        k = nil,
-        p = nil,
-        en = true,
-        order = 0,
-        update = function(self, deviceidx, args)
-            for k,v in pairs(self) do if v.is_nest or v.is_control then
-                v:update(deviceidx, args )
-            end end
-        end,
-        draw = function(self, deviceidx)  
-            for k,v in pairs(self) do if v.is_nest or v.is_control then
-                v:draw(deviceidx)
-            end end
-        end,
-        throw = function(self, deviceidx, method, ...)
-            self.p:throw(deviceidx, method, ...)
-        end,
-        set = function(self, tv) end, --table set nest = { nest = { control = value } }
-        get = function(self) end,
-        print = function(self) end,
-        write = function(self) end,
-        read = function(self) end
-    }
-
-    o = o or {}
-
-    local function nestify(p, k, v)
-        if type(v) == "table" then
-            if v.is_control then v.p = p
-            elseif v.is_nest then v._.p = p
-            else
-                v = nest_:new(v)
-                v._.p = p
-            end
-        end
-    end
-
-    local concat = function (n1, n2)
-        for k, v in pairs(n2) do
-            n1[k] = v
-        end
-        return n1
-    end
-
-    setmetatable(o, {
-        __index = function(t, k)
-            if k == "_" then return _
-            elseif self[k] ~= nil then return self[k]
-            elseif _[k] ~= nil then return _[k]
-            else return nil end
-        end,
-        __newindex = function(t, k, v)
-            if _[k] ~= nil then rawset(_,k,v) 
-            else
-                nestify(t, k, v)
-                rawset(t,k,v)
-            end
-        end,
-        __concat = concat,
-        __tostring = function(t) return 'nest_' end
-    })
-
-    for k,v in pairs(o) do nestify(o, k, v) end
+    local mt = getmetatable(o)
+    --mt.__tostring = function(t) return 'nest_' end
 
     return o
 end
 
-
-_group = {}
+_group = _obj_:new {}
 function _group:new(o)
-    local _ = {
-        k = nil,
-        is_group = true,
-        deviceidx = ""
-    }
+    o = _obj_.new(self, o, _group)
+    local _ = o._ 
 
-    o = o or {}
+    _.is_group = true
+    _.deviceidx = ""
 
-    setmetatable(o, {
-        __index = function(t, k)
-            if k == "_" then return _
-            elseif self[k] ~= nil then return self[k]
-            elseif _[k] ~= nil then return _[k]
-            else return nil end
-        end,
-        __newindex = function(t, k, v)
-            if _[k] ~= nil then rawset(_,k,v) 
-            else
-                if type(v) == "table" and v.is_control then
-                    v.group = t
-                   
-                    for i,w in ipairs(v.inputs) do
-                        w.deviceidx = w.deviceidx or _.deviceidx
-                    end
-                    for i,w in ipairs(v.outputs) do
-                        w.deviceidx = w.deviceidx or _.deviceidx
-                    end
+    local mt = getmetatable(o)
+    local mtn = mt.__newindex
+
+    mt.__newindex = function(t, k, v)
+        mtn(t, k, v)
+
+        if type(v) == "table" then
+            if  v.is_control then
+                v.group = t
+               
+                for i,w in ipairs(v.inputs) do
+                    w.deviceidx = w.deviceidx or _.deviceidx
                 end
-                
-                rawset(t,k,v)
+                for i,w in ipairs(v.outputs) do
+                    w.deviceidx = w.deviceidx or _.deviceidx
+                end
+            elseif v.is_group then
+                v._.deviceidx = _.deviceidx
             end
-        end
-    })
+        end 
+    end
 
     return o
 end
