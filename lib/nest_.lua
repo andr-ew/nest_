@@ -98,7 +98,8 @@ function _input:new(o)
         local i = mti(t, k) 
 
         if i then return i
-        elseif rawget(t, 'control') and t.control[k] then return t.control[k]
+        elseif rawget(t, 'control') and rawget(t, 'control')[k] then return rawget(t, 'control')[k]
+        --elseif rawget(t, 'control') and rawget(rawget(t, 'control'), k) then return rawget(rawget(t, 'control'), k) -- this screws things up if we need to call functions inherited into control :/ but it stops the line 46 stack overflow
         else return nil end
     end
 
@@ -225,8 +226,10 @@ function _control:new(o)
         elseif k == "output" then return t.outputs[1]
         elseif k == "target" then return t.targets[1]
         else return findmeta(_.p) end
+--        else return nil end
     end
-    mt.__tostring = function(t) return '_control' end
+
+    --mt.__tostring = function(t) return '_control' end
 
     for i,k in ipairs { "input", "output" } do
         local l = o[k .. 's']
@@ -237,20 +240,22 @@ function _control:new(o)
         end
 
         for i,v in ipairs(l) do
-            v.control = o
-            v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
+            if type(v) == 'table' and v['is_' .. k] then
+                rawset(v, 'control', o) -- gotcha!
+                v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
+            end
         end
 
         local lmt = getmetatable(l)
         local lmtn = lmt.__newindex
 
-        l.__newindex = function(t, kk, v)
-            if v['is_' .. k] then
-                v.control = t
+        lmt.__newindex = function(t, kk, v)
+            lmtn(t, kk, v)
+
+            if type(v) == 'table' and v['is_' .. k] then
+                rawset(v, 'control', o)
                 v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
             end
-            
-            lmtn(t, kk, v)
         end
     end
 
