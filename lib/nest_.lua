@@ -1,4 +1,3 @@
-
 -- _obj_ is a base object for all the types on this page that impliments concatenative programming. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
 
 _obj_ = {
@@ -49,7 +48,7 @@ function _obj_:new(o, clone_type)
         --__tostring = function(t) return '_obj_' end
     })
     
-    for k,v in pairs(o) do formattype(o, k, v) end
+    for k,v in pairs(o) do formattype(o, k, v) end -- stack overflow on c:new()
 
     for k,v in pairs(self) do 
         if not rawget(o, k) then
@@ -327,6 +326,16 @@ nest_ = _obj_:new {
                 m.device_redraws.screen = redraw
                 redraw = function()
                     screen.clear()
+
+
+
+
+
+
+
+
+
+
                     self:draw('screen')
                     screen.update()
                 end
