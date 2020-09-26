@@ -10,13 +10,15 @@ tab = require 'tabutil'
 -- _input __index order bugs
 
 c = _control:new {
-    v = { 1, 2 },
-    input = _input:new()
+    v = 3,
+    inputs = { _input:new() }
 }
 
-cc = c:new() --stack overflow on new order
+cc = c:new {
+    v = 4
+} --stack overflow on new order
 
--- c.input._ == c._ on old order, same for any duplicate keys btw c & c.input 
+-- cc.inputs[1].v = 3
 
 --[[
 _grid = include 'lib/nest_grid'

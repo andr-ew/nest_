@@ -67,9 +67,9 @@ end
 
 _input = _obj_:new {
     is_input = true,
-    deviceidx = nil,
     transform = nil,
     handler = nil,
+    deviceidx = nil,
     update = function(self, deviceidx, args)
         if(self.deviceidx == deviceidx) then
             return args
@@ -87,14 +87,22 @@ function _input:new(o)
     local mti = mt.__index
 
     mt.__index = function(t, k) 
-        --local i = mti(t, k) 
-
         -- this order feels more correct but is causing stack overflow on cc = c:new
-        if _.control and _.control[k] then return _.control[k]
-        elseif k == "_" then return _
+
+        --[[
+        
+        with _.control in front, new() is being indexed up to control and causing all sorts of problems, we could switch the order but this means that keys inside of control will travel to the top of the heiarchy tree before being returned. so it seems like the condition is more complex than expected.
+
+        try making a drawing with _control, _input, new functions, c, cc, the two vs to visualize the issue
+
+        ]]
+
+        --if k == 'inputs' or k == 'outputs' then return nil -- test
+        --else
+        if k == "_" then return _
         elseif _[k] ~= nil then return _[k]
-        --elseif _.control and _.control[k] then return _.control[k]
         elseif self[k] ~= nil then return self[k]
+        elseif _.control and _.control[k] then return _.control[k] -- new is getting indexed into control in current order
         else return nil end
     end
 
@@ -103,9 +111,9 @@ end
 
 _output = _obj_:new {
     is_output = true,
-    deviceidx = nil,
     transform = nil,
     redraw = nil,
+    deviceidx = nil,
     throw = function(self, ...)
         self.control.throw(self.control, self.deviceidx, ...)
     end,
@@ -228,15 +236,21 @@ function _control:new(o)
     ----[[
     for i,k in ipairs { "input", "output" } do -- lost on i/o table overwrite, fix in mt.__newindex
         local l = o[k .. 's']
-        
+
+        --print('o:', o, o.is_control, o.is_input, o.is_output) -- inputs[1] = o is getting in here - fuck, through new !
+
+        --if l then --test
+
+       --[[ -- this is in timeout but we'll bring it back later, I don't think it's the culprit :)
         if rawget(o, k) then 
-            rawset(l, 1, rawget(o, k)) -- this line !! weird
+            rawset(l, 1, rawget(o, k))
             rawset(o, k, nil)
         end
+        ]]
 
         for i,v in ipairs(l) do
             if type(v) == 'table' and v['is_' .. k] then
-                v._.control = o
+                rawset(v._, 'control',  o)
                 v.deviceidx = v.deviceidx or _.group and _.group.deviceidx or nil
             end
         end
@@ -252,6 +266,7 @@ function _control:new(o)
                 v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
             end
         end
+        --end -- test
     end
     --]]
     return o
