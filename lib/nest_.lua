@@ -217,13 +217,14 @@ function _control:new(o)
     end
 
     --mt.__tostring = function(t) return '_control' end
-    
+
+    -- something in here breaks cloning for .inputs[x]
     for i,k in ipairs { "input", "output" } do -- lost on i/o table overwrite, fix in mt.__newindex
         local l = o[k .. 's']
         
-        if o[k] then 
-            l[1] = o[k]
-            o[k] = nil
+        if rawget(o, k) then 
+            rawset(l, 1, rawget(o, k)) -- this line !! weird
+            rawset(o, k, nil)
         end
 
         for i,v in ipairs(l) do
