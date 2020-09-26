@@ -11,7 +11,8 @@ c = _control:new {
     , inputs = { _input:new { foo = "bar" } }
 }
 
-cc = c:new() -- stack overflow, only when c.inputs[1] is present
+cc = c:new()
+
 
 --_grid = include 'lib/nest_grid'
 

@@ -78,6 +78,7 @@ _input = _obj_:new {
 
 function _input:new(o)
     o = _obj_.new(self, o, _obj_)
+    local _ = o._
     
     local mt = getmetatable(o)
     local mti = mt.__index
@@ -86,7 +87,7 @@ function _input:new(o)
         local i = mti(t, k) 
 
         if i then return i
-        elseif rawget(t, 'control') and rawget(t, 'control')[k] then return rawget(t, 'control')[k]
+        elseif _.control and _.control[k] then return _.control[k]
         else return nil end
     end
 
@@ -216,7 +217,7 @@ function _control:new(o)
     end
 
     --mt.__tostring = function(t) return '_control' end
-
+    
     for i,k in ipairs { "input", "output" } do -- lost on i/o table overwrite, fix in mt.__newindex
         local l = o[k .. 's']
         
@@ -227,7 +228,7 @@ function _control:new(o)
 
         for i,v in ipairs(l) do
             if type(v) == 'table' and v['is_' .. k] then
-                rawset(v, 'control', o) -- gotcha!
+                v._.control = o
                 v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
             end
         end
@@ -239,7 +240,7 @@ function _control:new(o)
             lmtn(t, kk, v)
 
             if type(v) == 'table' and v['is_' .. k] then
-                rawset(v, 'control', o)
+                v._.control = o
                 v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
             end
         end
