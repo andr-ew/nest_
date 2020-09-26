@@ -4,7 +4,7 @@ _obj_ = {
     print = function(self) print(tostring(self)) end
 }
 function _obj_:new(o, clone_type)
-    local _ = {
+    local _ = { -- the "instance table" - useful as it is ignored by the inheritance rules, and also hidden in subtables
         is_obj = true,
         p = nil,
         k = nil

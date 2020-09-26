@@ -6,20 +6,9 @@ end
 include 'lib/nest_'
 tab = require 'tabutil'
 
-g = _group:new()
+_grid = include 'lib/nest_grid'
 
-g.c = _control:new {
-    v = { 1, 2 }
-    , inputs = { _input:new { foo = "bar" } }
-}
-
---g.cc = g.c:new() -- stack overflow
-
---_grid = include 'lib/nest_grid'
-
---[[
 n = nest_:new {
-    --welp, this is very wrong, new inheritance model maybe will fix hehe
     v = _grid.value:new {
         x = { 1, 2 },
         y = 1,
@@ -31,4 +20,11 @@ n = nest_:new {
         v = {}
     }
 } :connect { g = grid.connect() } 
-]]
+
+-- n.v.outputs[1].control == n.m.outputs[1].control == n.m :~/
+
+-- n.m.inputs[1].control = 5
+-- n.v.inputs[1].control --> 5
+-- yep, they're sharing the instance table
+
+-- n.v.inputs[1] == n.m.inputs[1] ............ lol

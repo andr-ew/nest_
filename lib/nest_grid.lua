@@ -1,4 +1,4 @@
-tab = require 'tabutil'
+local tab = require 'tabutil'
 
 local _grid = _group:new()
 _grid.deviceidx = 'g'
@@ -248,6 +248,7 @@ _grid.value.output.redraws = {
     end,
     line_x = function(s)
         for i = s.x[1], s.x[2] do
+            print(i, s.y, lvl(s, (s.v == i - s.x[1]) and 1 or 3))
             s.g:led(i, s.y, lvl(s, (s.v == i - s.x[1]) and 1 or 3))
         end
     end,
