@@ -1,5 +1,7 @@
 -- _obj_ is a base object for all the types on this page that impliments concatenative programming. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
 
+-- GOTCHA: overwriting an existing table value will not format type. if we do this, just make sure the type, p, k is correct
+
 _obj_ = {
     print = function(self) print(tostring(self)) end
 }
@@ -209,10 +211,11 @@ function _control:new(o)
         end
 
         local i = mti(t, k) 
-        if i then return i
-        elseif k == "input" then return t.inputs[1]
-        elseif k == "output" then return t.outputs[1]
-        elseif k == "target" then return t.targets[1]
+
+        if k == "input" then return o.inputs[1]
+        elseif k == "output" then return o.outputs[1]
+        elseif k == "target" then return o.targets[1]
+        elseif i then return i
         else return findmeta(_.p) end
     end
 

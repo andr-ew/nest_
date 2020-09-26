@@ -60,7 +60,7 @@ _grid.metacontrol = _metacontrol:new {
 
 _grid.muxctrl = _grid.control:new()
 
-_grid.muxctrl.input.handlers = {
+_grid.muxctrl.input.handlers = _obj_:new {
     point = { function(s, z) end },
     line = { function(s, v, z) end },
     plane = { function(s, x, y, z) end }
@@ -90,7 +90,7 @@ _grid.muxctrl.input.update = function(s, deviceidx, args)
     else return nil end
 end
 
-_grid.muxctrl.output.redraws = {
+_grid.muxctrl.output.redraws = _obj_:new {
     point = function(s) end,
     line_x = function(s) end,
     line_y = function(s) end,
@@ -139,7 +139,7 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
 -- use init() to ensure v has initialized properly
 
 _grid.momentary = _grid.muxctrl:new({ count = nil })
-_grid.momentary.input.handlers = {
+_grid.momentary.input.handlers = _obj_:new {
     point = function(s, x, y, z)
         s.v = z
         local t = nil
@@ -186,7 +186,7 @@ local lvl = function(s, i)
     return (type(x) == 'number') and ((i > 1) and 0 or x) or (x[i] or x[i-1] or ((i > 1) and 0 or x[1]))
 end
 
-_grid.momentary.output.redraws = {
+_grid.momentary.output.redraws = _obj_:new {
     point = function(s)
         s.g:led(s.x, s.y, lvl(s, s.v * 2 + 1))
     end,
@@ -223,7 +223,7 @@ _grid.momentary.output.redraws = {
 
 -- if count then actions fire on key up
 _grid.value = _grid.muxctrl:new()
-_grid.value.input.handlers = {
+_grid.value.input.handlers = _obj_:new {
     point = function(s, x, y, z) 
         if z > 0 then s:a(s.v) end
     end,
@@ -242,7 +242,7 @@ _grid.value.input.handlers = {
         end
     end
 }
-_grid.value.output.redraws = {
+_grid.value.output.redraws = _obj_:new {
     point = function(s)
         s.g:led(s.x, s.y, lvl(s, 1))
     end,
