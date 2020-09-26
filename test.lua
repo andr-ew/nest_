@@ -6,15 +6,19 @@ end
 include 'lib/nest_'
 tab = require 'tabutil'
 
---[[
+
+-- _input __index order bugs
+
 c = _control:new {
     v = { 1, 2 },
     input = _input:new()
 }
 
-cc = c:new()
-]]
+cc = c:new() --stack overflow on new order
 
+-- c.input._ == c._ on old order, same for any duplicate keys btw c & c.input 
+
+--[[
 _grid = include 'lib/nest_grid'
 
 n = nest_:new {
@@ -29,5 +33,6 @@ n = nest_:new {
         v = {}
     }
 } :connect { g = grid.connect() }
+]]
 
 -- n.v.output.v ~= n.v.v

@@ -33,8 +33,8 @@ function _obj_:new(o, clone_type)
     setmetatable(o, {
         __index = function(t, k)
             if k == "_" then return _
-            elseif self[k] ~= nil then return self[k]
             elseif _[k] ~= nil then return _[k]
+            elseif self[k] ~= nil then return self[k]
             else return nil end
         end,
         __newindex = function(t, k, v)
@@ -57,7 +57,7 @@ function _obj_:new(o, clone_type)
             if type(v) == "function" then
             elseif type(v) == "table" then
                 local clone = formattype(self, k, v):new()
-                rawset(o, k, formattype(o, k, clone))
+                o[k] = formattype(o, k, clone) ----
             else rawset(o,k,v) end 
         end
     end
@@ -67,7 +67,6 @@ end
 
 _input = _obj_:new {
     is_input = true,
-    control = nil,
     deviceidx = nil,
     transform = nil,
     handler = nil,
@@ -81,15 +80,21 @@ _input = _obj_:new {
 function _input:new(o)
     o = _obj_.new(self, o, _obj_)
     local _ = o._
+
+    _.control = nil
     
     local mt = getmetatable(o)
     local mti = mt.__index
 
     mt.__index = function(t, k) 
-        local i = mti(t, k) 
+        --local i = mti(t, k) 
 
-        if i then return i
-        elseif _.control and _.control[k] then return _.control[k]
+        -- this order feels more correct but is causing stack overflow on cc = c:new
+        if _.control and _.control[k] then return _.control[k]
+        elseif k == "_" then return _
+        elseif _[k] ~= nil then return _[k]
+        --elseif _.control and _.control[k] then return _.control[k]
+        elseif self[k] ~= nil then return self[k]
         else return nil end
     end
 
@@ -98,7 +103,6 @@ end
 
 _output = _obj_:new {
     is_output = true,
-    control = nil,
     deviceidx = nil,
     transform = nil,
     redraw = nil,
@@ -221,7 +225,7 @@ function _control:new(o)
 
     --mt.__tostring = function(t) return '_control' end
 
-    -- something in here breaks cloning for .inputs[x]
+    ----[[
     for i,k in ipairs { "input", "output" } do -- lost on i/o table overwrite, fix in mt.__newindex
         local l = o[k .. 's']
         
@@ -249,7 +253,7 @@ function _control:new(o)
             end
         end
     end
-
+    --]]
     return o
 end
 
