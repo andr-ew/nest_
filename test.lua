@@ -6,13 +6,14 @@ end
 include 'lib/nest_'
 tab = require 'tabutil'
 
-c = _control:new {
+g = _group:new()
+
+g.c = _control:new {
     v = { 1, 2 }
     , inputs = { _input:new { foo = "bar" } }
 }
 
-cc = c:new()
-
+--g.cc = g.c:new() -- stack overflow
 
 --_grid = include 'lib/nest_grid'
 
