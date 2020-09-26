@@ -229,7 +229,7 @@ function _control:new(o)
         for i,v in ipairs(l) do
             if type(v) == 'table' and v['is_' .. k] then
                 v._.control = o
-                v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
+                v.deviceidx = v.deviceidx or _.group and _.group.deviceidx or nil
             end
         end
 
@@ -397,7 +397,7 @@ function _group:new(o)
 
         if type(v) == "table" then
             if  v.is_control then
-                v.group = t
+                v._.group = t
                
                 for i,w in ipairs(v.inputs) do
                     w.deviceidx = w.deviceidx or _.deviceidx
@@ -410,6 +410,5 @@ function _group:new(o)
             end
         end 
     end
-
     return o
 end
