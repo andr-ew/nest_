@@ -1,21 +1,35 @@
 function r()
   norns.script.load(norns.state.script)
 end
+--norns.script.load('/home/we/dust/code/nest_/test.lua')
 
 include 'lib/nest_'
+tab = require 'tabutil'
+
+--[[
+c = _control:new {
+    v = 3,
+    inputs = { _input:new() }
+}
+
+cc = c:new {
+    v = 4
+}
+]]
+
+---[[
 _grid = include 'lib/nest_grid'
 
 n = nest_:new {
-    _meta = { foo = 'bar' },
-    --welp, this is very wrong, new inheritance model maybe will fix hehe
     v = _grid.value:new {
-        x = { 1, 2 },
+        x = { 1, 16 },
         y = 1,
-        v = 0
+        v = 1
     },
     m = _grid.momentary:new {
-        x = { 3, 4 },
-        y = 1,
+        x = { 1, 16 },
+        y = 2,
         v = {}
     }
-} :connect { g = grid.connect() } 
+} :connect { g = grid.connect() }
+--]]
