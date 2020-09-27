@@ -16,11 +16,8 @@ c = _control:new {
 
 cc = c:new {
     v = 4
-} --stack overflow on new order
-
--- cc.inputs[1].v = 3
-
---[[
+}
+---[[
 _grid = include 'lib/nest_grid'
 
 n = nest_:new {
@@ -35,6 +32,6 @@ n = nest_:new {
         v = {}
     }
 } :connect { g = grid.connect() }
-]]
+--]]
 
 -- n.v.output.v ~= n.v.v
