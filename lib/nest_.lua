@@ -1,3 +1,22 @@
+--[[
+
+RN
+a -> action
+_ -> instance
+_meta -> _
+
+create an actions table with multiple action callbacks, alias action to actions[1], set actions.__call to perform all actions in order
+
+create _control.__call metatmethod as a shortcut to set() and a nifty control linking mechanism
+
+nest.control(value) —- set shorthand
+nest.control1(_control2, value) -- set _control1 = value & _control2.actions[#actions] = control1
+
+
+CONCEPT: allow _inputs, _outputs in a nest w/o a parent control, set control manually. findmeta, en, will need to be functional w/o being inside a control
+
+]]
+
 -- _obj_ is a base object for all the types on this page that impliments concatenative programming. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
 
 -- GOTCHA: overwriting an existing table value will not format type. if we do this, just make sure the type, p, k is correct
@@ -94,9 +113,9 @@ function _input:new(o)
         elseif _[k] ~= nil then return _[k]
         else
             local c = _.control and _.control[k]
-
-            --privilege control for data, but privilege self for functions
-            if type(c) == 'function' then return self[k] or c
+            
+            -- catch shared keys, otherwise privilege control keys
+            if k == 'new' or k == 'update' or k == 'draw' or k == 'throw' then return self[k]
             else return c or self[k] end
         end
     end
@@ -188,19 +207,6 @@ _control = _obj_:new {
             end end
         end
     end,
-
-    --[[
-    
-    add param = nil
-    add :link(param.id)
-        set param to param
-        set v to param.v
-        set get & set to param .get & .set
-        overwrite param.a to update self, run self.a
-    end
-
-    ]]
-
     write = function(self) end,
     read = function(self) end,
     inputs = {},

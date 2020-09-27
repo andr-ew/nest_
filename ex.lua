@@ -1,5 +1,5 @@
 n = nest_:new {
-    gc = _grid.ctrl:new {
+    gc = _grid.control:new {
         x = { 1, 2 }, y = { 1, 2 }, lvl = 15, v = { x = 0, y = 0 },
         handler = function(_, x, y, z)
             if z == 1 then 

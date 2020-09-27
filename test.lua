@@ -17,7 +17,6 @@ cc = c:new {
 }
 ]]
 
----[[
 _grid = include 'lib/nest_grid'
 
 n = nest_:new {
@@ -32,4 +31,3 @@ n = nest_:new {
         v = {}
     }
 } :connect { g = grid.connect() }
---]]
