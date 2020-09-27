@@ -2,6 +2,8 @@
 
 -- GOTCHA: overwriting an existing table value will not format type. if we do this, just make sure the type, p, k is correct
 
+local tab = require 'tabutil'
+
 _obj_ = {
     print = function(self) print(tostring(self)) end
 }
@@ -85,17 +87,25 @@ function _input:new(o)
     _.control = nil
     
     local mt = getmetatable(o)
+    local mtn = mt.__newindex
 
     mt.__index = function(t, k) 
         if k == "_" then return _
         elseif _[k] ~= nil then return _[k]
         else
-            local ret = _.control and _.control[k]
+            local c = _.control and _.control[k]
 
             --privilege control for data, but privilege self for functions
-            if type(ret) == 'function' then return self[k] or ret
-            else return ret or self[k] end
+            if type(c) == 'function' then return self[k] or c
+            else return c or self[k] end
         end
+    end
+
+    mt.__newindex = function(t, k, v)
+        local c = _.control and _.control[k]
+    
+        if c and type(c) ~= 'function' then _.control[k] = v
+        else mtn(t, k, v) end
     end
 
     return o
@@ -135,11 +145,11 @@ _control = _obj_:new {
 
         for i,v in ipairs(self.inputs) do
             local hargs = v:update(deviceidx, args)
-
+            
             if hargs ~= nil then
                 d = true
 
-                if self.metacontrols_disabled then
+                if self.metacontrols and not self.metacontrols_disabled then
                     for i,w in ipairs(self.metacontrols) do
                         w:pass(v.handler, hargs)
                     end

@@ -148,7 +148,7 @@ _grid.momentary.input.handlers = _obj_:new {
         s:a(s.v, t)
     end,
     line = function(s, x, y, z)
-        local v = x - s.x[1]
+        local v = x - s.x[1] + 1
         if z > 0 then
             local rem = nil
             table.insert(s.v, v)
@@ -248,7 +248,6 @@ _grid.value.output.redraws = _obj_:new {
     end,
     line_x = function(s)
         for i = s.x[1], s.x[2] do
-            print(i, s.y, lvl(s, (s.v == i - s.x[1]) and 1 or 3))
             s.g:led(i, s.y, lvl(s, (s.v == i - s.x[1]) and 1 or 3))
         end
     end,
