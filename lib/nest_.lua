@@ -5,6 +5,7 @@
 _obj_ = {
     print = function(self) print(tostring(self)) end
 }
+
 function _obj_:new(o, clone_type)
     local _ = { -- the "instance table" - useful as it is ignored by the inheritance rules, and also hidden in subtables
         is_obj = true,
@@ -84,26 +85,17 @@ function _input:new(o)
     _.control = nil
     
     local mt = getmetatable(o)
-    local mti = mt.__index
 
     mt.__index = function(t, k) 
-        -- this order feels more correct but is causing stack overflow on cc = c:new
-
-        --[[
-        
-        with _.control in front, new() is being indexed up to control and causing all sorts of problems, we could switch the order but this means that keys inside of control will travel to the top of the heiarchy tree before being returned. so it seems like the condition is more complex than expected.
-
-        try making a drawing with _control, _input, new functions, c, cc, the two vs to visualize the issue
-
-        ]]
-
-        --if k == 'inputs' or k == 'outputs' then return nil -- test
-        --else
         if k == "_" then return _
         elseif _[k] ~= nil then return _[k]
-        elseif self[k] ~= nil then return self[k]
-        elseif _.control and _.control[k] then return _.control[k] -- new is getting indexed into control in current order
-        else return nil end
+        else
+            local ret = _.control and _.control[k]
+
+            --privilege control for data, but privilege self for functions
+            if type(ret) == 'function' then return self[k] or ret
+            else return ret or self[k] end
+        end
     end
 
     return o
@@ -222,32 +214,22 @@ function _control:new(o)
             else return nil end
         end
 
-        local i = mti(t, k) 
-
         if k == "input" then return o.inputs[1]
         elseif k == "output" then return o.outputs[1]
         elseif k == "target" then return o.targets[1]
-        elseif i then return i
-        else return findmeta(_.p) end
+        else return findmeta(_.p) or mti(t, k) end
     end
 
     --mt.__tostring = function(t) return '_control' end
 
-    ----[[
     for i,k in ipairs { "input", "output" } do -- lost on i/o table overwrite, fix in mt.__newindex
         local l = o[k .. 's']
 
-        --print('o:', o, o.is_control, o.is_input, o.is_output) -- inputs[1] = o is getting in here - fuck, through new !
-
-        --if l then --test
-
-       --[[ -- this is in timeout but we'll bring it back later, I don't think it's the culprit :)
         if rawget(o, k) then 
             rawset(l, 1, rawget(o, k))
             rawset(o, k, nil)
         end
-        ]]
-
+        
         for i,v in ipairs(l) do
             if type(v) == 'table' and v['is_' .. k] then
                 rawset(v._, 'control',  o)
@@ -266,19 +248,13 @@ function _control:new(o)
                 v.deviceidx = v.deviceidx or o.group and o.group.deviceidx or nil
             end
         end
-        --end -- test
     end
-    --]]
+ 
     return o
 end
 
 _metacontrol = _control:new {
-    pass = function(self, f, args) end,
-    --[[
-
-    passing the function will work but not for recall
-
-    ]]
+    pass = function(self, f, args) end, --passing the function will work but cannot be recalled
     targets = {}
 }
 
@@ -405,6 +381,7 @@ function nest_:new(o)
 end
 
 _group = _obj_:new {}
+
 function _group:new(o)
     o = _obj_.new(self, o, _group)
     local _ = o._ 
