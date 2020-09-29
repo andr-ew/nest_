@@ -49,7 +49,20 @@ n = nest_:new {
                         s.p.punchin = nil
                     end
                     
-                    sc.rec_flag(i, v)
+                    sc.rec(i, v)
+                end
+            },
+            play = _grid.toggle:new {
+                x = 2, y = i + 4,
+                action = function(s, v)
+                    if v == 1 and s.p.punchin then
+                        sc.region_length(i, punchin)
+                        s.p.resetwindow(s)
+
+                        s.p.punchin = nil
+                    end
+
+                    sc.play(i, v)
                 end
             }
         }
