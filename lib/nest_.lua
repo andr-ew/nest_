@@ -2,9 +2,9 @@
 
 RN
 a -> action
-p -> parent
+p
 
-create an actions table with multiple action callbacks, alias action to actions[1], set actions.__call to perform all actions in order
+create an actions object with multiple action callbacks, alias .action to actions[1], set actions.__call to perform all actions in order. add return to action, to modify v
 
 create _control.__call metatmethod as a shortcut to set() and a nifty control linking mechanism
 
@@ -15,17 +15,21 @@ CONCEPTS
 
 allow _inputs, _outputs in a nest w/o a parent control, set control(/parent) manually. findmeta, en, will need to be functional w/o being inside a control
 
-reimpliment _control as subtype of nest_, remove inputs{}, outputs{}; _input, _output simply refer to o, p (, meta), then self for members. _obj_ woudld support multiple parents and _i/_o would index them in order of appearence
+reimpliment _control as subtype of nest_, remove inputs{}, outputs{}; _input, _output simply refer to o, p (, meta), then self for members. _obj_ woudld support multiple parents and _i/_o would index them in order of appearence.
 
 when nest_ arg type is not table add a number range or key list argument option to initialize blank table children at specified keys
 
-add each(function(k, _)) function to _obj_. these would run after the top level table has been initialized, which helps to enable absolute paths to be used within a nest structure
+add :each(function(k, _)) to _obj_. these would run after the top level table has been initialized, which helps to enable absolute paths to be used within a nest structure
 
 try to impliment a top-down heirchy (inside of _input / _output), removing the need for the _meta key
 
-or, on the opposite end of the spectrum, remove _meta altogether. with the each() function i'm starting to question why we need this technique ! we would need to repliment connect() as a method which adds a key to all children and grandchildren
+or, on the opposite end of the spectrum, remove _meta altogether. with the each() function i'm starting to question why we need this technique ! we would need to repliment connect() as a method which adds devices to all children and grandchildren
 
-add a simple :append() function to _obj_
+add :append() and :prepend() to _obj_
+
+add :append_all(), add a member to all children & grandchildren
+
+actually impliment .enabled, which can be boolean or function
 
 ]]
 
