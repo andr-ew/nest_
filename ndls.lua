@@ -8,20 +8,20 @@ n = nest_:new {
             start = _arc.cycle:new {
                 n = i,
                 action = function(s, v)
-                    sc.loop_start(i, v / 64 * sc.region_length(i))
+                    sc.loop_start(i, v * sc.region_length(i)) -- v is 0-1
                 end,
                 enabled = function() return n.arcpg()[i][1] end
             },
             length = _arc.value:new {
                 n = i,
                 action = function(s, v)
-                    sc.loop_length(i, v / 64 * sc.region_length(i))
+                    sc.loop_length(i, v * sc.region_length(i))
                 end,
                 enabled = function() return n.arcpg()[i][2] end,
                 output = { enabled = false } --
             },
             buffer = _grid.value:new {
-                x = { 8, 15 }, y = i + 4,
+                x = { 8, 15 }, y = i + 4, v = i
                 action = function(s, v)
                     sc.buffer_steal_region(i, v + 1)
                 end
@@ -53,7 +53,7 @@ n = nest_:new {
                 end
             },
             play = _grid.toggle:new {
-                x = 2, y = i + 4,
+                x = 2, y = i + 4, lvl = { 4, 15 },
                 action = function(s, v)
                     if v == 1 and s.p.punchin then
                         sc.region_length(i, punchin)
@@ -64,12 +64,40 @@ n = nest_:new {
 
                     sc.play(i, v)
                 end
-            }
+            },
+            slew_reset = metro.init(function() 
+                sc.rate_slew(i, 0)
+            end, 0, 1),
+            rev = _grid.toggle:new {
+                x = 1, y = i, lvl = { 4, 15 },
+                action = function(s, v, t)
+                    local st = (1 + (math.random() * 0.5)) * t
+                    sc.rate_slew(i, st)
+                    s.p.slew_reset:start(st)
+
+                    sc.rate3(i, (v == 1) and 1 or -1)
+                end
+            },
+            rate = _grid.glide:new {
+                x = { 2, 11 }, y = i, v = 7
+                action = function(s, v, t) 
+                    local st = (1 + (math.random() * 0.5)) * t
+                    sc.rate_slew(i, st)
+                    s.p.slew_reset:start(st)
+
+                    sc.rate(i, math.pow(2, v - 7))
+                end,
+                indicator = _grid.value.output:new { ---
+                    x = 9, y = i, lvl = 4, order = -1
+                }
+            },
+            -------------------------
         }
     end),
     pat = _grid.pattern:new {
-        x = 15,
+        x = 16,
         y = { 1, 8 },
+        lvl = { 4, 15 },
         init = function(self) --
             self.target = n
         end
