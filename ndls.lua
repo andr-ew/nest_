@@ -91,6 +91,34 @@ n = nest_:new {
                     x = 9, y = i, lvl = 4, order = -1
                 }
             },
+            pre_level = _control:new { 
+                v = 0, mul = 1, action = function(s, v) sc.pre_level(i, v * s.mul) end
+            },
+            feedback = _control:new { 
+                v = 0, mul = 0, action = function(s, v) sc.level_cut_cut(i, i, v * s.mul) end
+            },
+            route = _grid.toggle:new {
+                x = { 4, 7 }, y = 4 + i,
+                action = function(s, v) -- change v to matrix ?
+                    for j,w in ipairs(v) do 
+                        if j == i and w == 1 then
+                            s.p.pre_level.mul = 0
+                            s.p.pre_level:bang() ------
+
+                            s.p.feedback.mul = 1
+                            s.p.feedback:bang()
+                        else 
+                            sc.level_cut_cut(i, j, w) 
+
+                            s.p.pre_level.mul = 1
+                            s.p.pre_level:bang() ------
+
+                            s.p.feedback.mul = 0
+                            s.p.feedback:bang()
+                        end
+                    end
+                end
+            }
             -------------------------
         }
     end),
