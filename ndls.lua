@@ -8,7 +8,7 @@ ndls = nest_:new {
             level = _arc.fader:new {
                 ring = function() ndls.arcpg.vertical and i or 1 end,
                 x = { 8, 54 },
-                action = function(s, v) 
+                action = function(s, v) -- action should be defined in the screen control and linked
                     sc.level(i, v)
                 end,
                 enabled = function() return ndls.arcpg()[i][0] == 1 end
@@ -215,7 +215,3 @@ ndls = nest_:new {
     enc = enc, 
     key = key
 }
-
-function init()
-end
-

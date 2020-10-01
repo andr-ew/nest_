@@ -31,7 +31,9 @@ add :append_all(), add a member to all children & grandchildren
 
 convention: allow most parameters to be a value or a function returning the desired value, imlimentations will need to manage this
 
-_paramcontrol: subtype of control which can be optionally linked to sync data with a param
+add a link parameter to allow a control to reference & update the v of another device rather than it's own. some extra layers will need to be added to ensure both controls stay up to date
+
+_paramcontrol: subtype of control which can be linked to a param ?
 
 clean up redraws: rather than redraw on any input, set up a global 30fps redraw metro and a global dirty flag per device. have _input.update() set the dirty flag and have the metro redraw only when dirty
 
