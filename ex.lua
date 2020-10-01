@@ -1,4 +1,4 @@
--- 16 pages of toggles and faders using library controls, fader values drawn on screen
+-- 16 pages of grid toggles and faders using library controls, fader values drawn on screen
 
 n = nest_:new {
     grid = {
