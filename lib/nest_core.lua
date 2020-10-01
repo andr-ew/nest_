@@ -2,7 +2,7 @@
 
 RN
 a -> action
-p
+order -> z ?
 
 create an actions object with multiple action callbacks, alias .action to actions[1], set actions.__call to perform all actions in order. add return to action, to modify v
 
@@ -29,7 +29,11 @@ add :append() and :prepend() to _obj_
 
 add :append_all(), add a member to all children & grandchildren
 
-actually impliment .enabled, which can be boolean or function
+convention: allow most parameters to be a value or a function returning the desired value, imlimentations will need to manage this
+
+_paramcontrol: subtype of control which can be optionally linked to sync data with a param
+
+clean up redraws: rather than redraw on any input, set up a global 30fps redraw metro and a global dirty flag per device. have _input.update() set the dirty flag and have the metro redraw only when dirty
 
 ]]
 
@@ -324,48 +328,6 @@ nest_ = _obj_:new {
         table.sort(self, function(a,b) return a.order < b.order end)
 
         for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
-    end,
-    connect = function(self, devices)
-        self:do_init()
-
-        if self._._meta == nil then self._._meta = {} end
-        local m = self._._meta
-
-        m.devices = devices
-        setmetatable(m, m.devices)
-        m.devices.__index = m.devices
-
-        m.device_redraws = {}
-
-        for k,v in pairs(m.devices) do
-            if k == 'g' or k == 'a' then
-                local kk = k
-                m.device_redraws[kk] = function() self:draw(kk) end
-                v[(kk == 'g') and 'key' or 'delta'] = function(...)
-                    m[kk]:all(0)
-                    self:update(kk, {...})
-                    m.device_redraws[kk]()
-                    m[kk]:refresh()
-                end
-            elseif k == 'm' or k == 'h' then
-                local kk = k
-                v.event = function(data) self:update(kk, data) end
-            elseif k == 'enc' then
-                v = function(...) self:update('enc', {...}) end
-            elseif k == 'key' then
-                v = function(...) self:update('key', {...}) end
-            elseif k == 'screen' then
-                m.device_redraws.screen = redraw
-                redraw = function()
-                    screen.clear()
-                    self:draw('screen')
-                    screen.update()
-                end
-            else print('nest_.connect: invalid device key. valid options are g, a, m, h, screen, enc, key')
-            end
-        end
-        
-        return self
     end,
     init = function(self) return self end,
     each = function(self, cb) return self end,

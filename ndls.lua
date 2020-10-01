@@ -2,26 +2,90 @@ include 'lib/nest_.lua'
 
 sc = include 'lib/supercut'
 
-n = nest_:new {
+ndls = nest_:new {
     tp = nest_:new(1, 4):each(function(i)
         return {
-            start = _arc.cycle:new {
-                n = i,
+            level = _arc.fader:new {
+                ring = function() ndls.arcpg.vertical and i or 1 end,
+                x = { 8, 54 },
+                action = function(s, v) 
+                    sc.level(i, v)
+                end,
+                enabled = function() return ndls.arcpg()[i][0] == 1 end
+            },
+            mod = {
+                v = 0,
+                x = 0,
+                a = 0,
+                y = 0,
+                dt = 1/60,
+                tick = function()
+                    local tp = ndls.tp[i]
+                    local m = tp.mod
+                    m.v = m.v + m.a * m.dt
+                    m.x = math.fmod(m.x + m.v * m.dt, 1)
+                    m.y = -1 * math.sin(m.x * 2 * math.pi)
+
+                    tp.arc_mod(m.x)
+                end
+            },
+            init = function(s) s.mod.tick:start() 
+                metro.init(s.mod.tick, s.mod.dt):start()
+            end,
+            arc_mod = _arc.cycle:new {
+                ring = function() return ndls.arcpg.vertical and i or 2 end,
+                handler = function(s, ring, d) -- weird use !
+                    s.p.mod.v = s.p.mod.v + d 
+                end,
+                enabled = function() return ndls.arcpg()[i][1] == 1 and ndls.global.alt() == 1 end
+            },
+            start = _arc.value:new {
+                ring = function() ndls.arcpg.vertical and i or 3 end, -- all params can be functions !
+                x = { 0, 64 },
                 action = function(s, v)
                     sc.loop_start(i, v * sc.region_length(i)) -- v is 0-1
+
+                    s.p.length:bang() --
+                    s.p.window:bang()
+                    s.p.endpt:bang()
                 end,
-                enabled = function() return n.arcpg()[i][1] end
+                enabled = function() return ndls.arcpg()[i][2] == 1 end
             },
             length = _arc.value:new {
-                n = i,
+                ring = function() ndls.arcpg.vertical and i or 4 end,
+                x = { 1, 64 },
                 action = function(s, v)
-                    sc.loop_length(i, v * sc.region_length(i))
+                    local len = util.clamp(v * sc.region_length(i), 0.001, 1 - s.p.start())
+                    sc.loop_length(i, len)
+                    
+                    s.p.window:bang()
+                    s.p.endpt:bang()
+                    
+                    return len / sc.region_length(i)
                 end,
-                enabled = function() return n.arcpg()[i][2] end,
+                enabled = function() return ndls.arcpg()[i][3] == 1 end,
                 output = { enabled = false } --
             },
+            endpt = _arc.value:new {
+                ring = function() ndls.arcpg.vertical and i or 4 end,
+                x = { 1, 64 },
+                action = function(s) 
+                    return s.p.start() + s.p.length()
+                end,
+                enabled = function() return ndls.arcpg()[i][3] == 1 end,
+                input = { enabled = false }
+            },
+            window  = _arc.range:new {
+                ring = function() ndls.arcpg.vertical and i or { 3, 4 } end, -- multiple rings
+                lvl = 4,
+                action = function(s)
+                    return { s.p.start(), s.p.endpt() }
+                end,
+                order = -1,
+                enabled = function() return ndls.arcpg()[i][2] == 1 or ndls.arcpg()[i][3] == 1 end,
+            }
             buffer = _grid.value:new {
-                x = { 8, 15 }, y = i + 4, v = i
+                x = { 8, 15 }, y = i + 3, v = i
                 action = function(s, v)
                     sc.buffer_steal_region(i, v + 1)
                 end
@@ -32,7 +96,7 @@ n = nest_:new {
                 s.p.length(sc.region_length(i))
             end
             rec = _grid.toggle:new { 
-                x = 1, y = i + 4,
+                x = 1, y = i + 3,
                 action = function(s, v)
                     if not s.p.play() and v == 1 then
                         sc.buffer_clear_region(i)
@@ -53,7 +117,7 @@ n = nest_:new {
                 end
             },
             play = _grid.toggle:new {
-                x = 2, y = i + 4, lvl = { 4, 15 },
+                x = 2, y = i + 3, lvl = { 4, 15 },
                 action = function(s, v)
                     if v == 1 and s.p.punchin then
                         sc.region_length(i, punchin)
@@ -98,7 +162,7 @@ n = nest_:new {
                 v = 0, mul = 0, action = function(s, v) sc.level_cut_cut(i, i, v * s.mul) end
             },
             route = _grid.toggle:new {
-                x = { 4, 7 }, y = 4 + i,
+                x = { 4, 7 }, y = 3 + i,
                 action = function(s, v) -- change v to matrix ?
                     for j,w in ipairs(v) do 
                         if j == i and w == 1 then
@@ -117,18 +181,29 @@ n = nest_:new {
                             s.p.feedback:bang()
                         end
                     end
-                end
+                end,
+                indicator = _grid.value.output:new { ---
+                    x = i + 3, y = i + 3, lvl = 4, order = -1
+                }
+            },
+            local = {
+                --mod position, friction
+                --level, pan, mod, mod
+                --start, length, mod, mod
+                --fine pitch, mod, fade
+                --filter pitch, crossfade, mod, resonance
             }
-            -------------------------
         }
     end),
+    screen_global = {
+        --feedback
+        --dry/wet, samplerate, drive, width
+    }
     pat = _grid.pattern:new {
         x = 16,
         y = { 1, 8 },
         lvl = { 4, 15 },
-        init = function(self) --
-            self.target = n
-        end
+        target = function(s) s.p.tp end
     },
     arcpg = _grid.control:new {
         
@@ -140,3 +215,7 @@ n = nest_:new {
     enc = enc, 
     key = key
 }
+
+function init()
+end
+
