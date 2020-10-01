@@ -1,3 +1,5 @@
+-- quad asyncronous tape looper for arc + grid in the style anaphora, anachronism, older things
+
 include 'lib/nest_.lua'
 
 sc = include 'lib/supercut'
