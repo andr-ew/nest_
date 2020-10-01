@@ -2,13 +2,44 @@ include 'lib/nest_.lua'
 
 sc = include 'lib/supercut'
 
+local margin = 4
+local gutter = 2
+local width = 128 - (margin * 2)
+local height = height - (margin * 2)
+
+
+-- lets make a lib for this, just for heck !
+local layout = {
+    { 
+        y = { margin, (height * 2 / 3) - gutter + margin }
+        x = { 
+            { margin,                            (width * 1 / 4) - gutter + margin },
+            { (width * 1 / 4) + gutter + margin, (width * 2 / 4) - gutter + margin },
+            { (width * 2 / 4) + gutter + margin, (width * 3 / 4) - gutter + margin },
+            { (width * 2 / 4) + gutter + margin, (width * 4 / 4) + margin }
+        },
+    },
+    {
+        y = { (height * 2 / 3) + gutter + margin, (height * 3 / 3) + margin }
+        x = {
+            { margin,                            (width * 1 / 3) - gutter + margin },
+            { (width * 1 / 4) + gutter + margin, (width * 2 / 3) - gutter + margin },
+            { (width * 2 / 4) + gutter + margin, (width * 3 / 3) + margin }
+        }
+    }
+}
+
+local alt = function() return ndls.alt() == 1 end
+local noalt = function() return ndls.alt() == 0 end
+
 ndls = nest_:new {
     tp = nest_:new(1, 4):each(function(i)
         return {
+            -------------------- for all arc controls, action should be defined in the screen control and linked to arc
             level = _arc.fader:new {
                 ring = function() ndls.arcpg.vertical and i or 1 end,
                 x = { 8, 54 },
-                action = function(s, v) -- action should be defined in the screen control and linked
+                action = function(s, v) 
                     sc.level(i, v)
                 end,
                 enabled = function() return ndls.arcpg()[i][0] == 1 end
@@ -155,7 +186,7 @@ ndls = nest_:new {
                     x = 9, y = i, lvl = 4, order = -1
                 }
             },
-            pre_level = _control:new { 
+            pre_level = _control:new { -- control w/o input or output ! only bangs + sets/gets !
                 v = 0, mul = 1, action = function(s, v) sc.pre_level(i, v * s.mul) end
             },
             feedback = _control:new { 
@@ -167,7 +198,7 @@ ndls = nest_:new {
                     for j,w in ipairs(v) do 
                         if j == i and w == 1 then
                             s.p.pre_level.mul = 0
-                            s.p.pre_level:bang() ------
+                            s.p.pre_level:bang() ------ or s.p.pre_level() ?
 
                             s.p.feedback.mul = 1
                             s.p.feedback:bang()
@@ -187,18 +218,92 @@ ndls = nest_:new {
                 }
             },
             local = {
+                enabled = function() return not ndls.isglobal end,
                 --mod position, friction
                 --level, pan, mod, mod
                 --start, length, mod, mod
                 --fine pitch, mod, fade
                 --filter pitch, crossfade, mod, resonance
+                pager = _enc.txt.radio:new {
+                    list = { 'm', 'l', 's', 'p', 'f' },
+                    v = 'p',
+                    x = layout[2].x[1][1],
+                    y = layout[2].y[1],
+                    n = 1
+                },
+                pg = {
+                    m = {
+                        ---------
+                    },
+                    l = {
+                        lvl = _enc.txt.number:new {
+                            label = 'd/w',
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = noalt
+                        },
+                        pan = _enc.txt.number:new {
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            range = { -1, 1 },
+                            n = 3,
+                            enabled = noalt
+                        },
+                        lmod = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = alt
+                        },
+                        pmod = _enc.txt.number:new {
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = alt
+                        }
+                    }
+                }:each(function(i, s) s.enabled = function() return ndls.local.pager() == s.k end end)
             }
         }
     end),
-    screen_global = {
-        --feedback
-        --dry/wet, samplerate, drive, width
-    }
+    isglobal = true,
+    global = {
+        enabled = function() return ndls.isglobal end,
+        fb = _enc.txt.number:new { -- if not self.label then self.label = self.k end
+            x = layout[2].x[1][1],
+            y = layout[2].y[1],
+            n = 1
+        },
+        dw = _enc.txt.number:new {
+            label = 'd/w',
+            x = layout[2].x[2][1],
+            y = layout[2].y[1],
+            n = 2,
+            enabled = noalt
+        },
+        sr = _enc.txt.number:new {
+            x = layout[2].x[3][1],
+            y = layout[2].y[1],
+            n = 3,
+            enabled = noalt
+        },
+        drv = _enc.txt.number:new {
+            x = layout[2].x[2][1],
+            y = layout[2].y[1],
+            n = 2,
+            enabled = alt
+        },
+        wdth = _enc.txt.number:new {
+            x = layout[2].x[3][1],
+            y = layout[2].y[1],
+            n = 3,
+            enabled = alt
+        }
+    },
+    alt = _key.momentary:new {
+        n = 2
+    },
     pat = _grid.pattern:new {
         x = 16,
         y = { 1, 8 },
@@ -206,7 +311,7 @@ ndls = nest_:new {
         target = function(s) s.p.tp end
     },
     arcpg = _grid.control:new {
-        
+        ----------
     }
 } :connect { 
     g = grid.connect(1), 

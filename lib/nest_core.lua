@@ -29,7 +29,7 @@ add :append() and :prepend() to _obj_
 
 add :append_all(), add a member to all children & grandchildren
 
-convention: allow most parameters to be a value or a function returning the desired value, imlimentations will need to manage this
+convention: allow most parameters to be a value or a function returning the desired value. current _grid. imlimentations will need to change. to impliment this we can create a blank par table as a proxy. par will index the same as _i/o, but if the value is a function, it'll return the return the return value of the function rather than the function itself
 
 add a link parameter to allow a control to reference & update the v of another device rather than it's own. some extra layers will need to be added to ensure both controls stay up to date
 
