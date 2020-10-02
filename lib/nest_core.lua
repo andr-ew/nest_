@@ -4,14 +4,16 @@ RN
 a -> action
 order -> z ?
 
-create an actions object with multiple action callbacks, alias .action to actions[1], set actions.__call to perform all actions in order. add return to action, to modify v
+CONCEPTS
+
+allow action to be a table with with multiple action callbacks ?
 
 create _control.__call metatmethod as a shortcut to set() and a nifty control linking mechanism
 
 nest.control(value) —- set shorthand
+nest.control(value, silent)
+nest.control(silent)
 nest.control1(_control2, value) -- set _control1 = value & _control2.actions[#actions] = control1
-
-CONCEPTS
 
 allow _inputs, _outputs in a nest w/o a parent control, set control(/parent) manually. findmeta, en, will need to be functional w/o being inside a control
 
@@ -29,13 +31,15 @@ add :append() and :prepend() to _obj_
 
 add :append_all(), add a member to all children & grandchildren
 
-convention: allow most parameters to be a value or a function returning the desired value. current _grid. imlimentations will need to change. to impliment this we can create a blank par table as a proxy. par will index the same as _i/o, but if the value is a function, it'll return the return the return value of the function rather than the function itself
+convention: allow most data parameters to be a value or a function returning the desired value. current _grid. imlimentations will need to change. to impliment this we can create a blank par table as a proxy. par will index the same as _i/o, but if the value is a function, it'll return the return the return value of the function rather than the function itself
 
-add a link parameter to allow a control to reference & update the v of another device rather than it's own. some extra layers will need to be added to ensure both controls stay up to date
+add a link parameter to allow a control to reference & update the v of another device rather than its own. some extra layers will need to be added to ensure both controls stay up to date (pre-action). (this is a more specific functionality, to replace the general functionality of multiple action callbacks)
 
 _paramcontrol: subtype of control which can be linked to a param ?
 
 clean up redraws: rather than redraw on any input, set up a global 30fps redraw metro and a global dirty flag per device. have _input.update() set the dirty flag and have the metro redraw only when dirty
+
+_nest: do_init() -> pre_init() -> init() -> bang
 
 ]]
 

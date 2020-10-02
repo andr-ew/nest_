@@ -44,7 +44,7 @@ ndls = nest_:new {
                 action = function(s, v) 
                     sc.level(i, v)
                 end,
-                enabled = function() return ndls.arcpg()[i][0] == 1 end
+                enabled = function() return ndls.arcpg()[i][1] == 1 end
             },
             mod = {
                 v = 0,
@@ -59,7 +59,8 @@ ndls = nest_:new {
                     m.x = math.fmod(m.x + m.v * m.dt, 1)
                     m.y = -1 * math.sin(m.x * 2 * math.pi)
 
-                    tp.arc_mod(m.x)
+                    --tp.arc_mod(m.x)
+                    tp.screen.pg.m.pos(m.x)
                 end
             },
             init = function(s) s.mod.tick:start() 
@@ -70,7 +71,7 @@ ndls = nest_:new {
                 handler = function(s, ring, d) -- weird use !
                     s.p.mod.v = s.p.mod.v + d 
                 end,
-                enabled = function() return ndls.arcpg()[i][1] == 1 and ndls.global.alt() == 1 end
+                enabled = function() return ndls.arcpg()[i][2] == 1 and ndls.global.alt() == 1 end
             },
             start = _arc.value:new {
                 ring = function() ndls.arcpg.vertical and i or 3 end, -- all params can be functions !
@@ -78,11 +79,11 @@ ndls = nest_:new {
                 action = function(s, v)
                     sc.loop_start(i, v * sc.region_length(i)) -- v is 0-1
 
-                    s.p.length:bang() --
-                    s.p.window:bang()
-                    s.p.endpt:bang()
+                    s.p.length() --
+                    s.p.window()
+                    s.p.endpt()
                 end,
-                enabled = function() return ndls.arcpg()[i][2] == 1 end
+                enabled = function() return ndls.arcpg()[i][3] == 1 end
             },
             length = _arc.value:new {
                 ring = function() ndls.arcpg.vertical and i or 4 end,
@@ -91,12 +92,12 @@ ndls = nest_:new {
                     local len = util.clamp(v * sc.region_length(i), 0.001, 1 - s.p.start())
                     sc.loop_length(i, len)
                     
-                    s.p.window:bang()
-                    s.p.endpt:bang()
+                    s.p.window()
+                    s.p.endpt()
                     
                     return len / sc.region_length(i)
                 end,
-                enabled = function() return ndls.arcpg()[i][3] == 1 end,
+                enabled = function() return ndls.arcpg()[i][4] == 1 end,
                 output = { enabled = false } --
             },
             endpt = _arc.value:new {
@@ -105,7 +106,7 @@ ndls = nest_:new {
                 action = function(s) 
                     return s.p.start() + s.p.length()
                 end,
-                enabled = function() return ndls.arcpg()[i][3] == 1 end,
+                enabled = function() return ndls.arcpg()[i][4] == 1 end,
                 input = { enabled = false }
             },
             window  = _arc.range:new {
@@ -115,7 +116,7 @@ ndls = nest_:new {
                     return { s.p.start(), s.p.endpt() }
                 end,
                 order = -1,
-                enabled = function() return ndls.arcpg()[i][2] == 1 or ndls.arcpg()[i][3] == 1 end,
+                enabled = function() return ndls.arcpg()[i][3] == 1 or ndls.arcpg()[i][4] == 1 end,
             }
             buffer = _grid.value:new {
                 x = { 8, 15 }, y = i + 3, v = i
@@ -200,18 +201,18 @@ ndls = nest_:new {
                     for j,w in ipairs(v) do 
                         if j == i and w == 1 then
                             s.p.pre_level.mul = 0
-                            s.p.pre_level:bang() ------ or s.p.pre_level() ?
+                            s.p.pre_level() ------ or s.p.pre_level() ?
 
                             s.p.feedback.mul = 1
-                            s.p.feedback:bang()
+                            s.p.feedback()
                         else 
                             sc.level_cut_cut(i, j, w) 
 
                             s.p.pre_level.mul = 1
-                            s.p.pre_level:bang() ------
+                            s.p.pre_level() ------
 
                             s.p.feedback.mul = 0
-                            s.p.feedback:bang()
+                            s.p.feedback()
                         end
                     end
                 end,
@@ -219,23 +220,31 @@ ndls = nest_:new {
                     x = i + 3, y = i + 3, lvl = 4, order = -1
                 }
             },
-            local = {
-                enabled = function() return not ndls.isglobal end,
-                --mod position, friction
-                --level, pan, mod, mod
-                --start, length, mod, mod
-                --fine pitch, mod, fade
-                --filter pitch, crossfade, mod, resonance
+            screen = {
+                enabled = function() return not ndls.screen_global end,
                 pager = _enc.txt.radio:new {
-                    list = { 'm', 'l', 's', 'p', 'f' },
+                    list = { 'm', 'l', 'w', 'p', 'f' },
                     v = 'p',
                     x = layout[2].x[1][1],
                     y = layout[2].y[1],
                     n = 1
                 },
                 pg = {
+                    -- onscreen visuals: marble falling through a tube, friction roates the tube between horizonatal & vertical
                     m = {
-                        ---------
+                        v = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2
+                        },
+                        mu = _enc.txt.number:new {
+                            label = utf8.char(956), --mu
+                            face = 3, --
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            range = { -0.1, 1 },
+                            n = 3
+                        }
                     },
                     l = {
                         lvl = _enc.txt.number:new {
@@ -253,25 +262,106 @@ ndls = nest_:new {
                             enabled = noalt
                         },
                         lmod = _enc.txt.number:new {
+                            label = 'mod',
                             x = layout[2].x[2][1],
                             y = layout[2].y[1],
                             n = 2,
                             enabled = alt
                         },
                         pmod = _enc.txt.number:new {
+                            label = 'mod',
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = alt
+                        }
+                    },
+                    w = {
+                        st = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = noalt
+                        },
+                        endpt = _enc.txt.number:new {
+                            label = 'end',
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = noalt
+                        },
+                        smod = _enc.txt.number:new {
+                            label = 'mod',
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = alt
+                        },
+                        emod = _enc.txt.number:new {
+                            label = 'mod',
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = alt
+                        }
+                    },
+                    p = {
+                        bnd = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            range = { -1, 1 }
+                            n = 2,
+                            enabled = noalt
+                        },
+                        fm = _enc.txt.number:new {
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = noalt
+                        },
+                        fade = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            range = { 0, 1000 },
+                            units = 'ms',
+                            step = 1,
+                            n = 2,
+                            enabled = alt
+                        }
+                    },
+                    f = {
+                        frq = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = noalt
+                        },
+                        fm = _enc.txt.number:new {
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = noalt
+                        },
+                        res = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = alt
+                        },
+                        shp = _enc.txt.number:new {
                             x = layout[2].x[3][1],
                             y = layout[2].y[1],
                             n = 3,
                             enabled = alt
                         }
                     }
-                }:each(function(i, s) s.enabled = function() return ndls.local.pager() == s.k end end)
+                }:each(function(i, s) s.enabled = function() return ndls.tp[i].screen.pager() == s.k end end)
             }
         }
     end),
-    isglobal = true,
-    global = {
-        enabled = function() return ndls.isglobal end,
+    screen_global = true,
+    screen = {
+        enabled = function() return ndls.screen_global end,
         fb = _enc.txt.number:new { -- if not self.label then self.label = self.k end
             x = layout[2].x[1][1],
             y = layout[2].y[1],
@@ -313,7 +403,38 @@ ndls = nest_:new {
         target = function(s) s.p.tp end
     },
     arcpg = _grid.control:new {
-        ----------
+        x = { 12, 15 }, y = { 1, 4 }, held = {}, vertical = true, lvl = 15,
+        v = {
+            { 1, 0, 0, 0 },
+            { 1, 0, 0, 0 },
+            { 1, 0, 0, 0 },
+            { 1, 0, 0, 0 }
+        },
+        handler = function(s, x, y, z) 
+            if z == 1 then
+                table.insert(s.held, { x = x - s.x[1], y = y - s.y[1] })
+            else
+                if #s.held > 1 then
+                    if s.held[1].x == s.held[2].x then s.vertical = true
+                    elseif s.held[1].y == s.held[2].y then s.vertical = false end
+                else
+                    for i = 0,3 do --y
+                        for j = 0,3 do --x 
+                            -- bugs looove lines like this !
+                            s.v[i + 1][j + 1] = (s.vertical and x == j) and 1 or ((not s.vertical and y == i) and 1 or 0)
+                        end 
+                    end
+                end
+ 
+                for i,v in ipairs(s.held) do
+                    if v.x == x - s.x[1] and v.y == y - s.y[1] then table.remove(s.held, i) end
+                end
+            end
+        end,
+        redraw = function(s) 
+            for i = 0,3 do for j = 0,3 do s.g:led(s.x[1] + j, s.y[1] + i, s.v[i + 1][j + 1] * s.lvl) end end
+        end,
+        action = function(s) s.device.a.dirty = true end -- is there a cleaner way to do this ? it's kinda niche
     }
 } :connect { 
     g = grid.connect(1), 
