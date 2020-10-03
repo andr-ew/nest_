@@ -120,7 +120,9 @@ ndls = nest_:new {
                             y = layout[2].y[1],
                             range = { -1, 1 },
                             n = 3,
-                            action = function() end, -----------
+                            action = function() 
+                                sc.pan(i, v)
+                            end,
                             enabled = noalt
                         },
                         lmod = _enc.txt.number:new {
@@ -194,6 +196,9 @@ ndls = nest_:new {
                             y = layout[2].y[1],
                             range = { -1, 1 }
                             n = 2,
+                            action = function(s, v) 
+                                sc.rate2(i, math.pow(2, v))
+                            end,
                             enabled = noalt
                         },
                         fm = _enc.txt.number:new {
@@ -205,10 +210,11 @@ ndls = nest_:new {
                         fade = _enc.txt.number:new {
                             x = layout[2].x[2][1],
                             y = layout[2].y[1],
-                            range = { 0, 1000 },
-                            units = 'ms',
-                            step = 1,
+                            units = 's',
                             n = 2,
+                            action = function(s, v) 
+                                sc.fade_time(i, v)
+                            end,
                             enabled = alt
                         }
                     },
@@ -220,6 +226,10 @@ ndls = nest_:new {
                             x = layout[2].x[2][1],
                             y = layout[2].y[1],
                             n = 2,
+                            v = 0.7,
+                            action = function(s, v) 
+                                sc.post_filter_fc(i, util.linexp(0, 1, 1, 12000, v))
+                            end,
                             enabled = noalt
                         },
                         fm = _enc.txt.number:new {
@@ -232,12 +242,19 @@ ndls = nest_:new {
                             x = layout[2].x[2][1],
                             y = layout[2].y[1],
                             n = 2,
+                            action = function(s, v) 
+                                softcut.post_filter_rq(i,1 - v)
+                            end,
                             enabled = alt
                         },
                         shp = _enc.txt.number:new {
                             x = layout[2].x[3][1],
                             y = layout[2].y[1],
                             n = 3,
+                            action = function() 
+                                supercut.post_filter_dry(i, 0)
+                                supercut.post_filter_lp(i, 1)
+                            end,
                             enabled = alt
                         }
                     }
