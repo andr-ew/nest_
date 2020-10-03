@@ -37,80 +37,229 @@ local noalt = function() return ndls.alt() == 0 end
 ndls = nest_:new {
     tp = nest_:new(1, 4):each(function(i)
         return {
-            -------------------- for all arc controls, action should be defined in the screen control and linked to arc
-            level = _arc.fader:new {
-                ring = function() ndls.arcpg.vertical and i or 1 end,
-                x = { 8, 54 },
-                action = function(s, v) 
-                    sc.level(i, v)
-                end,
-                enabled = function() return ndls.arcpg()[i][1] == 1 end
-            },
+            init = function(s) s.mod.tick:start() 
+                metro.init(s.mod.tick, s.mod.dt):start()
+            end,
             mod = {
                 v = 0,
                 x = 0,
-                a = 0,
+                mu = 0,
                 y = 0,
                 dt = 1/60,
                 tick = function()
                     local tp = ndls.tp[i]
                     local m = tp.mod
-                    m.v = m.v + m.a * m.dt
+                    m.v = m.v - m.mu * m.dt
                     m.x = math.fmod(m.x + m.v * m.dt, 1)
                     m.y = -1 * math.sin(m.x * 2 * math.pi)
-
-                    --tp.arc_mod(m.x)
-                    tp.screen.pg.m.pos(m.x)
+                    
+                    tp.screen.pg.m.v(m.v)
+                    tp.screen.pg.m.mu(m.mu)
+                    tp.position(m.x)
                 end
             },
-            init = function(s) s.mod.tick:start() 
-                metro.init(s.mod.tick, s.mod.dt):start()
-            end,
-            arc_mod = _arc.cycle:new {
+            screen = {
+                enabled = function() return not ndls.screen_global end,
+                pager = _enc.txt.radio:new {
+                    list = { 'm', 'l', 'w', 'p', 'f' },
+                    v = 'p',
+                    x = layout[2].x[1][1],
+                    y = layout[2].y[1],
+                    n = 1
+                },
+                pg = nest_:new {
+                    -- onscreen visuals: marble falling through a tube, friction roates the tube between horizonatal & vertical
+                    m = {
+                        v = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            range = { -math.huge, math.huge },
+                            action = function(s, v) ndls.tp[i].mod.v = v end,
+                            n = 2
+                        },
+                        mu = _enc.txt.number:new {
+                            label = utf8.char(956), --mu
+                            face = 3, --
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            range = { -0.1, 1 },
+                            action = function(s, v)
+                              ndls.tp[i].mod.mu = v 
+                              ndls.tp[i].mu(v)
+                            end,
+                            n = 3
+                        }
+                    },
+                    l = {
+                        lvl = _enc.txt.number:new {
+                            label = 'd/w',
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            action = function(s, v) 
+                                ndls.tp[i].level(v)
+
+                                sc.level(i, v)
+                            end,
+                            enabled = noalt
+                        },
+                        pan = _enc.txt.number:new {
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            range = { -1, 1 },
+                            n = 3,
+                            enabled = noalt
+                        },
+                        lmod = _enc.txt.number:new {
+                            label = 'mod',
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = alt
+                        },
+                        pmod = _enc.txt.number:new {
+                            label = 'mod',
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = alt
+                        }
+                    },
+                    w = {
+                        st = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            action = function(s, v)
+                                ndls.tp[i].start(v)
+
+                                sc.loop_start(i, v * sc.region_length(i)) -- v is 0-1
+                                s.p.len()
+                            end
+                            enabled = noalt
+                        },
+                        len = _enc.txt.number:new {
+                            label = 'end',
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            action = function(s, v) 
+                               ndls.tp[i].length(v)
+                               
+                              local len = util.clamp(v * sc.region_length(i), 0.001, 1 - s.p.start())
+                              sc.loop_length(i, len)
+                    
+                              return len / sc.region_length(i)
+                            end
+                            enabled = noalt
+                        },
+                        smod = _enc.txt.number:new {
+                            label = 'mod',
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = alt
+                        },
+                        emod = _enc.txt.number:new {
+                            label = 'mod',
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = alt
+                        }
+                    },
+                    p = {
+                        bnd = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            range = { -1, 1 }
+                            n = 2,
+                            enabled = noalt
+                        },
+                        fm = _enc.txt.number:new {
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = noalt
+                        },
+                        fade = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            range = { 0, 1000 },
+                            units = 'ms',
+                            step = 1,
+                            n = 2,
+                            enabled = alt
+                        }
+                    },
+                    f = {
+                        frq = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = noalt
+                        },
+                        fm = _enc.txt.number:new {
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = noalt
+                        },
+                        res = _enc.txt.number:new {
+                            x = layout[2].x[2][1],
+                            y = layout[2].y[1],
+                            n = 2,
+                            enabled = alt
+                        },
+                        shp = _enc.txt.number:new {
+                            x = layout[2].x[3][1],
+                            y = layout[2].y[1],
+                            n = 3,
+                            enabled = alt
+                        }
+                    }
+                }:each(function(i, s) s.enabled = function() return ndls.tp[i].screen.pager() == s.k end end)
+            },
+            level = _arc.fader:new {
+                ring = function() return ndls.arcpg.vertical and i or 1 end,
+                x = { 8, 54 },
+                action = function(s) s.p.screen.pg.l.lvl(v) end,
+                enabled = function() return ndls.arcpg()[i][1] == 1 end
+            },
+            position = _arc.cycle:new {
                 ring = function() return ndls.arcpg.vertical and i or 2 end,
                 handler = function(s, ring, d) -- weird use !
-                    s.p.mod.v = s.p.mod.v + d 
+                    s.p.screen.pg.m.v(s.p.screen.pg.m.v() + d)
                 end,
-                enabled = function() return ndls.arcpg()[i][2] == 1 and ndls.global.alt() == 1 end
+                enabled = function() return ndls.arcpg()[i][2] == 1 and noalt() end
+            },
+            mu = _arc.fader:new {
+                ring = function() return ndls.arcpg.vertical and i or 2 end,
+                x = { 0, 54 },
+                action = function(s, v) s.p.screen.pg.m.mu(v) end,
+                enabled = function() return ndls.arcpg()[i][2] == 1 and alt() end
             },
             start = _arc.value:new {
-                ring = function() ndls.arcpg.vertical and i or 3 end, -- all params can be functions !
-                x = { 0, 64 },
-                action = function(s, v)
-                    sc.loop_start(i, v * sc.region_length(i)) -- v is 0-1
-
-                    s.p.length() --
-                    s.p.window()
-                    s.p.endpt()
-                end,
+                ring = function() return ndls.arcpg.vertical and i or 3 end, -- all params can be functions !
+                action = function(s, v) s.p.screen.pg.w.st(v) end,
                 enabled = function() return ndls.arcpg()[i][3] == 1 end
             },
             length = _arc.value:new {
-                ring = function() ndls.arcpg.vertical and i or 4 end,
+                ring = function() return ndls.arcpg.vertical and i or 4 end,
                 x = { 1, 64 },
-                action = function(s, v)
-                    local len = util.clamp(v * sc.region_length(i), 0.001, 1 - s.p.start())
-                    sc.loop_length(i, len)
-                    
-                    s.p.window()
-                    s.p.endpt()
-                    
-                    return len / sc.region_length(i)
-                end,
+                action = function(s, v) return s.p.screen.pg.w.len(v) end,
                 enabled = function() return ndls.arcpg()[i][4] == 1 end,
                 output = { enabled = false } --
             },
             endpt = _arc.value:new {
-                ring = function() ndls.arcpg.vertical and i or 4 end,
+                ring = function() return ndls.arcpg.vertical and i or 4 end,
                 x = { 1, 64 },
-                action = function(s) 
-                    return s.p.start() + s.p.length()
-                end,
+                action = function(s) return s.p.start() + s.p.length() end, --
                 enabled = function() return ndls.arcpg()[i][4] == 1 end,
                 input = { enabled = false }
             },
             window  = _arc.range:new {
-                ring = function() ndls.arcpg.vertical and i or { 3, 4 } end, -- multiple rings
+                ring = function() return ndls.arcpg.vertical and i or { 3, 4 } end, -- multiple rings
                 lvl = 4,
                 action = function(s)
                     return { s.p.start(), s.p.endpt() }
@@ -129,7 +278,7 @@ ndls = nest_:new {
                 s.p.start(sc.region_start(i))
                 s.p.length(sc.region_length(i))
             end
-            rec = _grid.toggle:new { 
+            rec = _grid.toggle:new {
                 x = 1, y = i + 3,
                 action = function(s, v)
                     if not s.p.play() and v == 1 then
@@ -220,143 +369,6 @@ ndls = nest_:new {
                     x = i + 3, y = i + 3, lvl = 4, order = -1
                 }
             },
-            screen = {
-                enabled = function() return not ndls.screen_global end,
-                pager = _enc.txt.radio:new {
-                    list = { 'm', 'l', 'w', 'p', 'f' },
-                    v = 'p',
-                    x = layout[2].x[1][1],
-                    y = layout[2].y[1],
-                    n = 1
-                },
-                pg = {
-                    -- onscreen visuals: marble falling through a tube, friction roates the tube between horizonatal & vertical
-                    m = {
-                        v = _enc.txt.number:new {
-                            x = layout[2].x[2][1],
-                            y = layout[2].y[1],
-                            n = 2
-                        },
-                        mu = _enc.txt.number:new {
-                            label = utf8.char(956), --mu
-                            face = 3, --
-                            x = layout[2].x[3][1],
-                            y = layout[2].y[1],
-                            range = { -0.1, 1 },
-                            n = 3
-                        }
-                    },
-                    l = {
-                        lvl = _enc.txt.number:new {
-                            label = 'd/w',
-                            x = layout[2].x[2][1],
-                            y = layout[2].y[1],
-                            n = 2,
-                            enabled = noalt
-                        },
-                        pan = _enc.txt.number:new {
-                            x = layout[2].x[3][1],
-                            y = layout[2].y[1],
-                            range = { -1, 1 },
-                            n = 3,
-                            enabled = noalt
-                        },
-                        lmod = _enc.txt.number:new {
-                            label = 'mod',
-                            x = layout[2].x[2][1],
-                            y = layout[2].y[1],
-                            n = 2,
-                            enabled = alt
-                        },
-                        pmod = _enc.txt.number:new {
-                            label = 'mod',
-                            x = layout[2].x[3][1],
-                            y = layout[2].y[1],
-                            n = 3,
-                            enabled = alt
-                        }
-                    },
-                    w = {
-                        st = _enc.txt.number:new {
-                            x = layout[2].x[2][1],
-                            y = layout[2].y[1],
-                            n = 2,
-                            enabled = noalt
-                        },
-                        endpt = _enc.txt.number:new {
-                            label = 'end',
-                            x = layout[2].x[3][1],
-                            y = layout[2].y[1],
-                            n = 3,
-                            enabled = noalt
-                        },
-                        smod = _enc.txt.number:new {
-                            label = 'mod',
-                            x = layout[2].x[2][1],
-                            y = layout[2].y[1],
-                            n = 2,
-                            enabled = alt
-                        },
-                        emod = _enc.txt.number:new {
-                            label = 'mod',
-                            x = layout[2].x[3][1],
-                            y = layout[2].y[1],
-                            n = 3,
-                            enabled = alt
-                        }
-                    },
-                    p = {
-                        bnd = _enc.txt.number:new {
-                            x = layout[2].x[2][1],
-                            y = layout[2].y[1],
-                            range = { -1, 1 }
-                            n = 2,
-                            enabled = noalt
-                        },
-                        fm = _enc.txt.number:new {
-                            x = layout[2].x[3][1],
-                            y = layout[2].y[1],
-                            n = 3,
-                            enabled = noalt
-                        },
-                        fade = _enc.txt.number:new {
-                            x = layout[2].x[2][1],
-                            y = layout[2].y[1],
-                            range = { 0, 1000 },
-                            units = 'ms',
-                            step = 1,
-                            n = 2,
-                            enabled = alt
-                        }
-                    },
-                    f = {
-                        frq = _enc.txt.number:new {
-                            x = layout[2].x[2][1],
-                            y = layout[2].y[1],
-                            n = 2,
-                            enabled = noalt
-                        },
-                        fm = _enc.txt.number:new {
-                            x = layout[2].x[3][1],
-                            y = layout[2].y[1],
-                            n = 3,
-                            enabled = noalt
-                        },
-                        res = _enc.txt.number:new {
-                            x = layout[2].x[2][1],
-                            y = layout[2].y[1],
-                            n = 2,
-                            enabled = alt
-                        },
-                        shp = _enc.txt.number:new {
-                            x = layout[2].x[3][1],
-                            y = layout[2].y[1],
-                            n = 3,
-                            enabled = alt
-                        }
-                    }
-                }:each(function(i, s) s.enabled = function() return ndls.tp[i].screen.pager() == s.k end end)
-            }
         }
     end),
     screen_global = true,
@@ -400,7 +412,7 @@ ndls = nest_:new {
         x = 16,
         y = { 1, 8 },
         lvl = { 4, 15 },
-        target = function(s) s.p.tp end
+        target = function(s) return s.p.tp end
     },
     arcpg = _grid.control:new {
         x = { 12, 15 }, y = { 1, 4 }, held = {}, vertical = true, lvl = 15,

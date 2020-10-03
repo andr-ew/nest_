@@ -6,40 +6,29 @@ order -> z ?
 
 CONCEPTS
 
-allow action to be a table with with multiple action callbacks ?
+create _control.__call metatmethod as a set/bang/get function. if first arg is control, ignore it
 
-create _control.__call metatmethod as a shortcut to set() and a nifty control linking mechanism
+??? remove inputs{}, outputs{}; _input, _output simply refer to o, p (, meta), then self for members, control searches self for _inputs & _outputs to update ???
 
-nest.control(value) —- set shorthand
-nest.control(value, silent)
-nest.control(silent)
-nest.control1(_control2, value) -- set _control1 = value & _control2.actions[#actions] = control1
+add actions{} table, alias action to actions[1]
 
-allow _inputs, _outputs in a nest w/o a parent control, set control(/parent) manually. findmeta, en, will need to be functional w/o being inside a control
-
-reimpliment _control as subtype of nest_, remove inputs{}, outputs{}; _input, _output simply refer to o, p (, meta), then self for members. _obj_ woudld support multiple parents and _i/_o would index them in order of appearence.
+add :link(_control or function() return control end) to _control, link two controls by appending actions
 
 when nest_ arg type is not table add a number range or key list argument option to initialize blank table children at specified keys
 
 add :each(function(k, _)) to _obj_. these would run after the top level table has been initialized, which helps to enable absolute paths to be used within a nest structure
 
-try to impliment a top-down heirchy (inside of _input / _output), removing the need for the _meta key
-
 or, on the opposite end of the spectrum, remove _meta altogether. with the each() function i'm starting to question why we need this technique ! we would need to repliment connect() as a method which adds devices to all children and grandchildren
-
-add :append() and :prepend() to _obj_
-
-add :append_all(), add a member to all children & grandchildren
 
 convention: allow most data parameters to be a value or a function returning the desired value. current _grid. imlimentations will need to change. to impliment this we can create a blank par table as a proxy. par will index the same as _i/o, but if the value is a function, it'll return the return the return value of the function rather than the function itself
 
-add a link parameter to allow a control to reference & update the v of another device rather than its own. some extra layers will need to be added to ensure both controls stay up to date (pre-action). (this is a more specific functionality, to replace the general functionality of multiple action callbacks)
-
 _paramcontrol: subtype of control which can be linked to a param ?
 
-clean up redraws: rather than redraw on any input, set up a global 30fps redraw metro and a global dirty flag per device. have _input.update() set the dirty flag and have the metro redraw only when dirty
+clean up redraws: rather than redraw on any input, set up a global 30fps redraw metro and a global dirty flag per device. :update() or _control() sets the dirty flag 
 
 _nest: do_init() -> pre_init() -> init() -> bang
+
+handler(), _control() -> action[1]()i -> ... -> anction[n] -> v (catch nill returns)
 
 ]]
 
