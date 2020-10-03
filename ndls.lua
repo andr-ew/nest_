@@ -51,11 +51,18 @@ ndls = nest_:new {
                     local m = tp.mod
                     m.v = m.v - m.mu * m.dt
                     m.x = math.fmod(m.x + m.v * m.dt, 1)
-                    m.y = -1 * math.sin(m.x * 2 * math.pi)
-                    
+
                     tp.screen.pg.m.v(m.v)
                     tp.screen.pg.m.mu(m.mu)
                     tp.position(m.x)
+
+                    local last = m.y
+                    m.y = -1 * math.sin(m.x * 2 * math.pi)
+                    local dy = m.y - last
+
+                    for _,k in ipairs({ 'l', 'w', 'p', 'f' }) do 
+                        tp.screen.pg[k]:modulate(dy)
+                    end
                 end
             },
             screen = {
@@ -70,6 +77,7 @@ ndls = nest_:new {
                 pg = nest_:new {
                     -- onscreen visuals: marble falling through a tube, friction roates the tube between horizonatal & vertical
                     m = {
+                        -- if .label == nil .label = .k
                         v = _enc.txt.number:new {
                             x = layout[2].x[2][1],
                             y = layout[2].y[1],
@@ -91,6 +99,10 @@ ndls = nest_:new {
                         }
                     },
                     l = {
+                        modulate = function(s, d) 
+                            s.lvl:delta(d * s.lmod())
+                            s.pan:delta(d * s.pmod())
+                        end,
                         lvl = _enc.txt.number:new {
                             label = 'd/w',
                             x = layout[2].x[2][1],
@@ -108,6 +120,7 @@ ndls = nest_:new {
                             y = layout[2].y[1],
                             range = { -1, 1 },
                             n = 3,
+                            action = function() end, -----------
                             enabled = noalt
                         },
                         lmod = _enc.txt.number:new {
@@ -126,6 +139,10 @@ ndls = nest_:new {
                         }
                     },
                     w = {
+                        modulate = function(s, d) 
+                            s.st:delta(d * s.smod())
+                            s.len:delta(d * s.lmod())
+                        end,
                         st = _enc.txt.number:new {
                             x = layout[2].x[2][1],
                             y = layout[2].y[1],
@@ -160,7 +177,7 @@ ndls = nest_:new {
                             n = 2,
                             enabled = alt
                         },
-                        emod = _enc.txt.number:new {
+                        lmod = _enc.txt.number:new {
                             label = 'mod',
                             x = layout[2].x[3][1],
                             y = layout[2].y[1],
@@ -169,6 +186,9 @@ ndls = nest_:new {
                         }
                     },
                     p = {
+                        modulate = function(s, d) 
+                            s.bnd:delta(d * s.fm())
+                        end,
                         bnd = _enc.txt.number:new {
                             x = layout[2].x[2][1],
                             y = layout[2].y[1],
@@ -193,6 +213,9 @@ ndls = nest_:new {
                         }
                     },
                     f = {
+                        modulate = function(s, d) 
+                            s.frq:delta(d * s.fm())
+                        end,
                         frq = _enc.txt.number:new {
                             x = layout[2].x[2][1],
                             y = layout[2].y[1],
