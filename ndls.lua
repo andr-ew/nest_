@@ -266,18 +266,18 @@ ndls = nest_:new {
                 end,
                 order = -1,
                 enabled = function() return ndls.arcpg()[i][3] == 1 or ndls.arcpg()[i][4] == 1 end,
-            }
+            },
             buffer = _grid.value:new {
                 x = { 8, 15 }, y = i + 3, v = i
                 action = function(s, v)
                     sc.buffer_steal_region(i, v + 1)
                 end
-            }
+            },
             punchin = nil,
             resetwindow = function(s)
                 s.p.start(sc.region_start(i))
                 s.p.length(sc.region_length(i))
-            end
+            end,
             rec = _grid.toggle:new {
                 x = 1, y = i + 3,
                 action = function(s, v)
@@ -368,7 +368,7 @@ ndls = nest_:new {
                 indicator = _grid.value.output:new { ---
                     x = i + 3, y = i + 3, lvl = 4, order = -1
                 }
-            },
+            }
         }
     end),
     screen_global = true,
