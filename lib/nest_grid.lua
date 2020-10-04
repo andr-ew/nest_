@@ -1,3 +1,10 @@
+--[[
+
+add .raw value to track keys that are actually held on grid
+
+]]
+
+
 local tab = require 'tabutil'
 
 local _grid = _group:new()
@@ -229,16 +236,16 @@ _grid.value.input.handlers = _obj_:new {
     end,
     line = function(s, x, y, z) 
         if z > 0 then
-            local last = s.v
+            --local last = s.v
             s.v = x - s.x[1]
-            s:a(s.v, last)
+            s:a(s.v)--, last)
         end
     end,
     plane = function(s, x, y, z) 
         if z > 0 then
-            local last = s.v
+            --local last = s.v
             s.v = { x = x - s.x[1], y = y - s.y[1] }
-            s:a(s.v, last)
+            s:a(s.v)--, last)
         end
     end
 }

@@ -30,6 +30,8 @@ _nest: do_init() -> pre_init() -> init() -> bang
 
 handler(), _control() -> action[1]()i -> ... -> anction[n] -> v (catch nill returns)
 
+in control.update(), pass both the handler args and resulting value to _metacontrol, metacontrol decides what to store and recall. (.mode = 'v' or 'handler' for default pattern control)
+
 ]]
 
 -- _obj_ is a base object for all the types on this page that impliments concatenative programming. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
@@ -289,6 +291,7 @@ _metacontrol = _control:new {
     targets = {}
 }
 
+-- will need to set back to old imlimentation when remove _meta
 function _metacontrol:new(o)
     o = _control.new(self, o)
 
