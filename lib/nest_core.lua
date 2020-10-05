@@ -32,6 +32,8 @@ handler(), _control() -> action[1]()i -> ... -> anction[n] -> v (catch nill retu
 
 in control.update(), pass both the handler args and resulting value to _metacontrol, metacontrol decides what to store and recall. (.mode = 'v' or 'handler' for default pattern control)
 
+add path functionality to _obj_: construct relative string path from parent to child and evalue string path to child
+
 ]]
 
 -- _obj_ is a base object for all the types on this page that impliments concatenative programming. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
@@ -287,8 +289,9 @@ function _control:new(o)
 end
 
 _metacontrol = _control:new {
-    pass = function(self, f, args) end, --passing the function will work but cannot be recalled
-    targets = {}
+    pass = function(self, sender, package) end,
+    targets = {},
+    mode = 'handler' -- or 'v'
 }
 
 -- will need to set back to old imlimentation when remove _meta
@@ -318,6 +321,35 @@ function _metacontrol:new(o)
     end
 
     return o
+end
+
+local pt = include 'lib/pattern_time'
+
+_pattern = _metacontrol:new {
+    event = _obj_:new {
+        path = nil,
+        package = nil
+    },
+    pass = function(self, sender, package) 
+        self.pattern_time.watch(self.event:new {
+            path = sender:path(target),
+            package = package
+        })
+    end,
+    process = function(self, event) 
+    end,
+    pass = function() end
+    rec = function() end,
+    loop = function() end,
+    rate = function() end,
+    play = function() end,
+    quantize = function() end
+}
+
+function _pattern:new(o) 
+    o = _obj_.new(self, o)
+
+    o.pattern_time = pt.new()
 end
 
 nest_ = _obj_:new {
