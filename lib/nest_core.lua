@@ -26,6 +26,8 @@ _paramcontrol: subtype of control which can be linked to a param ?
 
 clean up redraws: rather than redraw on any input, set up a global 30fps redraw metro and a global dirty flag per device. :update() or _control() sets the dirty flag 
 
+add _nest.init = function() end param, init return table members are assigned to _nest
+
 _nest: do_init() -> pre_init() -> init() -> bang
 
 handler(), _control() -> action[1]()i -> ... -> anction[n] -> v (catch nill returns)
