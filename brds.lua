@@ -10,19 +10,22 @@ brds = nest_:new {
     },
     pg = nest_:new(2):each(function(i)
         return {
-            enabled = function() brds.pager() == i end,
+            enabled = function() brds.pager() + 1 == i end,
             func_pre = _grid.preset:new {
                 x = { 2, 8 }, y = 1,
                 target = function(s) return s.p.func end,
                 action = function(s, v) 
                     _grid.preset.action(s, v)
                     s.p.func.enabled = true
-                    s.p.scale.enabled = false
+                    s.p.quant.enabled = false
                 end
             },
             func = {
                 enabled = true
-                -- func screen params 
+                -- time
+                -- ramp
+                -- curve
+                -- transient/sustain/cycle
             },
             trans = _grid.glide:new {
                 x = { 1, 4}, y = 2,
@@ -30,19 +33,35 @@ brds = nest_:new {
                     -- set crow slew
                     s.p.cv()
                 end
-            }
-            scale_pre = _grid.preset:new {
+            },
+            quant_pre = _grid.preset:new {
                 x = { 4, 8 }, y = 2,
                 target = function(s) return s.p.scale end,
                 action = function(s, v) 
                     _grid.preset.action(s, v)
-                    s.p.scale.enabled = true
+                    s.p.quant.enabled = true
                     s.p.func.enabled = false
                 end
             },
-            scale = {
+            quant = {
                 enabled = false
-                -- scale screen params
+                --[[
+                
+                root: (440)
+                scale: 24tet/(ji)/linear
+                tuning: +1 ... 3.5 .. 12 (semitones, 0.5 is quarter tone)
+                key:
+
+                 c# d#    f# g# a#
+                c  d  e  f  g  a  b
+
+                  #   #     #   #   #
+                 # # # # # # # # # # # #
+                c   d   e f   g   a   b
+               
+                make 24tet the defacto ? :)
+ 
+                ]]
             },
             tgl = _momentary:new {
                 x = 1, y = 1, lvl = { 4, 16 },
@@ -118,7 +137,7 @@ brds = nest_:new {
                         rate = _grid.value:new {
                             x = { 1, 8 }, y = 4, v = 4,
                             action = function(s, v) s.p.rec:rate(math.pow(2, v - 4)) end
-                        },
+                        }
                         -- propability ?
                     }
                 }
