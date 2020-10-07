@@ -10,7 +10,8 @@ create _control.__call metatmethod as a set/bang/get function. if first arg is c
 
 ??? remove inputs{}, outputs{}; _input, _output simply refer to o, p (, meta), then self for members, control searches self for _inputs & _outputs to update ???
 
-add actions{} table, alias action to actions[1]
+add actions{} table, alias action to actions[1] 
+OR add actions table as a list of keys in self
 
 add :link(_control or function() return control end) to _control, link two controls by appending actions
 
@@ -23,6 +24,26 @@ or, on the opposite end of the spectrum, remove _meta altogether. with the each(
 convention: allow most data parameters to be a value or a function returning the desired value. current _grid. imlimentations will need to change. to impliment this we can create a blank par table as a proxy. par will index the same as _i/o, but if the value is a function, it'll return the return the return value of the function rather than the function itself
 
 _paramcontrol: subtype of control which can be linked to a param ?
+
+create the devices table and _device object
+
+_device = {
+    dirty = true,
+    object = grid/arc/screen/enc/key/etc,
+    redraw = function() end
+}
+
+devices = {
+    screen,
+    key,
+    enc,
+    g,
+    a,
+    m,
+    h
+}
+
+:connect adds a link to the devices table (table, not _obj_, make sure it doesn't become _obj_) to every child/grandchild as well as g, a, etc (/vport device) links
 
 clean up redraws: rather than redraw on any input, set up a global 30fps redraw metro and a global dirty flag per device. :update() or _control() sets the dirty flag 
 
@@ -60,7 +81,7 @@ function _obj_:new(o, clone_type)
             if v.is_obj then 
                 v._.p = t
                 v._.k = k
-            else
+            elseif not v.new then -- test !
                 v = clone_type:new(v)
                 v._.p = t
                 v._.k = k
