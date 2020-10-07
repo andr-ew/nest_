@@ -38,7 +38,7 @@ add path functionality to _obj_: construct relative string path from parent to c
 
 ]]
 
--- _obj_ is a base object for all the types on this page that impliments concatenative programming. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
+-- _obj_ is a base object for all the types on this page that impliments concatenative prototypical inheritance. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
 
 -- GOTCHA: overwriting an existing table value will not format type. if we do this, just make sure the type, p, k is correct
 

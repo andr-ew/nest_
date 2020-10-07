@@ -33,10 +33,11 @@ n = nest_:new {
         end)
     },
     screen = {
-        pager = _enc.tab:new {
+        pager = _enc.txt.radio:new {
+            list = { 1, 2, 3, 4 }
             x = { 8, 120 },
             y = { 8, 9 }
-            enc = 1
+            n = 1
         },
         pages = nest_:new(1, 16):each(function(i)
             return { 
@@ -47,15 +48,71 @@ n = nest_:new {
                     return nest_:new(0, 1).each(function(x)
                         return _screen.number:new {
                             x = x * 60 + 8,
-                            y = y * 24 + 16,
-                            link = function() return n.grid.pages.rows[x + 1 + (x * y * 2)] end
-                        }
+                            y = y * 24 + 16
+                        }:link(function() return n.grid.pages.rows[x + 1 + (x * y * 2)] end)
                     end)
                 end)
             }
         end)
     }
-}:connect { g = grid.connect(), screen = screen }
+}:connect { g = grid.connect() }
+
+-----------------------
+
+-- grid keyboard + screen synth params with a preset selector
+
+scale = { "D", "E", "G", "A", "B" }
+
+n = nest_:new {
+    pre = _grid.preset:new { x = { 1, 8 }, y = 1, target = function() return n.param end },
+    param = {
+        bend = _enc.txt.number:new {
+            x = 10, y = 10, n = 2,
+            action = function(s, v) engine.bend(v) end
+        },
+        cutoff = _enc.txt.number:new {
+            x = 64, y = 10, n = 2, v = 0.7,
+            action = function(s, v) 
+                engine.cutoff(util.linexp(0, 1, 1, 12000, v))
+            end
+        }
+    },
+    keyboard = _grid.momentary:new {
+        x = { 1, 8 }, y = { 2, 7 },
+        action = function(s, v, added, removed) 
+            local key
+            local gate
+            
+            if added then
+                key = added
+                gate = true
+            elseif removed then
+                key = removed
+                gate = false
+            end
+            
+            if key then
+                local note = scale[((key - 1) % #scale) + 1]
+              
+                for j,v in ipairs(musicutil.NOTE_NAMES) do
+                    if v == note then
+                        note = j - 1
+                        break
+                    end
+                end
+                  
+                note = note + math.floor((key - 1) / #scale) * 12 + s.y -- add row offset and wrap scale to next octave
+                  
+                if gate then
+                    engine.noteOn(note, musicutil.note_num_to_freq(note), 0.8 + math.random() * 0.2)
+                else
+                    msh.noteOff(note)
+                end
+            end
+        end
+    }
+}:connect { g = grid.connect() }
+
 
 -----------------------
 
