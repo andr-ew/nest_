@@ -124,7 +124,6 @@ n = nest_:new {
         handler = function(s, x, y, z)
             if z == 1 then 
                 s.v = { x = x - x[1], y = y - y[1] }
-                s:a(s.v)
             end
         end,
         redraw = function(_)
