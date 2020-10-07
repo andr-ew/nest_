@@ -1,6 +1,6 @@
 -- dual playable CV + function generator for grid + crow
 
-include 'lib/nest_/core'
+include 'lib/nest_/norns'
 include 'lib/nest_/txt'
 include 'lib/nest_/grid'
 
@@ -146,5 +146,7 @@ brds = nest_:new {
     end)
 } :connect {
     g = grid.connect(),
-    screen = screen
+    screen = screen, 
+    enc = enc, 
+    key = key
 }

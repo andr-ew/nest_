@@ -4,6 +4,8 @@ per the phase-out of _meta, this function will simply add the devices table to e
 
 ]]
 
+include 'lib/nest_/core.lua'
+
 nest_.connect = function(self, devices)
     self:do_init()
 
