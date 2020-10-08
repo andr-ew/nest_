@@ -1,15 +1,10 @@
 ```
 
-RN
-a -> action
-order -> z
-_group -> _device
-
 REFACTOR
 
 remove _meta functionality
 
-create the devices table and _dev object
+create the devs table and _dev object
 
 local _dev = {
     dirty = true,
@@ -18,7 +13,7 @@ local _dev = {
     handler = function() end
 }
 
-devices = {
+devs = {
     screen,
     key,
     enc,
@@ -36,7 +31,7 @@ clean up redraws: rather than redraw on any input, set up a global 30fps redraw 
 
 in control.update(), pass both the handler args and resulting value to _metacontrol, metacontrol decides what to store and recall. (.mode = 'v' or 'handler' for default pattern control)
 
-revert _meta implimentation back to the method used in branch/dead-things-from-christman
+revert _metacontrol implimentation back to the method used in branch/dead-things-from-christman
 
 --------------------
 
