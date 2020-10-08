@@ -2,6 +2,12 @@
 
 add .raw value to track keys that are actually held on grid
 
+_grid.trigger ?
+_grid.rect ?
+
+_grid.momentary -> _grid.gate ?
+
+
 ]]
 
 

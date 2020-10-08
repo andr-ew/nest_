@@ -256,7 +256,6 @@ _metacontrol = _control:new {
     mode = 'handler' -- or 'v'
 }
 
--- will need to set back to old imlimentation when remove _meta
 function _metacontrol:new(o)
     o = _control.new(self, o)
 
