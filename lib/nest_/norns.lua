@@ -1,4 +1,4 @@
-include 'lib/nest_/core.lua'
+include 'lib/nest_/core'
 
 nest_.connect = function(self, objects, fps)
     self:do_init()

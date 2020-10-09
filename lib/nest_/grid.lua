@@ -13,8 +13,8 @@ _grid.momentary -> _grid.gate ?
 
 local tab = require 'tabutil'
 
-local _grid = _group:new()
-_grid.deviceidx = 'g'
+_grid = _device:new()
+_grid.devk = 'g'
 
 _grid.control = _control:new {
     v = 0,
@@ -54,8 +54,8 @@ local input_contained = function(s, inargs)
     return contained.x and contained.y, axis_val
 end
 
-_grid.control.input.update = function(s, deviceidx, args)
-    if(s.deviceidx == deviceidx) then
+_grid.control.input.update = function(s, devk, args)
+    if(s.devk == devk) then
         if input_contained(s, args) then
             return args
         else return nil end
@@ -83,8 +83,8 @@ _grid.muxctrl.input.handler = function(s, k, ...)
     s.handlers[k](s, ...)
 end
 
-_grid.muxctrl.input.update = function(s, deviceidx, args)
-    if(s.deviceidx == deviceidx) then
+_grid.muxctrl.input.update = function(s, devk, args)
+    if(s.devk == devk) then
         local contained, axis_val = input_contained(s, args)        
 
         if contained then
@@ -114,8 +114,8 @@ _grid.muxctrl.output.redraw = function(s, k)
     s.redraws[k](s)
 end
 
-_grid.muxctrl.output.draw = function(s, deviceidx)
-    if(s.deviceidx == deviceidx) then
+_grid.muxctrl.output.draw = function(s, devk)
+    if(s.devk == devk) then
         local has_axis = { x = false, y = false }
 
         for i,v in ipairs{"x", "y"} do
@@ -158,7 +158,7 @@ _grid.momentary.input.handlers = _obj_:new {
         local t = nil
         if z > 0 then s.time = util.time()
         else t = util.time() - s.time end
-        s:a(s.v, t)
+        s:action(s.v, t)
     end,
     line = function(s, x, y, z)
         local v = x - s.x[1] + 1
@@ -166,12 +166,12 @@ _grid.momentary.input.handlers = _obj_:new {
             local rem = nil
             table.insert(s.v, v)
             if s.count and #s.v > s.count then rem = table.remove(s.v, 1) end
-            s:a(s.v, v, rem) -- v, added, removed
+            s:action(s.v, v, rem) -- v, added, removed
         else
             local k = tab.key(s.v, v)
             if k then  
                 table.remove(s.v, k)
-                s:a(s.v, nil, v)
+                s:action(s.v, nil, v)
             end
         end
     end,
@@ -181,7 +181,7 @@ _grid.momentary.input.handlers = _obj_:new {
             local rem = nil
             table.insert(s.v, v)
             if s.count and #s.v > s.count then rem = table.remove(s.v, 1) end
-            s:a(s.v, v, rem)
+            s:action(s.v, v, rem)
         else
             for i,w in ipairs(s.v) do
                 if w.x == v.x and w.y == v.y then 
@@ -238,20 +238,20 @@ _grid.momentary.output.redraws = _obj_:new {
 _grid.value = _grid.muxctrl:new()
 _grid.value.input.handlers = _obj_:new {
     point = function(s, x, y, z) 
-        if z > 0 then s:a(s.v) end
+        if z > 0 then s:action(s.v) end
     end,
     line = function(s, x, y, z) 
         if z > 0 then
             --local last = s.v
             s.v = x - s.x[1]
-            s:a(s.v)--, last)
+            s:action(s.v)--, last)
         end
     end,
     plane = function(s, x, y, z) 
         if z > 0 then
             --local last = s.v
             s.v = { x = x - s.x[1], y = y - s.y[1] }
-            s:a(s.v)--, last)
+            s:action(s.v)--, last)
         end
     end
 }

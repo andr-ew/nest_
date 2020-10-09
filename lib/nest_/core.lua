@@ -270,7 +270,7 @@ function _metacontrol:new(o)
     return o
 end
 
-local pt = include 'lib/pattern_time'
+--local pt = include 'lib/pattern_time'
 
 _pattern = _metacontrol:new {
     event = _obj_:new {
@@ -283,9 +283,8 @@ _pattern = _metacontrol:new {
             package = package
         })
     end,
-    process = function(self, event) 
-    end,
-    pass = function() end
+    process = function(self, event) end,
+    pass = function() end,
     rec = function() end,
     loop = function() end,
     rate = function() end,
@@ -296,7 +295,7 @@ _pattern = _metacontrol:new {
 function _pattern:new(o) 
     o = _obj_.new(self, o)
 
-    o.pattern_time = pt.new()
+    --o.pattern_time = pt.new()
 end
 
 nest_ = _obj_:new {

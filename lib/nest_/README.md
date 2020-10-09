@@ -2,9 +2,7 @@
 
 REFACTOR
 
-:connect adds a link to the devices table (table, not _obj_, make sure it doesn't become _obj_) to every child/grandchild as well as g, a, etc (/vport device) links
-
-clean up redraws: rather than redraw on any input, set up a global 30fps redraw metro and a global dirty flag per device. :update() or _control() sets the dirty flag 
+test
 
 -----------------
 

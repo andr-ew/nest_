@@ -3,7 +3,7 @@ function r()
 end
 --norns.script.load('/home/we/dust/code/nest_/test.lua')
 
-include 'lib/nest_'
+include 'lib/nest_/norns'
 tab = require 'tabutil'
 
 --[[
@@ -17,7 +17,7 @@ cc = c:new {
 }
 ]]
 
-_grid = include 'lib/nest_grid'
+include 'lib/nest_/grid'
 
 n = nest_:new {
     v = _grid.value:new {
