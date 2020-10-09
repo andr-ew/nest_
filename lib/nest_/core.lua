@@ -142,20 +142,19 @@ _control = _obj_:new {
         self:init()
     end,
     update = function(self, devk, args)
-        local d = false
-
         for i,v in ipairs(self.inputs) do
             local hargs = v:update(devk, args)
             
             if hargs ~= nil then
-                d = true
-                
-                -- change
+                if self.devs[v.devk] then self.devs[v.devk].dirty = true end
+ 
+                --[[ change
                 if self.metacontrols and not self.metacontrols_disabled then
                     for i,w in ipairs(self.metacontrols) do
                         w:pass(v.handler, hargs)
                     end
                 end
+                ]]
 
                 if v.handler then v:handler(table.unpack(hargs)) end
             end

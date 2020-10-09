@@ -1,19 +1,6 @@
---[[
-
-per the phase-out of _meta, this function will simply add the devices table to every _input or _output in the nest
-
-_dev = _obj_:new {
-    dirty = true,
-    object = nil,
-    redraw = nil,
-    handler = nil
-}
-
-]]
-
 include 'lib/nest_/core.lua'
 
-nest_.connect = function(self, objects)
+nest_.connect = function(self, objects, fps)
     self:do_init()
 
     local devs = {}
@@ -74,9 +61,36 @@ nest_.connect = function(self, objects)
         end
     end
 
-    -- initialize tick clock in devs, start clock
+    local fps = fps or 30
 
-    -- add devs, objects memebers to every decendent in self
+    clock.run(function() 
+        while true do 
+            clock.sleep(1/fps)
+            
+            for k,v in pairs(devs) do 
+                if(v.dirty) then 
+                    v.redraw()
+                    v.dirty = false
+                end
+            end
+        end   
+    end)
+
+    local function linkdevs(obj) 
+        if type(obj) == 'table' and obj.is_obj then
+            rawset(obj._, 'devs', devs)
+
+            for k,v in pairs(objects) do 
+                rawset(obj._, k, v)
+            end
+
+            for k,v in pairs(obj) do 
+                linkdevs(v)
+            end
+        end
+    end
+
+    linkdevs(self)
     
     return self
 end
