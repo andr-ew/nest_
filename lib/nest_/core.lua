@@ -141,26 +141,26 @@ _control = _obj_:new {
     do_init = function(self)
         self:init()
     end,
-    update = function(self, devk, args)
+    update = function(self, devk, args, mc)
         for i,v in ipairs(self.inputs) do
             local hargs = v:update(devk, args)
             
             if hargs ~= nil then
                 if self.devs[v.devk] then self.devs[v.devk].dirty = true end
  
-                --[[ change
-                if self.metacontrols and not self.metacontrols_disabled then
-                    for i,w in ipairs(self.metacontrols) do
-                        w:pass(v.handler, hargs)
+                if v.handler then 
+                    self.v = v:handler(table.unpack(hargs)) or self.v 
+                end
+
+                if self.metacontrols_enabled then
+                    for i,w in ipairs(mc) do
+                        w:pass(self, self.v, hargs)
                     end
                 end
-                ]]
-
-                if v.handler then v:handler(table.unpack(hargs)) end
             end
         end
         
-        -- call action(s), set v, set dirty flag
+        -- call action(s), set v
     end,
     draw = function(self, devk)
         for i,v in ipairs(self.outputs) do
@@ -243,7 +243,7 @@ function _control:new(o)
 end
 
 _metacontrol = _control:new {
-    pass = function(self, sender, package) end,
+    pass = function(self, sender, v, handler_args) end,
     targets = {},
     mode = 'handler' -- or 'v'
 }
@@ -260,9 +260,8 @@ function _metacontrol:new(o)
     tmt.__newindex = function(t, k, v)
         tmtn(t, k, v)
 
-        if v.is_control or v.is_nest then 
-            if v._.metacontrols == nil then v._.metacontrols = {} end
-            table.insert(v.metacontrols, o)
+        if v.is_nest then 
+            table.insert(v._.mc_links, o)
         end
 
     end
@@ -277,10 +276,10 @@ _pattern = _metacontrol:new {
         path = nil,
         package = nil
     },
-    pass = function(self, sender, package) 
+    pass = function(self, sender, v, handler_args) 
         self.pattern_time.watch(self.event:new {
             path = sender:path(target),
-            package = package
+            package = self.mode == 'v' and v or handler_args
         })
     end,
     process = function(self, event) end,
@@ -307,9 +306,13 @@ nest_ = _obj_:new {
     end,
     init = function(self) return self end,
     each = function(self, cb) return self end,
-    update = function(self, devk, args)
+    update = function(self, devk, args, mc)
+        if self.metacontrols_enabled then 
+            for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
+        end 
+
         for k,v in pairs(self) do if v.is_nest or v.is_control then
-            v:update(devk, args )
+            v:update(devk, args, mc)
         end end
     end,
     draw = function(self, devk)  
@@ -334,6 +337,8 @@ function nest_:new(o)
     _.en = true
     _.z = 0
     _.devs = {}
+    _.metacontrols_enabled = true
+    _.mc_links = {}
 
     local mt = getmetatable(o)
     --mt.__tostring = function(t) return 'nest_' end

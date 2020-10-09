@@ -18,7 +18,7 @@ nest_.connect = function(self, objects, fps)
                     vv:refresh()
                 end,
                 handler = function(...)
-                    self:update(kk, {...})
+                    self:update(kk, {...}, {})
                 end
             }
 
@@ -30,7 +30,7 @@ nest_.connect = function(self, objects, fps)
             devs[kk] = _dev:new {
                 object = vv,
                 handler = function(data)
-                    self:update(kk, data)
+                    self:update(kk, data, {})
                 end
             }
 
@@ -41,7 +41,7 @@ nest_.connect = function(self, objects, fps)
 
             devs[kk] = _dev:new {
                 handler = function(...)
-                    self:update(kk, {...})
+                    self:update(kk, {...}, {})
                 end
             }
 
@@ -68,7 +68,7 @@ nest_.connect = function(self, objects, fps)
             clock.sleep(1/fps)
             
             for k,v in pairs(devs) do 
-                if(v.dirty) then 
+                if v.dirty then 
                     v.redraw()
                     v.dirty = false
                 end
