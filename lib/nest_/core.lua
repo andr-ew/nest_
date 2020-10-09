@@ -73,10 +73,27 @@ _input = _obj_:new {
     transform = nil,
     handler = nil,
     devk = nil,
-    update = function(self, devk, args)
-        if(self.devk == devk) then
-            return args
-        else return nil end
+    filter = function(self, devk, args) return args end,
+    update = function(self, devk, args, mc)
+        if self.devk == devk then
+            local hargs = self:filter(devk, args)
+            
+            if hargs ~= nil and self.control then
+                if self.devs[self.devk] then self.devs[self.devk].dirty = true end
+ 
+                if self.handler then 
+                    self.control.v = self:handler(table.unpack(hargs)) or self.control.v
+                end
+
+                if self.metacontrols_enabled then
+                    for i,w in ipairs(mc) do
+                        w:pass(self.control, self.control.v, hargs)
+                    end
+                end
+            end
+        end
+        
+        -- call action(s), set v
     end
 }
 
@@ -114,64 +131,72 @@ end
 
 _output = _obj_:new {
     is_output = true,
-    transform = nil,
     redraw = nil,
     devk = nil,
-    throw = function(self, ...)
-        self.control.throw(self.control, self.devk, ...)
-    end,
     draw = function(self, devk)
         if(self.devk == devk) then
-            return {}
-        else return nil end
+            local rdargs = v:draw(devk)
+            if rdargs ~= nil and v.redraw then v:redraw(table.unpack(rdargs)) end
+        end
     end
 }
 
 _output.new = _input.new
 
-_control = _obj_:new {
-    is_control = true,
+nest_ = _obj_:new {
+    do_init = function(self)
+        self:init()
+        table.sort(self, function(a,b) return a.z < b.z end)
+
+        for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
+    end,
+    init = function(self) return self end,
+    each = function(self, cb) return self end,
+    update = function(self, devk, args, mc)
+        if self.metacontrols_enabled then 
+            for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
+        end 
+
+        for k,v in pairs(self) do if v.is_nest or v.is_input then
+            v:update(devk, args, mc)
+        end end
+    end,
+    draw = function(self, devk)  
+        for k,v in pairs(self) do if v.is_nest or v.is_output then
+            v:draw(devk)
+        end end
+    end,
+    set = function(self, tv) end, --table set nest = { nest = { control = value } }
+    get = function(self) end,
+    write = function(self) end,
+    read = function(self) end
+}
+
+function nest_:new(o)
+    o = _obj_.new(self, o, nest_)
+    local _ = o._ 
+
+    _.is_nest = true
+    _.enabled = true
+    _.z = 0
+    _.devs = {}
+    _.metacontrols_enabled = true
+    _.mc_links = {}
+
+    local mt = getmetatable(o)
+    --mt.__tostring = function(t) return 'nest_' end
+
+    return o
+end
+
+_control = nest_:new {
     v = 0,
     z = 0,
-    en = true,
     device = nil,
     action = function(s, v) end,
     init = function(s) end,
-    help = function(s) end,
     do_init = function(self)
         self:init()
-    end,
-    update = function(self, devk, args, mc)
-        for i,v in ipairs(self.inputs) do
-            local hargs = v:update(devk, args)
-            
-            if hargs ~= nil then
-                if self.devs[v.devk] then self.devs[v.devk].dirty = true end
- 
-                if v.handler then 
-                    self.v = v:handler(table.unpack(hargs)) or self.v 
-                end
-
-                if self.metacontrols_enabled then
-                    for i,w in ipairs(mc) do
-                        w:pass(self, self.v, hargs)
-                    end
-                end
-            end
-        end
-        
-        -- call action(s), set v
-    end,
-    draw = function(self, devk)
-        for i,v in ipairs(self.outputs) do
-            local rdargs = v:draw(devk)
-            if rdargs ~= nil and v.redraw then v:redraw(table.unpack(rdargs)) end
-        end
-    end,
-    throw = function(self, devk, method, ...)
-        if self.catch and self.devk == devk then
-            self:catch(devk, method, ...)
-        else self.p:throw(devk, method, ...) end
     end,
     print = function(self) end,
     get = function(self) return self.v end,
@@ -184,11 +209,7 @@ _control = _obj_:new {
             
             -- update dirty flag
         end
-    end,
-    write = function(self) end,
-    read = function(self) end,
-    inputs = {},
-    outputs = {}
+    end
 }
 
 function _control:new(o)
@@ -196,6 +217,7 @@ function _control:new(o)
     local _ = o._    
 
     _.devs = {}
+    _.is_control = true
 
     ---rm
     local mt = getmetatable(o)
@@ -210,6 +232,9 @@ function _control:new(o)
     ---/rm
 
     --mt.__tostring = function(t) return '_control' end
+
+
+    ---------------------------------refactor to direct i/o children
 
     for i,k in ipairs { "input", "output" } do -- lost on i/o table overwrite, fix in mt.__newindex
         local l = o[k .. 's']
@@ -244,7 +269,7 @@ end
 
 _metacontrol = _control:new {
     pass = function(self, sender, v, handler_args) end,
-    targets = {},
+    targets = {}, ----> target
     mode = 'handler' -- or 'v'
 }
 
@@ -295,55 +320,6 @@ function _pattern:new(o)
     o = _obj_.new(self, o)
 
     --o.pattern_time = pt.new()
-end
-
-nest_ = _obj_:new {
-    do_init = function(self)
-        self:init()
-        table.sort(self, function(a,b) return a.z < b.z end)
-
-        for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
-    end,
-    init = function(self) return self end,
-    each = function(self, cb) return self end,
-    update = function(self, devk, args, mc)
-        if self.metacontrols_enabled then 
-            for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
-        end 
-
-        for k,v in pairs(self) do if v.is_nest or v.is_control then
-            v:update(devk, args, mc)
-        end end
-    end,
-    draw = function(self, devk)  
-        for k,v in pairs(self) do if v.is_nest or v.is_control then
-            v:draw(devk)
-        end end
-    end,
-    throw = function(self, devk, method, ...)
-        self.p:throw(devk, method, ...)
-    end,
-    set = function(self, tv) end, --table set nest = { nest = { control = value } }
-    get = function(self) end,
-    write = function(self) end,
-    read = function(self) end
-}
-
-function nest_:new(o)
-    o = _obj_.new(self, o, nest_)
-    local _ = o._ 
-
-    _.is_nest = true
-    _.en = true
-    _.z = 0
-    _.devs = {}
-    _.metacontrols_enabled = true
-    _.mc_links = {}
-
-    local mt = getmetatable(o)
-    --mt.__tostring = function(t) return 'nest_' end
-
-    return o
 end
 
 _device = _obj_:new {}
