@@ -1,10 +1,7 @@
 ```
-
 REFACTOR
 
-convention: allow most data parameters to be a value or a function returning the desired value. current _grid. imlimentations will need to change. to impliment this we can create a blank par table as a proxy. par will index the same as _i/o, but if the value is a function, it'll return the return the return value of the function rather than the function itself
-
-TEST
+refactor .par support for grid module
 
 --------------
 

@@ -24,6 +24,7 @@ n = nest_:new {
         x = { 1, 16 },
         y = 1,
         v = 1,
+        test = function() return function() return 'foo' end end,
         action = function(s, v) print(v) end
     },
     m = _grid.momentary:new {

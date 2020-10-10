@@ -52,6 +52,28 @@ function _obj_:new(o, clone_type)
         end--,
         --__tostring = function(t) return '_obj_' end
     })
+
+    --[[
+    
+    the parameter proxy table - when accesed this empty table aliases to the object, but if the accesed member is a function, the return value of the function is returned, rather than the function itself
+
+    ]]
+    _.par = {}
+
+    local function resolve(s, f) 
+        if type(f) == 'function' then
+            return resolve(s, f(s))
+        else return f end
+    end
+
+    setmetatable(_.par, {
+        __index = function(t, k) 
+            if o[k] then
+                return resolve(o, o[k])
+            end
+        end,
+        __newindex = function(t, k, v) o[k] = v end
+    })
     
     for k,v in pairs(o) do formattype(o, k, v) end -- stack overflow on c:new()
 
@@ -187,6 +209,7 @@ function nest_:new(o)
 
     local mt = getmetatable(o)
     --mt.__tostring = function(t) return 'nest_' end
+
 
     return o
 end
