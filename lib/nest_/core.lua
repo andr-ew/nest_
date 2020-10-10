@@ -75,7 +75,7 @@ _input = _obj_:new {
     filter = function(self, devk, args) return args end,
     update = function(self, devk, args, mc)
         if self.devk == devk then
-            local hargs = self:filter(devk, args)
+            local hargs = self:filter(args)
             
             if hargs ~= nil and self.control then
                 if self.devs[self.devk] then self.devs[self.devk].dirty = true end
@@ -134,8 +134,7 @@ _output = _obj_:new {
     devk = nil,
     draw = function(self, devk)
         if(self.devk == devk) then
-            local rdargs = v:draw(devk)
-            if rdargs ~= nil and v.redraw then v:redraw(table.unpack(rdargs)) end
+            if self.redraw then self:redraw() end
         end
     end
 }
@@ -156,14 +155,18 @@ nest_ = _obj_:new {
             for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
         end 
 
-        for k,v in pairs(self) do if v.is_nest or v.is_input then
-            v:update(devk, args, mc)
-        end end
+        for k,v in pairs(self) do 
+            if type(v) == 'table' then if v.update then
+                v:update(devk, args, mc)
+            end end
+        end
     end,
     draw = function(self, devk)  
-        for k,v in pairs(self) do if v.is_nest or v.is_output then
-            v:draw(devk)
-        end end
+        for k,v in pairs(self) do
+            if type(v) == 'table' then if v.draw then
+                v:draw(devk)
+            end end
+        end
     end,
     set = function(self, tv) end, --table set nest = { nest = { control = value } }
     get = function(self) end,
@@ -224,19 +227,18 @@ function _control:new(o)
     --mt.__tostring = function(t) return '_control' end
 
     mt.__newindex = function(t, k, v) 
-        lmtn(t, k, v)
-
-        if type(v) == 'table' and v.is_input or v.is_output then
+        mtn(t, k, v)
+        if type(v) == 'table' then if v.is_input or v.is_output then
             rawset(v._, 'control', o)
             v.devk = v.devk or o.devk
-        end
+        end end
     end
 
-    for _,v in ipairs(o) do
-        if type(v) == 'table' and v.is_input or v.is_output then
+    for k,v in pairs(o) do
+        if type(v) == 'table' then if v.is_input or v.is_output then
             rawset(v._, 'control', o)
             v.devk = v.devk or o.devk
-        end
+        end end
     end
  
     return o
@@ -331,13 +333,16 @@ function _device:new(o)
         mtn(t, k, v)
 
         if type(v) == "table" then
-            if  v.is_control then
-                v.devk = _.devk
-               
-                for i,w in ipairs(v) do
-                    if w.is_input or w.is_output then w.devk = _.devk end
+            if v.is_control then
+                for l,w in pairs(v) do
+                    if type(w) == 'table' then
+                        if w.is_input or w.is_output then 
+                            w.devk = _.devk 
+                        end
+                    end
                 end
 
+                v.devk = _.devk
             elseif v.is_device then
                 v._.devk = _.devk
             end

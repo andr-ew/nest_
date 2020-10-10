@@ -1,7 +1,5 @@
 --[[
 
-update structure to match core refactors
-
 add .raw value to track keys that are actually held on grid
 
 _grid.trigger ?
@@ -9,9 +7,7 @@ _grid.rect ?
 
 _grid.momentary -> _grid.gate ?
 
-
 ]]
-
 
 local tab = require 'tabutil'
 
@@ -23,8 +19,8 @@ _grid.control = _control:new {
     x = 1,
     y = 1,
     lvl = 15,
-    inputs = { _input:new() },
-    outputs = { _output:new() }
+    input = _input:new(),
+    output = _output:new()
 }
 
 local input_contained = function(s, inargs)
@@ -56,11 +52,9 @@ local input_contained = function(s, inargs)
     return contained.x and contained.y, axis_val
 end
 
-_grid.control.input.update = function(s, devk, args)
-    if(s.devk == devk) then
-        if input_contained(s, args) then
-            return args
-        else return nil end
+_grid.control.input.filter = function(s, args)
+    if input_contained(s, args) then
+        return args
     else return nil end
 end
 
@@ -69,8 +63,8 @@ _grid.metacontrol = _metacontrol:new {
     x = 1,
     y = 1,
     lvl = 15,
-    inputs = { _grid.control.input:new() },
-    outputs = { _grid.control.output:new() }
+    input = _input:new(),
+    output = _output:new()
 }
 
 _grid.muxctrl = _grid.control:new()
@@ -85,23 +79,21 @@ _grid.muxctrl.input.handler = function(s, k, ...)
     s.handlers[k](s, ...)
 end
 
-_grid.muxctrl.input.update = function(s, devk, args)
-    if(s.devk == devk) then
-        local contained, axis_val = input_contained(s, args)        
+_grid.muxctrl.input.filter = function(s, args)
+    local contained, axis_val = input_contained(s, args)
 
-        if contained then
-            if axis_val.x == nil and axis_val.y == nil then
-                return { "point", args[1], args[2], args[3] }
-            elseif axis_val.x ~= nil and axis_val.y ~= nil then
-                return { "plane", args[1], args[2], args[3] }
-            else
-                if axis_val.x ~= nil then
-                    return { "line", args[1], args[2], args[3] }
-                elseif axis_val.y ~= nil then
-                    return { "line", args[2], args[1], args[3] }
-                end
+    if contained then
+        if axis_val.x == nil and axis_val.y == nil then
+            return { "point", args[1], args[2], args[3] }
+        elseif axis_val.x ~= nil and axis_val.y ~= nil then
+            return { "plane", args[1], args[2], args[3] }
+        else
+            if axis_val.x ~= nil then
+                return { "line", args[1], args[2], args[3] }
+            elseif axis_val.y ~= nil then
+                return { "line", args[2], args[1], args[3] }
             end
-        else return nil end
+        end
     else return nil end
 end
 
@@ -112,42 +104,35 @@ _grid.muxctrl.output.redraws = _obj_:new {
     plane = function(s) end
 }
 
-_grid.muxctrl.output.redraw = function(s, k)
-    s.redraws[k](s)
-end
+_grid.muxctrl.output.redraw = function(s, devk)
+    local has_axis = { x = false, y = false }
 
-_grid.muxctrl.output.draw = function(s, devk)
-    if(s.devk == devk) then
-        local has_axis = { x = false, y = false }
-
-        for i,v in ipairs{"x", "y"} do
-            if type(s[v]) == "table" then
-                if #s[v] == 1 then
-                elseif #s[v] == 2 then
-                    has_axis[v] = true
-                end
+    for i,v in ipairs{"x", "y"} do
+        if type(s[v]) == "table" then
+            if #s[v] == 1 then
+            elseif #s[v] == 2 then
+                has_axis[v] = true
             end
         end
+    end
 
-        if has_axis.x == false and has_axis.y == false then
-            return { "point" }
-        elseif has_axis.x and has_axis.y then
-            return { "plane" }
-        else
-            if has_axis.x then
-                return { "line_x" }
-            elseif has_axis.y then
-                return { "line_y" }
-            end
+    if has_axis.x == false and has_axis.y == false then
+        s.redraws.point(s)
+    elseif has_axis.x and has_axis.y then
+        s.redraws.plane(s)
+    else
+        if has_axis.x then
+            s.redraws.line_x(s)
+        elseif has_axis.y then
+            s.redraws.line_y(s)
         end
-    else return nil end
+    end
 end
 
 _grid.muxmetacntrl = _grid.metacontrol:new {
-    inputs = { _grid.muxctrl.input:new() },
-    outputs = { _grid.muxctrl.output:new() }
+    input = _grid.muxctrl.input:new(),
+    output = _grid.muxctrl.output:new()
 }
-
 
 -- add support for count = { high, low }, low presses must be stored somehow but will not change v or call a(). the t sent tracks from the first key down
 

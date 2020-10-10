@@ -129,7 +129,7 @@ n = nest_:new {
                 s.v = { x = x - x[1], y = y - y[1] }
             end
         end,
-        redraw = function(_)
+        redraw = function(s)
             s.g:led(s.x[1] + s.v.x, s.y[1] + s.v.y, s.lvl)
         end,
         action = function(s, v)

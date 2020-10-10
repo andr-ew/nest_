@@ -23,11 +23,13 @@ n = nest_:new {
     v = _grid.value:new {
         x = { 1, 16 },
         y = 1,
-        v = 1
+        v = 1,
+        action = function(s, v) print(v) end
     },
     m = _grid.momentary:new {
         x = { 1, 16 },
         y = 2,
-        v = {}
+        v = {},
+        action = function(s, v) print(v) end
     }
 } :connect { g = grid.connect() }
