@@ -1,7 +1,7 @@
 ```
 REFACTOR
 
-refactor .par support for grid module
+refactor .p_ support for grid module
 
 --------------
 

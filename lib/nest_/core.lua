@@ -58,7 +58,7 @@ function _obj_:new(o, clone_type)
     the parameter proxy table - when accesed this empty table aliases to the object, but if the accesed member is a function, the return value of the function is returned, rather than the function itself
 
     ]]
-    _.par = {}
+    _.p_ = {}
 
     local function resolve(s, f) 
         if type(f) == 'function' then
@@ -66,7 +66,7 @@ function _obj_:new(o, clone_type)
         else return f end
     end
 
-    setmetatable(_.par, {
+    setmetatable(_.p_, {
         __index = function(t, k) 
             if o[k] then
                 return resolve(o, o[k])
