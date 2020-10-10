@@ -1,4 +1,4 @@
-**`nest_`** is an object language for building user interface structures on the monome norns sound computer
+nest_ is an object language for building user interface structures on the monome norns sound computer
 
 work in progress !
 
