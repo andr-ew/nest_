@@ -1,5 +1,7 @@
 --[[
 
+update structure to match core refactors
+
 add .raw value to track keys that are actually held on grid
 
 _grid.trigger ?

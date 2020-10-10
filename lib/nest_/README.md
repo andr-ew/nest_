@@ -6,7 +6,13 @@ refactor _control as subtype of nest_ ( benefit: shared update(), draw(), consis
 
 remove inputs{}, outputs{}; _input, _output simply refer to o, p (, meta), then self for members, control searches self for _inputs & _outputs to update (same for targets)
 
+TEST
+
+------------------------
+
 convention: allow most data parameters to be a value or a function returning the desired value. current _grid. imlimentations will need to change. to impliment this we can create a blank par table as a proxy. par will index the same as _i/o, but if the value is a function, it'll return the return the return value of the function rather than the function itself
+
+TEST
 
 --------------
 
@@ -36,5 +42,9 @@ add path functionality to _obj_: construct relative string path from parent to c
 RM
 
 throw
+
+IMPLIMENT
+
+enabled
 
 ```

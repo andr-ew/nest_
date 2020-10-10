@@ -70,7 +70,6 @@ end
 
 _input = _obj_:new {
     is_input = true,
-    transform = nil,
     handler = nil,
     devk = nil,
     filter = function(self, devk, args) return args end,
@@ -114,7 +113,7 @@ function _input:new(o)
             local c = _.control and _.control[k]
             
             -- catch shared keys, otherwise privilege control keys
-            if k == 'new' or k == 'update' or k == 'draw' or k == 'throw' then return self[k]
+            if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' then return self[k]
             else return c or self[k] end
         end
     end
@@ -192,7 +191,7 @@ end
 _control = nest_:new {
     v = 0,
     z = 0,
-    device = nil,
+    devk = nil,
     action = function(s, v) end,
     init = function(s) end,
     do_init = function(self)
@@ -219,48 +218,24 @@ function _control:new(o)
     _.devs = {}
     _.is_control = true
 
-    ---rm
     local mt = getmetatable(o)
-    local mti = mt.__index
-
-    mt.__index = function(t, k) 
-        if k == "input" then return o.inputs[1]
-        elseif k == "output" then return o.outputs[1]
-        elseif k == "target" then return o.targets[1]
-        else return mti(t, k) end
-    end
-    ---/rm
+    local mtn = mt.__newindex
 
     --mt.__tostring = function(t) return '_control' end
 
+    mt.__newindex = function(t, k, v) 
+        lmtn(t, k, v)
 
-    ---------------------------------refactor to direct i/o children
-
-    for i,k in ipairs { "input", "output" } do -- lost on i/o table overwrite, fix in mt.__newindex
-        local l = o[k .. 's']
-
-        if rawget(o, k) then 
-            rawset(l, 1, rawget(o, k))
-            rawset(o, k, nil)
+        if type(v) == 'table' and v.is_input or v.is_output then
+            rawset(v._, 'control', o)
+            v.devk = v.devk or o.devk
         end
-        
-        for i,v in ipairs(l) do
-            if type(v) == 'table' and v['is_' .. k] then
-                rawset(v._, 'control',  o)
-                v.devk = v.devk or _.device and _.device.devk or nil
-            end
-        end
+    end
 
-        local lmt = getmetatable(l)
-        local lmtn = lmt.__newindex
-
-        lmt.__newindex = function(t, kk, v)
-            lmtn(t, kk, v)
-
-            if type(v) == 'table' and v['is_' .. k] then
-                v._.control = o
-                v.devk = v.devk or o.device and o.device.devk or nil
-            end
+    for _,v in ipairs(o) do
+        if type(v) == 'table' and v.is_input or v.is_output then
+            rawset(v._, 'control', o)
+            v.devk = v.devk or o.devk
         end
     end
  
@@ -269,7 +244,7 @@ end
 
 _metacontrol = _control:new {
     pass = function(self, sender, v, handler_args) end,
-    targets = {}, ----> target
+    target = nil,
     mode = 'handler' -- or 'v'
 }
 
@@ -277,18 +252,36 @@ function _metacontrol:new(o)
     o = _control.new(self, o)
 
     local mt = getmetatable(o)
-    mt.__tostring = function() return '_metacontrol' end
+    local mtn = mt.__newindex
+    
+    --mt.__tostring = function() return '_metacontrol' end
 
-    local tmt = getmetatable(o.targets)
-    local tmtn = mt.__newindex
+    mt.__newindex = function(t, k, v)
+        mtn(t, k, v)
 
-    tmt.__newindex = function(t, k, v)
-        tmtn(t, k, v)
+        if k == 'target' then 
+            vv = v
 
-        if v.is_nest then 
-            table.insert(v._.mc_links, o)
+            if type(v) == 'functon' then 
+                vv = v()
+            end
+
+            if type(vv) == 'table' and vv.is_nest then 
+                table.insert(vv._.mc_links, o)
+            end
+        end
+    end
+    
+    if o.target then
+        vv = o.target
+
+        if type(o.target) == 'functon' then 
+            vv = o.target()
         end
 
+        if type(vv) == 'table' and vv.is_nest then 
+            table.insert(vv._.mc_links, o)
+        end
     end
 
     return o
@@ -339,14 +332,12 @@ function _device:new(o)
 
         if type(v) == "table" then
             if  v.is_control then
-                v._.device = t
+                v.devk = _.devk
                
-                for i,w in ipairs(v.inputs) do
-                    w.devk = w.devk or _.devk
+                for i,w in ipairs(v) do
+                    if w.is_input or w.is_output then w.devk = _.devk end
                 end
-                for i,w in ipairs(v.outputs) do
-                    w.devk = w.devk or _.devk
-                end
+
             elseif v.is_device then
                 v._.devk = _.devk
             end
