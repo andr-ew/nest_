@@ -30,20 +30,20 @@ local input_contained = function(s, inargs)
     local args = { x = inargs[1], y = inargs[2] }
 
     for i,v in ipairs{"x", "y"} do
-        if type(s[v]) == "table" then
-            if #s[v] == 1 then
-                s[v] = s[v][1]
-                if s[v] == args[v] then
+        if type(s.p_[v]) == "table" then
+            if #s.p_[v] == 1 then
+                s[v] = s.p_[v][1]
+                if s.p_[v] == args[v] then
                     contained[v] = true
                 end
-            elseif #s[v] == 2 then
-                if  s[v][1] <= args[v] and args[v] <= s[v][2] then
+            elseif #s.p_[v] == 2 then
+                if  s.p_[v][1] <= args[v] and args[v] <= s.p_[v][2] then
                     contained[v] = true
-                    axis_val[v] = args[v] - s[v][1]
+                    axis_val[v] = args[v] - s.p_[v][1]
                 end
             end
         else
-            if s[v] == args[v] then
+            if s.p_[v] == args[v] then
                 contained[v] = true
             end
         end
@@ -108,9 +108,9 @@ _grid.muxctrl.output.redraw = function(s, devk)
     local has_axis = { x = false, y = false }
 
     for i,v in ipairs{"x", "y"} do
-        if type(s[v]) == "table" then
-            if #s[v] == 1 then
-            elseif #s[v] == 2 then
+        if type(s.p_[v]) == "table" then
+            if #s.p_[v] == 1 then
+            elseif #s.p_[v] == 2 then
                 has_axis[v] = true
             end
         end
@@ -148,11 +148,11 @@ _grid.momentary.input.handlers = _obj_:new {
         s:action(s.v, t)
     end,
     line = function(s, x, y, z)
-        local v = x - s.x[1] + 1
+        local v = x - s.p_.x[1] + 1
         if z > 0 then
             local rem = nil
             table.insert(s.v, v)
-            if s.count and #s.v > s.count then rem = table.remove(s.v, 1) end
+            if s.p_.count and #s.v > s.p_.count then rem = table.remove(s.v, 1) end
             s:action(s.v, v, rem) -- v, added, removed
         else
             local k = tab.key(s.v, v)
@@ -163,11 +163,11 @@ _grid.momentary.input.handlers = _obj_:new {
         end
     end,
     plane = function(s, x, y, z) 
-        local v = { x = x - s.x[1], y = y - s.y[1] }
+        local v = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
         if z > 0 then
             local rem = nil
             table.insert(s.v, v)
-            if s.count and #s.v > s.count then rem = table.remove(s.v, 1) end
+            if s.p_.count and #s.v > s.p_.count then rem = table.remove(s.v, 1) end
             s:action(s.v, v, rem)
         else
             for i,w in ipairs(s.v) do
@@ -181,32 +181,32 @@ _grid.momentary.input.handlers = _obj_:new {
 }
 
 local lvl = function(s, i)
-    local x = s.lvl
+    local x = s.p_.lvl
     -- come back later and understand or not understand ? :)
     return (type(x) == 'number') and ((i > 1) and 0 or x) or (x[i] or x[i-1] or ((i > 1) and 0 or x[1]))
 end
 
 _grid.momentary.output.redraws = _obj_:new {
     point = function(s)
-        s.g:led(s.x, s.y, lvl(s, s.v * 2 + 1))
+        s.g:led(s.p_.x, s.p_.y, lvl(s, s.v * 2 + 1))
     end,
     line_x = function(s)
         local mtrx = {}
-        for i = 1, s.x[2] - s.x[1] do mtrx[i] = lvl(s, 3) end
+        for i = 1, s.p_.x[2] - s.p_.x[1] do mtrx[i] = lvl(s, 3) end
         for i,v in ipairs(s.v) do mtrx[v] = lvl(s, 1) end
-        for i,v in ipairs(mtrx) do s.g:led(i + s.x[1] - 1, s.y, v) end
+        for i,v in ipairs(mtrx) do s.g:led(i + s.p_.x[1] - 1, s.p_.y, v) end
     end,
     line_y = function(s)
         local mtrx = {}
-        for i = 1, s.y[2] - s.y[1] do mtrx[i] = lvl(s, 3) end
+        for i = 1, s.p_.y[2] - s.p_.y[1] do mtrx[i] = lvl(s, 3) end
         for i,v in ipairs(s.v) do mtrx[v] = lvl(s, 1) end
-        for i,v in ipairs(mtrx) do s.g:led(s.x, i + s.y[1] - 1, v) end
+        for i,v in ipairs(mtrx) do s.g:led(s.p_.x, i + s.p_.y[1] - 1, v) end
     end,
     plane = function(s)
         local mtrx = {}
-        for i = 1, s.x[2] - s.x[1] do
+        for i = 1, s.p_.x[2] - s.p_.x[1] do
             mtrx[i] = {}
-            for j = 1, s.y[2] - s.y[1] do
+            for j = 1, s.p_.y[2] - s.p_.y[1] do
                 mtrx[i][j] = lvl(s, 3)
             end
         end
@@ -215,7 +215,7 @@ _grid.momentary.output.redraws = _obj_:new {
 
         for i,w in ipairs(mtrx) do
             for j,v in ipairs(w) do
-                s.g:led(i + s.x[1] - 1, j + s.y[1] - 1, v)
+                s.g:led(i + s.p_.x[1] - 1, j + s.p_.y[1] - 1, v)
             end
         end
     end
@@ -230,36 +230,36 @@ _grid.value.input.handlers = _obj_:new {
     line = function(s, x, y, z) 
         if z > 0 then
             --local last = s.v
-            s.v = x - s.x[1]
+            s.v = x - s.p_.x[1]
             s:action(s.v)--, last)
         end
     end,
     plane = function(s, x, y, z) 
         if z > 0 then
             --local last = s.v
-            s.v = { x = x - s.x[1], y = y - s.y[1] }
+            s.v = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
             s:action(s.v)--, last)
         end
     end
 }
 _grid.value.output.redraws = _obj_:new {
     point = function(s)
-        s.g:led(s.x, s.y, lvl(s, 1))
+        s.g:led(s.p_.x, s.p_.y, lvl(s, 1))
     end,
     line_x = function(s)
-        for i = s.x[1], s.x[2] do
-            s.g:led(i, s.y, lvl(s, (s.v == i - s.x[1]) and 1 or 3))
+        for i = s.p_.x[1], s.p_.x[2] do
+            s.g:led(i, s.p_.y, lvl(s, (s.v == i - s.p_.x[1]) and 1 or 3))
         end
     end,
     line_y = function(s)
-        for i = s.y[1], s.y[2] do
-            s.g:led(s.x, i, lvl(s, (s.v == i - s.y[1]) and 1 or 3))
+        for i = s.p_.y[1], s.p_.y[2] do
+            s.g:led(s.p_.x, i, lvl(s, (s.v == i - s.p_.y[1]) and 1 or 3))
         end
     end,
     plane = function(s)
         for i = s.x[1], s.x[2] do
-            for j = s.y[1], s.y[2] do
-                s.g:led(i, j, lvl(s, ((s.v.x == i - s.x[1]) and (s.v.y == j - s.y[1])) and 1 or 3))
+            for j = s.p_.y[1], s.p_.y[2] do
+                s.g:led(i, j, lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 3))
             end
         end
     end

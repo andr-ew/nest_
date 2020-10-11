@@ -1,7 +1,7 @@
 ```
 REFACTOR
 
-refactor .p_ support for grid module
+delegate update as action caller, not handler (v + extras is return value)
 
 --------------
 
