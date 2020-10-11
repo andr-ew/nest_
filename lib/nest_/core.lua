@@ -153,7 +153,7 @@ function _input:new(o)
             local c = _.control and _.control[k]
             
             -- catch shared keys, otherwise privilege control keys
-            if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' then return self[k]
+            if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' or k == 'bang' then return self[k]
             else return c or self[k] end
         end
     end
@@ -183,10 +183,11 @@ _output.new = _input.new
 
 nest_ = _obj_:new {
     do_init = function(self)
-        self:init()
-        table.sort(self, function(a,b) return a.z < b.z end)
+        if self.pre_init then self:pre_init() end
+        if self.init then self:init() end
+        self:bang()
 
-        for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
+        for k,v in pairs(self) do if type(v) == 'table' then if v.do_init then v:do_init() end end end
     end,
     init = function(self) return self end,
     each = function(self, f) 
@@ -234,7 +235,7 @@ nest_ = _obj_:new {
 }
 
 function nest_:new(o, ...)
-    if type(o) ~= 'table' then 
+    if o ~= nil and type(o) ~= 'table' then 
         local arg = { o, ... }
         o = {}
 
@@ -269,6 +270,16 @@ function nest_:new(o, ...)
 
     local mt = getmetatable(o)
     --mt.__tostring = function(t) return 'nest_' end
+    
+    mt.__call = function(arg, ...)
+        if arg then if type(arg == 'table') then  -- ignore arg 1 when called like a method 
+            if arg.is_nest then 
+                return o:set(...)
+            end 
+        end end
+
+        return o:set(arg, ...)
+    end
 
     return o
 end
@@ -295,7 +306,7 @@ _control = nest_:new {
 }
 
 function _control:new(o)
-    o = _obj_.new(self, o, _obj_)
+    o = nest_.new(self, o)
     local _ = o._    
 
     _.devs = {}

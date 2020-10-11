@@ -4,9 +4,9 @@
 
 ADD
 
-_nest: do_init() -> pre_init() -> init() -> bang
-
 create _control._call metatmethod as a set/bang/get function. if first arg is control, ignore it
+
+maintain z sorted lookup in _obj_
 
 nest_ get/set: table macros nest = { nest = { control = value } } 
 
