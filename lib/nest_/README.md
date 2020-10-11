@@ -2,8 +2,6 @@
 
 ADD
 
-when nest_ arg type is not table add a number range or key list argument option to initialize blank table children at specified keys
-
 add :each(function(k, _)) to _obj_. these would run after the top level table has been initialized, which helps to enable absolute paths to be used within a nest structure
 
 add actions{} list of action function keys in self
@@ -21,11 +19,6 @@ add :link(_control or function() return control end) to _control, link two contr
 
 
 add path functionality to _obj_: construct relative string path from parent to child and evalue string path to child
-
-
-RM
-
-throw
 
 IMPLIMENT
 

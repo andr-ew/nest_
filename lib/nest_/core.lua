@@ -1,34 +1,40 @@
 -- _obj_ is a base object for all the types on this page that impliments concatenative prototypical inheritance. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
 
--- GOTCHA: overwriting an existing table value will not format type. if we do this, just make sure the type, p, k is correct
+-- GOTCHA: overwriting an existing table value will not format type. instead, use :replace()
 
 local tab = require 'tabutil'
 
+
+local function formattype(t, k, v, clone_type) 
+    if type(v) == "table" then
+        if v.is_obj then 
+            v._.p = t
+            v._.k = k
+        elseif not v.new then -- test !
+            v = clone_type:new(v)
+            v._.p = t
+            v._.k = k
+        end
+    end
+
+    return v
+end
+
 _obj_ = {
-    print = function(self) print(tostring(self)) end
+    print = function(self) print(tostring(self)) end,
+    replace = function(self, k, v) 
+        rawset(self, k, formattype(self, k, v, self._.clone_type))
+    end
 }
 
 function _obj_:new(o, clone_type)
     local _ = { -- the "instance table" - useful as it is ignored by the inheritance rules, and also hidden in subtables
         is_obj = true,
         p = nil,
-        k = nil
+        k = nil,
+        clone_type = clone_type
     }
 
-    local function formattype(t, k, v) 
-        if type(v) == "table" then
-            if v.is_obj then 
-                v._.p = t
-                v._.k = k
-            elseif not v.new then -- test !
-                v = clone_type:new(v)
-                v._.p = t
-                v._.k = k
-            end
-        end
-
-        return v
-    end
 
     o = o or {}
     clone_type = clone_type or _obj_
@@ -42,7 +48,7 @@ function _obj_:new(o, clone_type)
         end,
         __newindex = function(t, k, v)
             if _[k] ~= nil then rawset(_,k,v) 
-            else rawset(t, k, formattype(t, k, v)) end
+            else rawset(t, k, formattype(t, k, v, clone_type)) end
         end,
         __concat = function (n1, n2)
             for k, v in pairs(n2) do
@@ -75,14 +81,14 @@ function _obj_:new(o, clone_type)
         __newindex = function(t, k, v) o[k] = v end
     })
     
-    for k,v in pairs(o) do formattype(o, k, v) end -- stack overflow on c:new()
+    for k,v in pairs(o) do formattype(o, k, v, clone_type) end -- stack overflow on c:new()
 
     for k,v in pairs(self) do 
         if not rawget(o, k) then
             if type(v) == "function" then
             elseif type(v) == "table" then
-                local clone = formattype(self, k, v):new()
-                o[k] = formattype(o, k, clone) ----
+                local clone = formattype(self, k, v, clone_type):new()
+                o[k] = formattype(o, k, clone, clone_type) ----
             else rawset(o,k,v) end 
         end
     end
@@ -119,8 +125,6 @@ _input = _obj_:new {
                 end
             end
         end
-        
-        -- call action(s), set v
     end
 }
 
@@ -177,7 +181,14 @@ nest_ = _obj_:new {
         for k,v in pairs(self) do if v.is_nest or v.is_control then v:do_init() end end
     end,
     init = function(self) return self end,
-    each = function(self, cb) return self end,
+    each = function(self, f) 
+        for k,v in pairs(self) do 
+            local r = f(k, v)
+            if r then self:replace(k, r) end
+        end
+
+        return self 
+    end,
     update = function(self, devk, args, mc)
         if self.metacontrols_enabled then 
             for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
@@ -202,7 +213,30 @@ nest_ = _obj_:new {
     read = function(self) end
 }
 
-function nest_:new(o)
+function nest_:new(o, ...)
+    if type(o) ~= 'table' then 
+        local arg = { o, ... }
+        o = {}
+
+        if type(o) == 'number' and #arg <= 2 then 
+            local min = 1
+            local max = 1
+            
+            if #arg == 1 then max = arg[1] end
+            
+            if #arg == 2 then 
+                min = arg[1]
+                max = arg[2]
+            end
+            
+            for i = min, max do
+                o[i] = nest_:new()
+            end
+        else
+            for _,k in arg do o[k] = nest_:new() end
+        end
+    end
+
     o = _obj_.new(self, o, nest_)
     local _ = o._ 
 
