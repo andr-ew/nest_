@@ -4,7 +4,6 @@
 
 local tab = require 'tabutil'
 
-
 local function formattype(t, k, v, clone_type) 
     if type(v) == "table" then
         if v.is_obj then 
@@ -22,7 +21,7 @@ end
 
 _obj_ = {
     print = function(self) print(tostring(self)) end,
-    replace = function(self, k, v) 
+    replace = function(self, k, v)
         rawset(self, k, formattype(self, k, v, self._.clone_type))
     end
 }
@@ -102,7 +101,7 @@ _input = _obj_:new {
     devk = nil,
     filter = function(self, devk, args) return args end,
     update = function(self, devk, args, mc)
-        if self.devk == devk then
+        if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
             if hargs ~= nil and self.control then
@@ -125,6 +124,15 @@ _input = _obj_:new {
                 end
             end
         end
+    end,
+    bang = function(self)
+        if self.action then 
+            self.control.v = self:action(self.control.v) or self.control.v
+        end
+        
+        if self.devs[self.devk] then self.devs[self.devk].dirty = true end
+
+        return self.control.v
     end
 }
 
@@ -165,7 +173,7 @@ _output = _obj_:new {
     redraw = nil,
     devk = nil,
     draw = function(self, devk)
-        if(self.devk == devk) then
+        if self.p_.enabled and self.devk == devk then
             if self.redraw then self:redraw() end
         end
     end
@@ -190,25 +198,37 @@ nest_ = _obj_:new {
         return self 
     end,
     update = function(self, devk, args, mc)
-        if self.metacontrols_enabled then 
-            for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
-        end 
+        if self.enabled == nil or self.p_.enabled == true then
+            if self.metacontrols_enabled then 
+                for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
+            end 
 
-        for k,v in pairs(self) do 
-            if type(v) == 'table' then if v.update then
-                v:update(devk, args, mc)
-            end end
+            for k,v in pairs(self) do 
+                if type(v) == 'table' then if v.update then
+                    v:update(devk, args, mc)
+                end end
+            end
         end
     end,
     draw = function(self, devk)  
         for k,v in pairs(self) do
-            if type(v) == 'table' then if v.draw then
-                v:draw(devk)
-            end end
+            if self.enabled == nil or self.p_.enabled == true then
+                if type(v) == 'table' then if v.draw then
+                    v:draw(devk)
+                end end
+            end
         end
     end,
-    set = function(self, tv) end, --table set nest = { nest = { control = value } }
+    set = function(self, t) end,
     get = function(self) end,
+    bang = function(self) 
+        local ret = nil
+        for k,w in pairs(self) do 
+            if type(w) == 'table' and w.bang then ret = w:bang() end
+        end
+        
+        return ret
+    end,
     write = function(self) end,
     read = function(self) end
 }
@@ -250,7 +270,6 @@ function nest_:new(o, ...)
     local mt = getmetatable(o)
     --mt.__tostring = function(t) return 'nest_' end
 
-
     return o
 end
 
@@ -264,16 +283,14 @@ _control = nest_:new {
         self:init()
     end,
     print = function(self) end,
-    get = function(self) return self.v end,
-    set = function(self, v, silent)
-        self.v = v
-        silent = silent or false
-
+    get = function(self, silent) 
         if not silent then
-            self:action(v, self.meta)
-            
-            -- update dirty flag
-        end
+            return self:bang()
+        else return self.v end
+    end,
+    set = function(self, v, silent)
+        self:replace('v', v or self.v)
+        return self:get(silent)
     end
 }
 
