@@ -103,7 +103,13 @@ _input = _obj_:new {
                 if self.devs[self.devk] then self.devs[self.devk].dirty = true end
  
                 if self.handler then 
-                    self.control.v = self:handler(table.unpack(hargs)) or self.control.v
+                    local aargs = table.pack(self:handler(table.unpack(hargs)) or self.control.v)
+
+                    if self.action then 
+                        self.control.v = self:action(table.unpack(aargs)) or self.control.v
+                    else 
+                        self.controlv = aargs[1]
+                    end
                 end
 
                 if self.metacontrols_enabled then

@@ -1,9 +1,4 @@
 ```
-REFACTOR
-
-delegate update as action caller, not handler (v + extras is return value)
-
---------------
 
 ADD
 

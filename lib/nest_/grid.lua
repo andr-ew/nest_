@@ -145,7 +145,7 @@ _grid.momentary.input.handlers = _obj_:new {
         local t = nil
         if z > 0 then s.time = util.time()
         else t = util.time() - s.time end
-        s:action(s.v, t)
+        return s.v, t
     end,
     line = function(s, x, y, z)
         local v = x - s.p_.x[1] + 1
@@ -153,12 +153,12 @@ _grid.momentary.input.handlers = _obj_:new {
             local rem = nil
             table.insert(s.v, v)
             if s.p_.count and #s.v > s.p_.count then rem = table.remove(s.v, 1) end
-            s:action(s.v, v, rem) -- v, added, removed
+            return s.v, v, rem -- v, added, removed
         else
             local k = tab.key(s.v, v)
             if k then  
                 table.remove(s.v, k)
-                s:action(s.v, nil, v)
+                return s.v, nil, v
             end
         end
     end,
@@ -168,12 +168,12 @@ _grid.momentary.input.handlers = _obj_:new {
             local rem = nil
             table.insert(s.v, v)
             if s.p_.count and #s.v > s.p_.count then rem = table.remove(s.v, 1) end
-            s:action(s.v, v, rem)
+            return s.v, v, rem
         else
             for i,w in ipairs(s.v) do
                 if w.x == v.x and w.y == v.y then 
                     table.remove(s.v, i)
-                    s.a(s.v, nil, v)
+                    return s.v, nil, v
                 end
             end
         end
@@ -225,20 +225,20 @@ _grid.momentary.output.redraws = _obj_:new {
 _grid.value = _grid.muxctrl:new()
 _grid.value.input.handlers = _obj_:new {
     point = function(s, x, y, z) 
-        if z > 0 then s:action(s.v) end
+        if z > 0 then return s.v end
     end,
     line = function(s, x, y, z) 
         if z > 0 then
             --local last = s.v
             s.v = x - s.p_.x[1]
-            s:action(s.v)--, last)
+            return s.v --, last)
         end
     end,
     plane = function(s, x, y, z) 
         if z > 0 then
             --local last = s.v
             s.v = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
-            s:action(s.v)--, last)
+            return s.v --, last)
         end
     end
 }
