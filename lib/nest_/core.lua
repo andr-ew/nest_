@@ -14,10 +14,14 @@ local function formattype(t, k, v, clone_type)
             v._.p = t
             v._.k = k
         end
+
+        t._.zsort[#t._.zsort + 1] = v
     end
 
     return v
 end
+
+local function zcomp(a, b) return a.z > b.z end
 
 _obj_ = {
     print = function(self) print(tostring(self)) end,
@@ -31,9 +35,10 @@ function _obj_:new(o, clone_type)
         is_obj = true,
         p = nil,
         k = nil,
+        z = 0,
+        zsort = {}, -- list of obj children sorted by descending z value
         clone_type = clone_type
     }
-
 
     o = o or {}
     clone_type = clone_type or _obj_
@@ -47,15 +52,19 @@ function _obj_:new(o, clone_type)
         end,
         __newindex = function(t, k, v)
             if _[k] ~= nil then rawset(_,k,v) 
-            else rawset(t, k, formattype(t, k, v, clone_type)) end
+            else
+                rawset(t, k, formattype(t, k, v, clone_type)) 
+                
+                table.sort(_.zsort, zcomp)
+            end
         end,
         __concat = function (n1, n2)
             for k, v in pairs(n2) do
                 n1[k] = v
             end
             return n1
-        end--,
-        --__tostring = function(t) return '_obj_' end
+        end,
+        __tostring = function(t) return tostring(t.k) end
     })
 
     --[[
@@ -80,17 +89,20 @@ function _obj_:new(o, clone_type)
         __newindex = function(t, k, v) o[k] = v end
     })
     
-    for k,v in pairs(o) do formattype(o, k, v, clone_type) end -- stack overflow on c:new()
+    for k,v in pairs(o) do formattype(o, k, v, clone_type) end
 
     for k,v in pairs(self) do 
         if not rawget(o, k) then
             if type(v) == "function" then
-            elseif type(v) == "table" then
-                local clone = formattype(self, k, v, clone_type):new()
+                -- function pointers are not copied to child, instead they are referenced using metatables
+            elseif type(v) == "table" and v.is_obj then
+                local clone = self[k]:new()
                 o[k] = formattype(o, k, clone, clone_type) ----
             else rawset(o,k,v) end 
         end
     end
+
+    table.sort(_.zsort, zcomp)
     
     return o
 end
@@ -187,7 +199,7 @@ nest_ = _obj_:new {
         if self.init then self:init() end
         self:bang()
 
-        for k,v in pairs(self) do if type(v) == 'table' then if v.do_init then v:do_init() end end end
+        for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.do_init then v:do_init() end end end
     end,
     init = function(self) return self end,
     each = function(self, f) 
@@ -204,19 +216,19 @@ nest_ = _obj_:new {
                 for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
             end 
 
-            for k,v in pairs(self) do 
-                if type(v) == 'table' then if v.update then
+            for i,v in ipairs(self.zsort) do 
+                if v.update then
                     v:update(devk, args, mc)
-                end end
+                end
             end
         end
     end,
     draw = function(self, devk)  
-        for k,v in pairs(self) do
+        for i,v in ipairs(self.zsort) do
             if self.enabled == nil or self.p_.enabled == true then
-                if type(v) == 'table' then if v.draw then
+                if v.draw then
                     v:draw(devk)
-                end end
+                end
             end
         end
     end,
@@ -224,8 +236,8 @@ nest_ = _obj_:new {
     get = function(self) end,
     bang = function(self) 
         local ret = nil
-        for k,w in pairs(self) do 
-            if type(w) == 'table' and w.bang then ret = w:bang() end
+        for i,w in ipairs(self.zsort) do 
+            if w.bang then ret = w:bang() end
         end
         
         return ret
@@ -263,7 +275,6 @@ function nest_:new(o, ...)
 
     _.is_nest = true
     _.enabled = true
-    _.z = 0
     _.devs = {}
     _.metacontrols_enabled = true
     _.mc_links = {}
@@ -286,7 +297,6 @@ end
 
 _control = nest_:new {
     v = 0,
-    z = 0,
     devk = nil,
     action = function(s, v) end,
     init = function(s) end,
