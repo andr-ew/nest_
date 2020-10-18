@@ -1,14 +1,3 @@
---[[
-
-add .raw value to track keys that are actually held on grid
-
-_grid.trigger ?
-_grid.rect ?
-
-_grid.momentary -> _grid.gate ?
-
-]]
-
 local tab = require 'tabutil'
 
 _grid = _device:new()
@@ -25,7 +14,7 @@ _grid.control = _control:new {
 
 local input_contained = function(s, inargs)
     local contained = { x = false, y = false }
-    local axis_val = { x = nil, y = nil }
+    local axis_size = { x = nil, y = nil }
 
     local args = { x = inargs[1], y = inargs[2] }
 
@@ -39,8 +28,8 @@ local input_contained = function(s, inargs)
             elseif #s.p_[v] == 2 then
                 if  s.p_[v][1] <= args[v] and args[v] <= s.p_[v][2] then
                     contained[v] = true
-                    axis_val[v] = args[v] - s.p_[v][1]
                 end
+                axis_size[v] = s.p_[v][2] - s.p_[v][1] + 1
             end
         else
             if s.p_[v] == args[v] then
@@ -49,7 +38,7 @@ local input_contained = function(s, inargs)
         end
     end
 
-    return contained.x and contained.y, axis_val
+    return contained.x and contained.y, axis_size
 end
 
 _grid.control.input.filter = function(s, args)
@@ -67,44 +56,55 @@ _grid.metacontrol = _metacontrol:new {
     output = _output:new()
 }
 
-_grid.muxctrl = _grid.control:new()
+_grid.muxcontrol = _grid.control:new()
 
-_grid.muxctrl.input.handlers = _obj_:new {
+-- update -> filter -> handler -> muxhandler -> muxfilter -> action -> v
+
+-- stop the chain if muxhandler returns nil or some other value. this might need some changes to core ? what if the user just doesn't feel like returning a value from handler?
+
+_grid.muxcontrol.input.muxhandler = _obj_:new {
     point = { function(s, z) end },
     line = { function(s, v, z) end },
     plane = { function(s, x, y, z) end }
 }
 
-_grid.muxctrl.input.handler = function(s, k, ...)
-    s.handlers[k](s, ...)
+_grid.muxcontrol.input.muxfilter = _obj_:new {
+    point = function(s, ...) return ... end,
+    line = function(s, ...) return ... end,
+    plane = function(s, ...) return ... end
+}
+
+
+_grid.muxcontrol.input.handler = function(s, k, ...)
+    return s.muxfilter[k](s, s.muxhandler[k](s, ...))
 end
 
-_grid.muxctrl.input.filter = function(s, args)
-    local contained, axis_val = input_contained(s, args)
+_grid.muxcontrol.input.filter = function(s, args)
+    local contained, axis_size = input_contained(s, args)
 
     if contained then
-        if axis_val.x == nil and axis_val.y == nil then
+        if axis_size.x == nil and axis_size.y == nil then
             return { "point", args[1], args[2], args[3] }
-        elseif axis_val.x ~= nil and axis_val.y ~= nil then
+        elseif axis_size.x ~= nil and axis_size.y ~= nil then
             return { "plane", args[1], args[2], args[3] }
         else
-            if axis_val.x ~= nil then
+            if axis_size.x ~= nil then
                 return { "line", args[1], args[2], args[3] }
-            elseif axis_val.y ~= nil then
+            elseif axis_size.y ~= nil then
                 return { "line", args[2], args[1], args[3] }
             end
         end
     else return nil end
 end
 
-_grid.muxctrl.output.redraws = _obj_:new {
+_grid.muxcontrol.output.redraws = _obj_:new {
     point = function(s) end,
     line_x = function(s) end,
     line_y = function(s) end,
     plane = function(s) end
 }
 
-_grid.muxctrl.output.redraw = function(s, devk)
+_grid.muxcontrol.output.redraw = function(s, devk)
     local has_axis = { x = false, y = false }
 
     for i,v in ipairs{"x", "y"} do
@@ -130,17 +130,57 @@ _grid.muxctrl.output.redraw = function(s, devk)
 end
 
 _grid.muxmetacntrl = _grid.metacontrol:new {
-    input = _grid.muxctrl.input:new(),
-    output = _grid.muxctrl.output:new()
+    input = _grid.muxcontrol.input:new(),
+    output = _grid.muxcontrol.output:new()
 }
 
--- add support for count = { high, low }, low presses must be stored somehow but will not change v or call a(). the t sent tracks from the first key down
+_grid.momentary = _grid.muxcontrol:new({ count = nil, held = {}, matrix = {} })
 
--- use init() to ensure v has initialized properly
+_grid.momentary.new = function(self, o) 
+    o = _grid.muxcontrol.new(self, o)
 
-_grid.momentary = _grid.muxctrl:new({ count = nil })
-_grid.momentary.input.handlers = _obj_:new {
-    point = function(s, x, y, z)
+    local _, axis = input_contained(o, { -1, -1 })
+    
+    local v --matrix
+    
+    if axis.x and axis.y then 
+        v = {}
+        o.v = type(o.v) == 'table' and o.v or {}
+        for x = 1, axis.x do 
+            v[x] = {}
+            for y = 1, axis.y do
+                v[x][y] = 0
+            end
+        end
+    elseif axis.x or axis.y then
+        v = {}
+        o.v = type(o.v) == 'table' and o.v or {}
+        for i = 1, (axis.x or axis.y) do 
+            v[i] = 0
+        end
+    else 
+        v = o.v
+    end
+
+    o:replace('matrix', v)
+    
+    return o
+end
+
+local function count(s) 
+    local min = 0
+    local max = nil
+
+    if type(s.p_.count) == "table" then 
+        max = s.p_.count[#s.p_.count]
+        min = #s.p_.count > 1 and s.p_.count[1] or 0
+    else max = s.p_.count end
+
+    return min, max
+end
+
+_grid.momentary.input.muxhandler = _obj_:new {
+    point = function(s, x, y, z) --
         s.v = z
         local t = nil
         if z > 0 then s.time = util.time()
@@ -148,19 +188,27 @@ _grid.momentary.input.handlers = _obj_:new {
         return s.v, t
     end,
     line = function(s, x, y, z)
-        local v = x - s.p_.x[1] + 1
+        local min, max = count(s)
+        local i = x - s.p_.x[1] + 1
+        local add
+        local rem
+
         if z > 0 then
-            local rem = nil
-            table.insert(s.v, v)
-            if s.p_.count and #s.v > s.p_.count then rem = table.remove(s.v, 1) end
-            return s.v, v, rem -- v, added, removed
+            add = i
+            table.insert(s.v, i)
+            if s.p_.count and #s.held > s.p_.count then rem = table.remove(s.held, 1) end
         else
-            local k = tab.key(s.v, v)
-            if k then  
-                table.remove(s.v, k)
-                return s.v, nil, v
+            local k = tab.key(s.held, i)
+            if k then
+                rem = table.remove(s.held, k)
             end
         end
+
+        if add then s.matrix[add] = 1 end
+        if rem then s.matrix[rem] = 0 end
+   
+        -- only proceed through the reset of the chain if #held > min, use a nil return here to stop the chain
+        return s.held, add, rem, s.matrix
     end,
     plane = function(s, x, y, z) 
         local v = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
@@ -178,6 +226,13 @@ _grid.momentary.input.handlers = _obj_:new {
             end
         end
     end
+}
+
+--nothing for momentary ?
+_grid.momentary.input.muxfilter = _obj_:new {
+    point = function(s, ...) return ... end,
+    line = function(s, ...) return s, ... end,
+    plane = function(s, ...) return ... end
 }
 
 local lvl = function(s, i)
@@ -222,23 +277,21 @@ _grid.momentary.output.redraws = _obj_:new {
 }
 
 -- if count then actions fire on key up
-_grid.value = _grid.muxctrl:new()
-_grid.value.input.handlers = _obj_:new {
+_grid.value = _grid.muxcontrol:new()
+_grid.value.input.muxhandler = _obj_:new {
     point = function(s, x, y, z) 
         if z > 0 then return s.v end
     end,
     line = function(s, x, y, z) 
         if z > 0 then
-            --local last = s.v
             s.v = x - s.p_.x[1]
-            return s.v --, last)
+            return s.v
         end
     end,
     plane = function(s, x, y, z) 
         if z > 0 then
-            --local last = s.v
             s.v = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
-            return s.v --, last)
+            return s.v
         end
     end
 }
