@@ -20,6 +20,7 @@ _grid.rect
 _grid.momentary -> _grid.gate ?
 
 control
+fill (output only)
 value
 trigger
 gate
@@ -41,6 +42,9 @@ fader
 arc
 switch
 cycle { range = { -1, -1 }, step = 1/64 }
+
+pattern
+preset
 
 ```
 

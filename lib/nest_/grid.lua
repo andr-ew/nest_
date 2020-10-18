@@ -72,7 +72,6 @@ _grid.muxcontrol.input.muxfilter = _obj_:new {
     plane = function(s, ...) return ... end
 }
 
-
 _grid.muxcontrol.input.handler = function(s, k, ...)
     return s.muxfilter[k](s, s.muxhandler[k](s, ...))
 end

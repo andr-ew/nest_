@@ -186,9 +186,9 @@ _output = _obj_:new {
     is_output = true,
     redraw = nil,
     devk = nil,
-    draw = function(self, devk)
+    draw = function(self, devk, t)
         if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
-            if self.redraw then self:redraw(s.devs[devk].object) end
+            if self.redraw then self:redraw(s.devs[devk].object, t) end
         end
     end
 }
@@ -225,11 +225,11 @@ nest_ = _obj_:new {
             end
         end
     end,
-    draw = function(self, devk)  
+    draw = function(self, devk, t)
         for i,v in ipairs(self.zsort) do
             if self.enabled == nil or self.p_.enabled == true then
                 if v.draw then
-                    v:draw(devk)
+                    v:draw(devk, t)
                 end
             end
         end

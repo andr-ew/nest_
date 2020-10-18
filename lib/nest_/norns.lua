@@ -5,6 +5,12 @@ nest_.connect = function(self, objects, fps)
 
     local devs = {}
 
+    local fps = fps or 30
+    local elapsed = 0
+
+    -- put something like this inside of a redraw to blink every 3 seconds
+    -- elapsed // 3 % 2
+
     for k,v in pairs(objects) do
         if k == 'g' or k == 'a' then
             local kk = k
@@ -14,7 +20,7 @@ nest_.connect = function(self, objects, fps)
                 object = vv,
                 redraw = function() 
                     vv:all(0)
-                    self:draw(kk) 
+                    self:draw(kk, elapsed) 
                     vv:refresh()
                 end,
                 handler = function(...)
@@ -51,7 +57,7 @@ nest_.connect = function(self, objects, fps)
                 object = screen,
                 redraw = function()
                     screen.clear()
-                    self:draw('screen')
+                    self:draw('screen', elapsed)
                     screen.update()
                 end
             }
@@ -62,11 +68,10 @@ nest_.connect = function(self, objects, fps)
         end
     end
 
-    local fps = fps or 30
-
     clock.run(function() 
         while true do 
             clock.sleep(1/fps)
+            elapsed = elapsed + 1/fps
             
             for k,v in pairs(devs) do 
                 if v.dirty then 
