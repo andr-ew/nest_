@@ -79,15 +79,18 @@ n = nest_:new {
     },
     keyboard = _grid.momentary:new {
         x = { 1, 8 }, y = { 2, 7 },
-        action = function(s, v, added, removed) 
+        action = function(s, v, t, added, removed) 
             local key
             local gate
+            local row
             
             if added then
-                key = added
+                key = added.x
+                row = added.y
                 gate = true
             elseif removed then
-                key = removed
+                key = removed.x
+                row = removed.y
                 gate = false
             end
             
@@ -101,7 +104,7 @@ n = nest_:new {
                     end
                 end
                   
-                note = note + math.floor((key - 1) / #scale) * 12 + s.y -- add row offset and wrap scale to next octave
+                note = note + math.floor((key - 1) / #scale) * 12 + row -- add row offset and wrap scale to next octave
                   
                 if gate then
                     engine.noteOn(note, musicutil.note_num_to_freq(note), 0.8 + math.random() * 0.2)
@@ -126,7 +129,7 @@ n = nest_:new {
                 s.v = { x = x - x[1], y = y - y[1] }
             end
         end,
-        redraw = function(_)
+        redraw = function(s)
             s.g:led(s.x[1] + s.v.x, s.y[1] + s.v.y, s.lvl)
         end,
         action = function(s, v)

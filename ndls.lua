@@ -1,6 +1,9 @@
 -- quad asyncronous tape looper for arc + grid in the style anaphora, anachronism, older things
 
-include 'lib/nest_.lua'
+include 'lib/nest_/norns'
+include 'lib/nest_/grid'
+include 'lib/nest_/arc'
+include 'lib/best_/txt'
 
 sc = include 'lib/supercut'
 
@@ -258,7 +261,7 @@ ndls = nest_:new {
                             enabled = alt
                         }
                     }
-                }:each(function(i, s) s.enabled = function() return ndls.tp[i].screen.pager() == s.k end end)
+                }:each(function(k, s) s.enabled = function() return ndls.tp[i].screen.pager() == k end end)
             },
             level = _arc.fader:new {
                 ring = function() return ndls.arcpg.vertical and i or 1 end,
