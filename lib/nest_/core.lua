@@ -123,11 +123,7 @@ _input = _obj_:new {
                     local aargs = table.pack(self:handler(table.unpack(hargs)))
 
                     if aargs then 
-                        if self.action then 
-                            self.control.v = self:action(table.unpack(aargs)) or aargs[1]
-                        else 
-                            self.controlv = aargs[1]
-                        end
+                        self.control:replace('v', self.action and self:action(table.unpack(aargs)) or aargs[1])
 
                         if self.metacontrols_enabled then
                             for i,w in ipairs(mc) do

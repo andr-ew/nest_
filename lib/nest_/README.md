@@ -1,21 +1,15 @@
 # grid
 
 ```
+RM muxfilter
 
-initialize v's based on orientation (via pre_init or new)
-
-momentary, toggle: add matric data & action arg, draw using matrix
-
-add .held value to track keys that are actually held on grid
-
-add support for count = { high, low }, low presses must be stored somehow but will not change v or call action(). the t sent tracks from the first key down
-
-
-animation
+TEST momentary
 
 _grid.toggle -- if #lvl >= 2 then #lvl == number of states
 _grid.trigger
-_grid.rect
+_grid.fill
+
+toggle, trigger, value: edge. if edge == 0, support momentary primitives where applicable (count, t, add, rem)
 
 _grid.momentary -> _grid.gate ?
 
@@ -23,7 +17,7 @@ control
 fill (output only)
 value
 trigger
-gate
+momentary
 toggle
 range
 fader { range = { 0, 1 } }
@@ -55,7 +49,7 @@ ADD
 
 nest_ get/set: table macros nest = { nest = { control = value } } 
 
-_obj_:add() macro for appending new values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
+_obj_:put() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
 
 add path functionality to _obj_: construct relative string path from parent to child and evalue string path to child
 

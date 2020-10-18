@@ -66,6 +66,7 @@ _grid.muxcontrol.input.muxhandler = _obj_:new {
     plane = { function(s, x, y, z) end }
 }
 
+-- muxfilter is kind of unnecesary, we can just run the momentary functions when we need them inside toggle, trigger
 _grid.muxcontrol.input.muxfilter = _obj_:new {
     point = function(s, ...) return ... end,
     line = function(s, ...) return ... end,
@@ -131,18 +132,17 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
     output = _grid.muxcontrol.output:new()
 }
 
-_grid.momentary = _grid.muxcontrol:new({ count = nil, held = {}, matrix = {} })
+_grid.momentary = _grid.muxcontrol:new({ count = nil, held = {}, tdown = {}, tlast = {}, theld = {}, list = {} })
 
 _grid.momentary.new = function(self, o) 
     o = _grid.muxcontrol.new(self, o)
 
     local _, axis = input_contained(o, { -1, -1 })
     
-    local v --matrix
+    local v
     
     if axis.x and axis.y then 
         v = {}
-        o.v = type(o.v) == 'table' and o.v or {}
         for x = 1, axis.x do 
             v[x] = {}
             for y = 1, axis.y do
@@ -151,15 +151,18 @@ _grid.momentary.new = function(self, o)
         end
     elseif axis.x or axis.y then
         v = {}
-        o.v = type(o.v) == 'table' and o.v or {}
         for i = 1, (axis.x or axis.y) do 
             v[i] = 0
         end
     else 
-        v = o.v
+        v = 0
     end
 
-    o:replace('matrix', v)
+    if type(v) ~= type(o.v) then o:replace('v', v) end
+    o:replace('held', type(v) == 'table' and o.v:new() or o.v)
+    o:replace('tdown', type(v) == 'table' and o.v:new() or o.v)
+    o:replace('theld', type(v) == 'table' and o.v:new() or o.v)
+    o:replace('tlast', type(v) == 'table' and o.v:new() or o.v)
     
     return o
 end
@@ -178,58 +181,73 @@ end
 
 _grid.momentary.input.muxhandler = _obj_:new {
     point = function(s, x, y, z) --
-        s.v = z
-        local t = nil
-        if z > 0 then s.time = util.time()
-        else t = util.time() - s.time end
-        return s.v, t
+        if z > 0 then 
+            s.tlast = s.tdown
+            s.tdown = util.time()
+        else s.theld = util.time() - s.tdown end
+        return z, s.theld
     end,
     line = function(s, x, y, z)
-        local min, max = count(s)
         local i = x - s.p_.x[1] + 1
+        local min, max = count(s)
         local add
         local rem
 
         if z > 0 then
             add = i
-            table.insert(s.v, i)
-            if s.p_.count and #s.held > s.p_.count then rem = table.remove(s.held, 1) end
+            s.tlast[i] = s.tdown[i]
+            s.tdown[i] = util.time()
+            table.insert(s.list, i)
+            if max and #s.list > max then rem = table.remove(s.list, 1) end
         else
-            local k = tab.key(s.held, i)
+            local k = tab.key(s.list, i)
             if k then
-                rem = table.remove(s.held, k)
+                rem = table.remove(s.list, k)
             end
+            s.theld[i] = util.time() - s.tdown[i]
         end
 
-        if add then s.matrix[add] = 1 end
-        if rem then s.matrix[rem] = 0 end
+        if add then s.held[add] = 1 end
+        if rem then s.held[rem] = 0 end
    
-        -- only proceed through the reset of the chain if #held > min, use a nil return here to stop the chain
-        return s.held, add, rem, s.matrix
+        if #s.held > min then return s.held, add, rem end
     end,
     plane = function(s, x, y, z) 
-        local v = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
+        local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
+        local min, max = count(s)
+        local add
+        local rem
+
         if z > 0 then
-            local rem = nil
-            table.insert(s.v, v)
-            if s.p_.count and #s.v > s.p_.count then rem = table.remove(s.v, 1) end
-            return s.v, v, rem
+            add = i
+            s.tlast[i.x][i.y] = s.tdown[i.x][i.y]
+            s.tdown[i.x][i.y] = util.time()
+            table.insert(s.list, i)
+            if max and #s.list > max then rem = table.remove(s.list, 1) end
         else
-            for i,w in ipairs(s.v) do
-                if w.x == v.x and w.y == v.y then 
-                    table.remove(s.v, i)
-                    return s.v, nil, v
+            for j,w in ipairs(s.list) do
+                if w.x == i.x and w.y == i.y then 
+                    rem = table.remove(s.list, j)
                 end
             end
+            s.theld[i.x][i.y] = util.time() - s.tdown[i.x][i.y]
         end
+
+        if add then s.held[add.x][add.y] = 1 end
+        if rem then s.held[rem.x][rem.y] = 0 end
+   
+        if #s.held > min then return s.held, add, rem end
     end
 }
 
---nothing for momentary ?
 _grid.momentary.input.muxfilter = _obj_:new {
     point = function(s, ...) return ... end,
-    line = function(s, ...) return s, ... end,
-    plane = function(s, ...) return ... end
+    line = function(s, held, add, rem) 
+        return held:new(), add, rem, s.theld, s.list --> return s.v:put(held) ?
+    end,
+    plane = function(s, held, ...) 
+        return held:new(), add, rem, s.theld, s.list --> return s.v:put(held) ?
+    end 
 }
 
 local lvl = function(s, i)
@@ -273,7 +291,7 @@ _grid.momentary.output.redraws = _obj_:new {
     end
 }
 
--- if count then actions fire on key up
+--init v, support edge, if edge == 0 support count, theld
 _grid.value = _grid.muxcontrol:new()
 _grid.value.input.muxhandler = _obj_:new {
     point = function(s, x, y, z) 
