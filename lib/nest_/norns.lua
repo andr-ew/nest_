@@ -80,11 +80,12 @@ nest_.connect = function(self, objects, fps)
     local function linkdevs(obj) 
         if type(obj) == 'table' and obj.is_obj then
             rawset(obj._, 'devs', devs)
-
+            
+            --might not be needed with _output.redraw args
             for k,v in pairs(objects) do 
                 rawset(obj._, k, v)
             end
-
+            
             for k,v in pairs(obj) do 
                 linkdevs(v)
             end

@@ -187,8 +187,8 @@ _output = _obj_:new {
     redraw = nil,
     devk = nil,
     draw = function(self, devk)
-        if self.p_.enabled and self.devk == devk then
-            if self.redraw then self:redraw(s.devs.object) end
+        if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
+            if self.redraw then self:redraw(s.devs[devk].object) end
         end
     end
 }
