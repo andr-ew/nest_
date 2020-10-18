@@ -1,15 +1,19 @@
 # grid
 
 ```
+REFACTOR
+
 RM muxfilter
 
 TEST momentary
+
+ADD
 
 _grid.toggle -- if #lvl >= 2 then #lvl == number of states
 _grid.trigger
 _grid.fill
 
-toggle, trigger, value: edge. if edge == 0, support momentary primitives where applicable (count, t, add, rem)
+toggle, trigger, value: edge. if edge == 0, use different handlers to support momentary primitives where applicable (count, t, add, rem)
 
 _grid.momentary -> _grid.gate ?
 
