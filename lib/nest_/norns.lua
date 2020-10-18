@@ -48,6 +48,7 @@ nest_.connect = function(self, objects, fps)
             v = devs[kk].handler
         elseif k == 'screen' then
             devs[kk] = _dev:new {
+                object = screen,
                 redraw = function()
                     screen.clear()
                     self:draw('screen')

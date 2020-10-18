@@ -60,8 +60,6 @@ _grid.muxcontrol = _grid.control:new()
 
 -- update -> filter -> handler -> muxhandler -> muxfilter -> action -> v
 
--- stop the chain if muxhandler returns nil or some other value. this might need some changes to core ? what if the user just doesn't feel like returning a value from handler?
-
 _grid.muxcontrol.input.muxhandler = _obj_:new {
     point = { function(s, z) end },
     line = { function(s, v, z) end },

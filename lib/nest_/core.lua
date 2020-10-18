@@ -120,18 +120,20 @@ _input = _obj_:new {
                 if self.devs[self.devk] then self.devs[self.devk].dirty = true end
  
                 if self.handler then 
-                    local aargs = table.pack(self:handler(table.unpack(hargs)) or self.control.v)
+                    local aargs = table.pack(self:handler(table.unpack(hargs)))
 
-                    if self.action then 
-                        self.control.v = self:action(table.unpack(aargs)) or self.control.v
-                    else 
-                        self.controlv = aargs[1]
-                    end
-                end
+                    if aargs then 
+                        if self.action then 
+                            self.control.v = self:action(table.unpack(aargs)) or aargs[1]
+                        else 
+                            self.controlv = aargs[1]
+                        end
 
-                if self.metacontrols_enabled then
-                    for i,w in ipairs(mc) do
-                        w:pass(self.control, self.control.v, hargs)
+                        if self.metacontrols_enabled then
+                            for i,w in ipairs(mc) do
+                                w:pass(self.control, self.control.v, aargs)
+                            end
+                        end
                     end
                 end
             end
@@ -186,7 +188,7 @@ _output = _obj_:new {
     devk = nil,
     draw = function(self, devk)
         if self.p_.enabled and self.devk == devk then
-            if self.redraw then self:redraw() end
+            if self.redraw then self:redraw(s.devs.object) end
         end
     end
 }
