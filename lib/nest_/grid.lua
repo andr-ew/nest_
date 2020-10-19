@@ -125,7 +125,29 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
     output = _grid.muxcontrol.output:new()
 }
 
-_grid.momentary = _grid.muxcontrol:new({ count = nil, held = 0, tdown = 0, tlast = 0, theld = 0, list = 0, vinit = 0 })
+_grid.momentary = _grid.muxcontrol:new({ count = nil })
+
+local function minit(axis) 
+    local v
+    if axis.x and axis.y then 
+        v = {}
+        for x = 1, axis.x do 
+            v[x] = {}
+            for y = 1, axis.y do
+                v[x][y] = 0
+            end
+        end
+    elseif axis.x or axis.y then
+        v = {}
+        for x = 1, (axis.x or axis.y) do 
+            v[x] = 0
+        end
+    else 
+        v = 0
+    end
+
+    return v
+end
 
 _grid.momentary.new = function(self, o) 
     o = _grid.muxcontrol.new(self, o)
@@ -134,48 +156,12 @@ _grid.momentary.new = function(self, o)
 
     local _, axis = input_contained(o, { -1, -1 })
 
-    -- why am I dumb ........
-    if axis.x and axis.y then 
-        v = {}
-        o.held = {}
-        o.vinit = {}
-        o.tdown = {}
-        o.tlast = {}
-        o.theld = {}
-        for x = 1, axis.x do 
-            v[x] = {}
-            o.held[x] = {}
-            o.vinit[x] = {}
-            o.tdown[x] = {}
-            o.tlast[x] = {}
-            o.theld[x] = {}
-            for y = 1, axis.y do
-                v[x][y] = 0
-                o.held[x][y] = 0
-                o.vinit[x][y] = 0
-                o.tdown[x][y] = 0
-                o.tlast[x][y] = 0
-                o.theld[x][y] = 0
-            end
-        end
-    elseif axis.x or axis.y then
-        v = {}
-        o.held = {}
-        o.vinit = {}
-        o.tdown = {}
-        o.tlast = {}
-        o.theld = {}
-        for x = 1, (axis.x or axis.y) do 
-            v[x] = 0
-            o.held[x] = 0
-            o.vinit[x] = 0
-            o.tdown[x] = 0
-            o.tlast[x] = 0
-            o.ntheld[x] = 0
-        end
-    else 
-        v = 0
-    end
+    local v = minit(axis)
+    o.held = minit(axis)
+    o.tdown = minit(axis)
+    o.tlast = minit(axis)
+    o.theld = minit(axis)
+    o.vinit = minit(axis)
 
     if type(o.v) ~= type(v) or #o.v ~= #v then o.v = v end
     
@@ -256,28 +242,127 @@ _grid.momentary.input.muxhandler = _obj_:new {
     end
 }
 
-_grid.toggle = _grid.momentary:new { edge = 1 } -- add tog{}, ttog{}, toglist{}, initialize using a function this time
+_grid.toggle = _grid.momentary:new { edge = 1 }
+
+_grid.toggle.new = function(self, o) 
+    o = _grid.momentary.new(self, o)
+
+    rawset(o, 'toglist', {})
+
+    local _, axis = input_contained(o, { -1, -1 })
+
+    --o.tog = minit(axis)
+    o.ttog = minit(axis)
+    
+    return o
+end
+
+local function toggle(s, v)
+    return (v + 1) % ((type(s.lvl == 'table') and #s.lvl > 1) and (#s.lvl - 1) or 1)
+end
 
 _grid.toggle.input.muxhandler = _obj_:new {
     point = function(s, x, y, z)
         local held = _grid.momentary.input.muxhandler.point(s, x, y, z)
 
         if s.edge == 1 and held == 1 then
-            return not s.v, util.time() - s.tlast
+            return toggle(s, s.v), util.time() - s.tlast
         elseif s.edge == 0 and held == 0 then
-            return not s.v, util.time() - s.tlast, s.theld
+            return toggle(s, s.v), util.time() - s.tlast, s.theld
         end
     end,
     line = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.point(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.line(s, x, y, z)
         local min, max = count(s)
+        local i
+        local add
+        local rem
+       
+        if s.edge == 1 and hadd then i = hadd end
+        if s.edge == 0 and hrem then i = hrem end
+        
+        if i then   
+            if #s.toglist >= min then
+                local v = toggle(s.v[i])
+                
+                if v > 0 then
+                    add = i
+                    
+                    if v == 1 then table.insert(s.toglist, i) end
+                    if max and #s.toglist > max then rem = table.remove(s.toglist, 1) end
+                else 
+                    local k = tab.key(s.toglist, i)
+                    if k then
+                        rem = table.remove(s.toglist, k)
+                    end
+                end
+            
+                s.ttog[i] = util.time() - s.tlast[i]
 
-        --add hlist to toglist when toglist empty and #hlist >= min, update tog else invert tog[add or rem], update toglist
+                if add then s.v[add] = v end
+                if rem then s.v[rem] = 0 end
 
-        return #s.toglist >= min and s.tog or s.vinit, add, rem, s.ttog, theld, s.toglist
+            elseif #hlist >= min then
+                for j,w in ipairs(hlist) do
+                    s.toglist[j] = w
+                    s.v[w] = 1
+                end
+            else 
+                for j,w in ipairs(s.v) do s.v[j] = 0 end
+                s.toglist = {}
+            end
+
+            return s.v, add, rem, s.ttog, theld, s.toglist
+        end
     end,
     plane = function(s, x, y, z)
-        local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
+        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.plane(s, x, y, z)
+        local min, max = count(s)
+        local i
+        local add
+        local rem
+       
+        if s.edge == 1 and hadd then i = hadd end
+        if s.edge == 0 and hrem then i = hrem end
+        
+        if i then   
+            if #s.toglist >= min then
+                local v = toggle(s.v[i.x][i.y])
+                
+                if v > 0 then
+                    add = i
+                    
+                    if v == 1 then table.insert(s.toglist, i) end
+                    if max and #s.toglist > max then rem = table.remove(s.toglist, 1) end
+                else 
+                    for j,w in ipairs(s.toglist) do
+                        if w.x == i.x and w.y == i.y then 
+                            rem = table.remove(s.list, j)
+                        end
+                    end
+                end
+            
+                s.ttog[i] = util.time() - s.tlast[i]
+
+                if add then s.v[add.x][add.y] = v end
+                if rem then s.v[rem.x][rem.y] = 0 end
+
+            elseif #hlist >= min then
+                for j,w in ipairs(hlist) do
+                    s.toglist[j] = w
+                    s.v[w.x][w.y] = 1
+                end
+            else 
+                for x,w in ipairs(s.v) do 
+                    for y,_ in ipairs(w) do
+                        s.v[x][y] = 0
+                    end
+                end
+                s.toglist = {}
+            end
+
+            return s.v, add, rem, s.ttog, theld, s.toglist
+        end
     end
 }
 

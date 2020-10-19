@@ -1,9 +1,13 @@
 # grid
 
 ```
+TEST
+
+toggle
+momentary
+
 ADD
 
-_grid.toggle -- if #lvl >= 2 then #lvl == number of states
 _grid.trigger
 
 toggle, trigger, value: edge. if edge == 0, use different handlers to support momentary primitives where applicable (count, t, add, rem)
@@ -12,7 +16,7 @@ _grid.momentary -> _grid.gate ?
 
 control
 fill (output only)
-range (output only)
+range
 value
 trigger
 momentary
