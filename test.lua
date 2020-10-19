@@ -29,7 +29,11 @@ n = nest_:new {
     m = _grid.momentary:new {
         z = 3,
         x = { 1, 16 },
-        y = { 2, 8 },
+        y = { 2, 7 },
         action = function(s, v) print(v) end
+    },
+    f = _grid.fill:new {
+        x = { 1, 16 },
+        y = 8
     }
 } :connect { g = grid.connect() }

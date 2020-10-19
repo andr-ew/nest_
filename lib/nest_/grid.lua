@@ -279,6 +279,44 @@ _grid.momentary.output.muxredraw = _obj_:new {
     end
 }
 
+_grid.fill = _grid.muxcontrol:new()
+_grid.fill.input = nil
+
+_grid.fill.new = function(self, o) 
+    o = _grid.muxcontrol.new(self, o)
+
+    local _, axis = input_contained(o, { -1, -1 })
+    local v
+
+    if axis.x and axis.y then 
+        v = {}
+        for x = 1, axis.x do 
+            v[x] = {}
+            for y = 1, axis.y do
+                v[x][y] = 1
+            end
+        end
+    elseif axis.x or axis.y then
+        v = {}
+        for x = 1, (axis.x or axis.y) do 
+            v[x] = 1
+        end
+    else 
+        v = 1
+    end
+
+    if type(o.v) ~= type(v) then o.v = v end
+
+    return o
+end
+
+_grid.fill.output.muxredraw = _obj_:new {
+    point = _grid.momentary.output.muxredraw.point,
+    line_x = _grid.momentary.output.muxredraw.line_x,
+    line_y = _grid.momentary.output.muxredraw.line_y,
+    plane = _grid.momentary.output.muxredraw.plane
+}
+
 --init v, support edge, if edge == 0 support count, theld
 _grid.value = _grid.muxcontrol:new()
 _grid.value.input.muxhandler = _obj_:new {
