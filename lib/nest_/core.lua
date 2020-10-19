@@ -122,8 +122,8 @@ _input = _obj_:new {
                 if self.handler then 
                     local aargs = table.pack(self:handler(table.unpack(hargs)))
 
-                    if aargs then 
-                        self.control:replace('v', self.action and self:action(table.unpack(aargs)) or aargs[1])
+                    if aargs[1] then 
+                        self.control.v = self.action and self:action(table.unpack(aargs)) or aargs[1]
 
                         if self.metacontrols_enabled then
                             for i,w in ipairs(mc) do
@@ -137,7 +137,7 @@ _input = _obj_:new {
     end,
     bang = function(self)
         if self.action then 
-            self.control.v = self:action(self.control.v) or self.control.v
+            self.control.v = self.action and self:action(self.control.v) or self.control.v
         end
         
         if self.devs[self.devk] then self.devs[self.devk].dirty = true end
@@ -182,9 +182,9 @@ _output = _obj_:new {
     is_output = true,
     redraw = nil,
     devk = nil,
-    draw = function(self, devk, t)
+    draw = function(self, devk)
         if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
-            if self.redraw then self:redraw(s.devs[devk].object, t) end
+            if self.redraw then self:redraw(self.devs[devk].object, self.v) end
         end
     end
 }
@@ -221,11 +221,11 @@ nest_ = _obj_:new {
             end
         end
     end,
-    draw = function(self, devk, t)
+    draw = function(self, devk)
         for i,v in ipairs(self.zsort) do
             if self.enabled == nil or self.p_.enabled == true then
                 if v.draw then
-                    v:draw(devk, t)
+                    v:draw(devk)
                 end
             end
         end

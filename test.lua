@@ -24,14 +24,12 @@ n = nest_:new {
         z = 2,
         x = function() return { 1, 16 } end,
         y = 1,
-        v = 1,
         action = function(s, v) print(v) end
     },
     m = _grid.momentary:new {
         z = 3,
         x = { 1, 16 },
-        y = 2,
-        v = {},
+        y = { 2, 8 },
         action = function(s, v) print(v) end
     }
 } :connect { g = grid.connect() }

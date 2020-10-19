@@ -58,7 +58,7 @@ _grid.metacontrol = _metacontrol:new {
 
 _grid.muxcontrol = _grid.control:new()
 
--- update -> filter -> handler -> muxhandler -> muxfilter -> action -> v
+-- update -> filter -> handler -> muxhandler -> action -> v
 
 _grid.muxcontrol.input.muxhandler = _obj_:new {
     point = { function(s, z) end },
@@ -66,15 +66,8 @@ _grid.muxcontrol.input.muxhandler = _obj_:new {
     plane = { function(s, x, y, z) end }
 }
 
--- muxfilter is kind of unnecesary, we can just run the momentary functions when we need them inside toggle, trigger
-_grid.muxcontrol.input.muxfilter = _obj_:new {
-    point = function(s, ...) return ... end,
-    line = function(s, ...) return ... end,
-    plane = function(s, ...) return ... end
-}
-
 _grid.muxcontrol.input.handler = function(s, k, ...)
-    return s.muxfilter[k](s, s.muxhandler[k](s, ...))
+    return s.muxhandler[k](s, ...)
 end
 
 _grid.muxcontrol.input.filter = function(s, args)
@@ -95,14 +88,14 @@ _grid.muxcontrol.input.filter = function(s, args)
     else return nil end
 end
 
-_grid.muxcontrol.output.redraws = _obj_:new {
+_grid.muxcontrol.output.muxredraw = _obj_:new {
     point = function(s) end,
     line_x = function(s) end,
     line_y = function(s) end,
     plane = function(s) end
 }
 
-_grid.muxcontrol.output.redraw = function(s, devk)
+_grid.muxcontrol.output.redraw = function(s, g, v)
     local has_axis = { x = false, y = false }
 
     for i,v in ipairs{"x", "y"} do
@@ -115,14 +108,14 @@ _grid.muxcontrol.output.redraw = function(s, devk)
     end
 
     if has_axis.x == false and has_axis.y == false then
-        s.redraws.point(s)
+        s.muxredraw.point(s, g, v)
     elseif has_axis.x and has_axis.y then
-        s.redraws.plane(s)
+        s.muxredraw.plane(s, g, v)
     else
         if has_axis.x then
-            s.redraws.line_x(s)
+            s.muxredraw.line_x(s, g, v)
         elseif has_axis.y then
-            s.redraws.line_y(s)
+            s.muxredraw.line_y(s, g, v)
         end
     end
 end
@@ -132,37 +125,59 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
     output = _grid.muxcontrol.output:new()
 }
 
-_grid.momentary = _grid.muxcontrol:new({ count = nil, held = {}, tdown = {}, tlast = {}, theld = {}, list = {} })
+_grid.momentary = _grid.muxcontrol:new({ count = nil, held = 0, tdown = 0, tlast = 0, theld = 0, list = 0, vinit = 0 })
 
 _grid.momentary.new = function(self, o) 
     o = _grid.muxcontrol.new(self, o)
 
+    rawset(o, 'list', {})
+
     local _, axis = input_contained(o, { -1, -1 })
-    
-    local v
-    
+
+    -- why am I dumb ........
     if axis.x and axis.y then 
         v = {}
+        o.held = {}
+        o.vinit = {}
+        o.tdown = {}
+        o.tlast = {}
+        o.theld = {}
         for x = 1, axis.x do 
             v[x] = {}
+            o.held[x] = {}
+            o.vinit[x] = {}
+            o.tdown[x] = {}
+            o.tlast[x] = {}
+            o.theld[x] = {}
             for y = 1, axis.y do
                 v[x][y] = 0
+                o.held[x][y] = 0
+                o.vinit[x][y] = 0
+                o.tdown[x][y] = 0
+                o.tlast[x][y] = 0
+                o.theld[x][y] = 0
             end
         end
     elseif axis.x or axis.y then
         v = {}
-        for i = 1, (axis.x or axis.y) do 
-            v[i] = 0
+        o.held = {}
+        o.vinit = {}
+        o.tdown = {}
+        o.tlast = {}
+        o.theld = {}
+        for x = 1, (axis.x or axis.y) do 
+            v[x] = 0
+            o.held[x] = 0
+            o.vinit[x] = 0
+            o.tdown[x] = 0
+            o.tlast[x] = 0
+            o.ntheld[x] = 0
         end
     else 
         v = 0
     end
 
-    if type(v) ~= type(o.v) then o:replace('v', v) end
-    o:replace('held', type(v) == 'table' and o.v:new() or o.v)
-    o:replace('tdown', type(v) == 'table' and o.v:new() or o.v)
-    o:replace('theld', type(v) == 'table' and o.v:new() or o.v)
-    o:replace('tlast', type(v) == 'table' and o.v:new() or o.v)
+    if type(o.v) ~= type(v) or #o.v ~= #v then o.v = v end
     
     return o
 end
@@ -180,7 +195,7 @@ local function count(s)
 end
 
 _grid.momentary.input.muxhandler = _obj_:new {
-    point = function(s, x, y, z) --
+    point = function(s, x, y, z)
         if z > 0 then 
             s.tlast = s.tdown
             s.tdown = util.time()
@@ -210,9 +225,9 @@ _grid.momentary.input.muxhandler = _obj_:new {
         if add then s.held[add] = 1 end
         if rem then s.held[rem] = 0 end
    
-        if #s.held > min then return s.held, add, rem end
+        return #s.list > min and s.held or s.vinit, add, rem, s.theld, s.list
     end,
-    plane = function(s, x, y, z) 
+    plane = function(s, x, y, z)
         local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
         local min, max = count(s)
         local add
@@ -225,6 +240,7 @@ _grid.momentary.input.muxhandler = _obj_:new {
             table.insert(s.list, i)
             if max and #s.list > max then rem = table.remove(s.list, 1) end
         else
+            rem = i
             for j,w in ipairs(s.list) do
                 if w.x == i.x and w.y == i.y then 
                     rem = table.remove(s.list, j)
@@ -235,58 +251,30 @@ _grid.momentary.input.muxhandler = _obj_:new {
 
         if add then s.held[add.x][add.y] = 1 end
         if rem then s.held[rem.x][rem.y] = 0 end
-   
-        if #s.held > min then return s.held, add, rem end
-    end
-}
 
-_grid.momentary.input.muxfilter = _obj_:new {
-    point = function(s, ...) return ... end,
-    line = function(s, held, add, rem) 
-        return held:new(), add, rem, s.theld, s.list --> return s.v:put(held) ?
-    end,
-    plane = function(s, held, ...) 
-        return held:new(), add, rem, s.theld, s.list --> return s.v:put(held) ?
-    end 
+        return #s.list > min and s.held or s.vinit, add, rem, s.theld, s.list
+    end
 }
 
 local lvl = function(s, i)
     local x = s.p_.lvl
     -- come back later and understand or not understand ? :)
-    return (type(x) == 'number') and ((i > 1) and 0 or x) or (x[i] or x[i-1] or ((i > 1) and 0 or x[1]))
+    return (type(x) ~= 'table') and ((i > 0) and x or 0) or x[i + 1] or 15
 end
 
-_grid.momentary.output.redraws = _obj_:new {
-    point = function(s)
-        s.g:led(s.p_.x, s.p_.y, lvl(s, s.v * 2 + 1))
+_grid.momentary.output.muxredraw = _obj_:new {
+    point = function(s, g, v)
+        g:led(s.p_.x, s.p_.y, lvl(s, v * 2 + 1))
     end,
-    line_x = function(s)
-        local mtrx = {}
-        for i = 1, s.p_.x[2] - s.p_.x[1] do mtrx[i] = lvl(s, 3) end
-        for i,v in ipairs(s.v) do mtrx[v] = lvl(s, 1) end
-        for i,v in ipairs(mtrx) do s.g:led(i + s.p_.x[1] - 1, s.p_.y, v) end
+    line_x = function(s, g, v)
+        for x,l in ipairs(v) do g:led(x + s.p_.x[1] - 1, s.p_.y, lvl(s, l)) end
     end,
-    line_y = function(s)
-        local mtrx = {}
-        for i = 1, s.p_.y[2] - s.p_.y[1] do mtrx[i] = lvl(s, 3) end
-        for i,v in ipairs(s.v) do mtrx[v] = lvl(s, 1) end
-        for i,v in ipairs(mtrx) do s.g:led(s.p_.x, i + s.p_.y[1] - 1, v) end
+    line_y = function(s, g, v)
+        for y,l in ipairs(v) do g:led(s.p_.x, y + s.p_.y[1] - 1, lvl(s, l)) end
     end,
-    plane = function(s)
-        local mtrx = {}
-        for i = 1, s.p_.x[2] - s.p_.x[1] do
-            mtrx[i] = {}
-            for j = 1, s.p_.y[2] - s.p_.y[1] do
-                mtrx[i][j] = lvl(s, 3)
-            end
-        end
-
-        for i,v in ipairs(s.v) do mtrx[v.x][v.y] = lvl(s, 1) end
-
-        for i,w in ipairs(mtrx) do
-            for j,v in ipairs(w) do
-                s.g:led(i + s.p_.x[1] - 1, j + s.p_.y[1] - 1, v)
-            end
+    plane = function(s, g, v)
+        for x,r in ipairs(v) do 
+            for y,l in ipairs(r) do g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl(s, l)) end
         end
     end
 }
@@ -295,39 +283,37 @@ _grid.momentary.output.redraws = _obj_:new {
 _grid.value = _grid.muxcontrol:new()
 _grid.value.input.muxhandler = _obj_:new {
     point = function(s, x, y, z) 
-        if z > 0 then return s.v end
+        if z > 0 then return 0 end
     end,
     line = function(s, x, y, z) 
         if z > 0 then
-            s.v = x - s.p_.x[1]
-            return s.v
+            return x - s.p_.x[1]
         end
     end,
     plane = function(s, x, y, z) 
         if z > 0 then
-            s.v = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
-            return s.v
+            return { x = x - s.p_.x[1], y = y - s.p_.y[1] }
         end
     end
 }
-_grid.value.output.redraws = _obj_:new {
-    point = function(s)
-        s.g:led(s.p_.x, s.p_.y, lvl(s, 1))
+_grid.value.output.muxredraw = _obj_:new {
+    point = function(s, g, v)
+        g:led(s.p_.x, s.p_.y, lvl(s, 1))
     end,
-    line_x = function(s)
+    line_x = function(s, g, v)
         for i = s.p_.x[1], s.p_.x[2] do
-            s.g:led(i, s.p_.y, lvl(s, (s.v == i - s.p_.x[1]) and 1 or 3))
+            g:led(i, s.p_.y, lvl(s, (s.v == i - s.p_.x[1]) and 1 or 0))
         end
     end,
-    line_y = function(s)
+    line_y = function(s, g, v)
         for i = s.p_.y[1], s.p_.y[2] do
-            s.g:led(s.p_.x, i, lvl(s, (s.v == i - s.p_.y[1]) and 1 or 3))
+            g:led(s.p_.x, i, lvl(s, (s.v == i - s.p_.y[1]) and 1 or 0))
         end
     end,
-    plane = function(s)
+    plane = function(s, g, v)
         for i = s.x[1], s.x[2] do
             for j = s.p_.y[1], s.p_.y[2] do
-                s.g:led(i, j, lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 3))
+                g:led(i, j, lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 0))
             end
         end
     end

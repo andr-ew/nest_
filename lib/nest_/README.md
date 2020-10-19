@@ -1,12 +1,6 @@
 # grid
 
 ```
-REFACTOR
-
-RM muxfilter
-
-TEST momentary
-
 ADD
 
 _grid.toggle -- if #lvl >= 2 then #lvl == number of states
