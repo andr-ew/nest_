@@ -224,8 +224,9 @@ _grid.momentary.input.muxhandler = _obj_:new {
 
         if add then s.held[add] = 1 end
         if rem then s.held[rem] = 0 end
-   
-        return #s.list > min and s.held or s.vinit, add, rem, s.theld, s.list
+
+        local gt = #s.list > min
+        if gt then return gt and s.held or s.vinit, add, rem, s.theld, s.list end
     end,
     plane = function(s, x, y, z)
         local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
@@ -252,7 +253,8 @@ _grid.momentary.input.muxhandler = _obj_:new {
         if add then s.held[add.x][add.y] = 1 end
         if rem then s.held[rem.x][rem.y] = 0 end
 
-        return #s.list > min and s.held or s.vinit, add, rem, s.theld, s.list
+        local gt = #s.list > min
+        if gt then return gt and s.held or s.vinit, add, rem, s.theld, s.list end
     end
 }
 
