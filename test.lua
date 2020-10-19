@@ -33,6 +33,7 @@ n = nest_:new {
         action = function(s, v) print(v) end
     },
     f = _grid.fill:new {
+        z = 1,
         x = { 1, 16 },
         y = 8
     }

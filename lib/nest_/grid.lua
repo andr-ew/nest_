@@ -225,8 +225,7 @@ _grid.momentary.input.muxhandler = _obj_:new {
         if add then s.held[add] = 1 end
         if rem then s.held[rem] = 0 end
 
-        local gt = #s.list > min
-        if gt then return gt and s.held or s.vinit, add, rem, s.theld, s.list end
+        return #s.list >= min and s.held or s.init, add, rem, s.theld, s.list
     end,
     plane = function(s, x, y, z)
         local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
@@ -253,8 +252,32 @@ _grid.momentary.input.muxhandler = _obj_:new {
         if add then s.held[add.x][add.y] = 1 end
         if rem then s.held[rem.x][rem.y] = 0 end
 
-        local gt = #s.list > min
-        if gt then return gt and s.held or s.vinit, add, rem, s.theld, s.list end
+        return #s.list >= min and s.held or s.vinit, add, rem, s.theld, s.list
+    end
+}
+
+_grid.toggle = _grid.momentary:new { edge = 1 } -- add tog{}, ttog{}, toglist{}, initialize using a function this time
+
+_grid.toggle.input.muxhandler = _obj_:new {
+    point = function(s, x, y, z)
+        local held = _grid.momentary.input.muxhandler.point(s, x, y, z)
+
+        if s.edge == 1 and held == 1 then
+            return not s.v, util.time() - s.tlast
+        elseif s.edge == 0 and held == 0 then
+            return not s.v, util.time() - s.tlast, s.theld
+        end
+    end,
+    line = function(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.point(s, x, y, z)
+        local min, max = count(s)
+
+        --add hlist to toglist when toglist empty and #hlist >= min, update tog else invert tog[add or rem], update toglist
+
+        return #s.toglist >= min and s.tog or s.vinit, add, rem, s.ttog, theld, s.toglist
+    end,
+    plane = function(s, x, y, z)
+        local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
     end
 }
 

@@ -12,11 +12,11 @@ _grid.momentary -> _grid.gate ?
 
 control
 fill (output only)
+range (output only)
 value
 trigger
 momentary
 toggle
-range
 fader { range = { 0, 1 } }
 
 metacontrol
@@ -43,6 +43,8 @@ preset
 
 ```
 ADD
+
+control.animation() callback that runs on every frame between full device refreshes. these are collected every update in the _dev and run seprately in the draw clock
 
 nest_ get/set: table macros nest = { nest = { control = value } } 
 

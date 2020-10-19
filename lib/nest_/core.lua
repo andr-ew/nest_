@@ -21,7 +21,11 @@ local function formattype(t, k, v, clone_type)
     return v
 end
 
-local function zcomp(a, b) return a.z > b.z end
+local function zcomp(a, b) 
+    if type(a) == 'table' and type(b) == 'table' and a.z and b.z then
+        return a.z > b.z 
+    else return false end
+end
 
 _obj_ = {
     print = function(self) print(tostring(self)) end,
