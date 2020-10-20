@@ -1,15 +1,6 @@
 # grid
 
 ```
-TEST
-
-toggle
-momentary
-
-BUG
-
-input.handler is being double called
-
 ADD
 
 _grid.trigger
