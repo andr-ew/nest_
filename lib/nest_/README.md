@@ -4,10 +4,9 @@
 ADD
 
 _grid.trigger
-
-toggle, trigger, value: edge. if edge == 0, use different handlers to support momentary primitives where applicable (count, t, add, rem)
-
-_grid.momentary -> _grid.gate ?
+_grid.value: count, t
+_grid.range
+_grid.fader
 
 control
 fill (output only)
@@ -43,7 +42,7 @@ preset
 ```
 ADD
 
-control.animation() callback that runs on every frame between full device refreshes. these are collected every update in the _dev and run seprately in the draw clock
+replace bang() with update() w/ no args
 
 nest_ get/set: table macros nest = { nest = { control = value } } 
 

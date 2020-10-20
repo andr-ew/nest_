@@ -399,6 +399,19 @@ _grid.toggle.input.muxhandler = _obj_:new {
     end
 }
 
+_grid.trigger = _grid.momentary:new { edge = 1, blinktime = 0.5 }
+
+_grid.trigger.new = function(self, o) 
+    o = _grid.momentary.new(self, o)
+
+    local _, axis = input_contained(o, { -1, -1 })
+
+    o.blink = minit(axis)
+    
+    return o
+end
+
+
 _grid.fill = _grid.muxcontrol:new()
 _grid.fill.input = nil
 

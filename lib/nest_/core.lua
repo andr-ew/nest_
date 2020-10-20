@@ -72,6 +72,9 @@ function _obj_:new(o, clone_type)
             end
             return n1
         end,
+        __call = function(idk, ...) -- dunno what's going on w/ the first arg to this metatmethod
+            return o:new(...)
+        end,
         __tostring = function(t) return tostring(t.k) end
     })
 
@@ -120,8 +123,8 @@ _input = _obj_:new {
     handler = nil,
     devk = nil,
     filter = function(self, devk, args) return args end,
+    arg_defaults = {},
     update = function(self, devk, args, mc)
-        --print("input.update")
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
@@ -142,16 +145,14 @@ _input = _obj_:new {
                     end
                 end
             end
-        end
-    end,
-    bang = function(self)
-        if self.action then 
-            self.control.v = self.action and self:action(self.control.v) or self.control.v
-        end
-        
-        if self.devs[self.devk] then self.devs[self.devk].dirty = true end
+        elseif devk == nil or args == nil then -- called w/o arguments
 
-        return self.control.v
+            self.control.v = self.action and self:action(self.control.v, table.unpack(self.arg_defaults)) or self.control.v
+            
+            if self.devs[self.devk] then self.devs[self.devk].dirty = true end
+
+            return self.control.v
+        end
     end
 }
 
@@ -172,7 +173,7 @@ function _input:new(o)
             local c = _.control and _.control[k]
             
             -- catch shared keys, otherwise privilege control keys
-            if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' or k == 'bang' then return self[k]
+            if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' then return self[k]
             else return c or self[k] end
         end
     end
@@ -191,9 +192,9 @@ _output = _obj_:new {
     is_output = true,
     redraw = nil,
     devk = nil,
-    draw = function(self, devk)
+    draw = function(self, devk, t)
         if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
-            if self.redraw then self:redraw(self.devs[devk].object, self.v) end
+            if self.redraw then self.devs[devk].dirty = self.devs[devk].dirty or self:redraw(self.devs[devk].object, self.v, t) end
         end
     end
 }
@@ -204,7 +205,7 @@ nest_ = _obj_:new {
     do_init = function(self)
         if self.pre_init then self:pre_init() end
         if self.init then self:init() end
-        self:bang()
+        self:update()
 
         for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.do_init then v:do_init() end end end
     end,
@@ -218,7 +219,16 @@ nest_ = _obj_:new {
         return self 
     end,
     update = function(self, devk, args, mc)
-        if self.enabled == nil or self.p_.enabled == true then
+        if devk == nil or args == nil then -- called w/o arguments
+
+            local ret = nil
+            for i,w in ipairs(self.zsort) do 
+                if w.update then ret = w:update() end
+            end
+            
+            return ret
+        
+        elseif self.enabled == nil or self.p_.enabled == true then
             if self.metacontrols_enabled then 
                 for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
             end 
@@ -230,25 +240,17 @@ nest_ = _obj_:new {
             end
         end
     end,
-    draw = function(self, devk)
+    draw = function(self, devk, t)
         for i,v in ipairs(self.zsort) do
             if self.enabled == nil or self.p_.enabled == true then
                 if v.draw then
-                    v:draw(devk)
+                    v:draw(devk, t)
                 end
             end
         end
     end,
     set = function(self, t) end,
     get = function(self) end,
-    bang = function(self) 
-        local ret = nil
-        for i,w in ipairs(self.zsort) do 
-            if w.bang then ret = w:bang() end
-        end
-        
-        return ret
-    end,
     write = function(self) end,
     read = function(self) end
 }
@@ -293,16 +295,6 @@ function nest_:new(o, ...)
     local mt = getmetatable(o)
     --mt.__tostring = function(t) return 'nest_' end
     
-    mt.__call = function(arg, ...)
-        if arg then if type(arg == 'table') then  -- ignore arg 1 when called like a method 
-            if arg.is_nest then 
-                return o:set(...)
-            end 
-        end end
-
-        return o:set(arg, ...)
-    end
-
     return o
 end
 
@@ -317,7 +309,7 @@ _control = nest_:new {
     print = function(self) end,
     get = function(self, silent) 
         if not silent then
-            return self:bang()
+            return self:update()
         else return self.v end
     end,
     set = function(self, v, silent)

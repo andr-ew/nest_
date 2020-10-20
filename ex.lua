@@ -117,6 +117,65 @@ n = nest_:new {
 }:connect { g = grid.connect() }
 
 
+-- 16 pages of grid toggles and faders using library controls, fader values drawn on screen (no new)
+
+n = nest_ {
+    grid = {
+        pager = _grid.value {
+            x = { 1, 16 },
+            y = 1
+        },
+        pages = nest_(1, 16):each(function(i)
+            return { 
+                enabled = function() 
+                    return n.grid.pager() == i 
+                end,
+                rows = nest_(2, 5):each(function(i)
+                    return {
+                        fader = _grid.fader {
+                            x = { 2, 15 },
+                            y = i,
+                            action = function(_, v) 
+                                faderthings[_.y](v)
+                            end
+                        },
+                        toggle = _grid.toggle {
+                            x = 1,
+                            y = i
+                            action = function(_, v)
+                                togglethings[_.y](v)
+                            end
+                        }
+                    }
+                end)
+            }
+        end)
+    },
+    screen = {
+        pager = _enc.txt.radio {
+            list = { 1, 2, 3, 4 }
+            x = { 8, 120 },
+            y = { 8, 9 }
+            n = 1
+        },
+        pages = nest_ (1, 16):each(function(i)
+            return { 
+                enabled = function() 
+                    return n.screen.pager() == i 
+                end,
+                vals = nest_(0, 1).each(function(y)
+                    return nest_(0, 1).each(function(x)
+                        return _screen.number {
+                            x = x * 60 + 8,
+                            y = y * 24 + 16
+                        }:link(function() return n.grid.pages.rows[x + 1 + (x * y * 2)] end)
+                    end)
+                end)
+            }
+        end)
+    }
+}:connect { g = grid.connect() }
+
 -----------------------
 
 -- simple custom grid control, 2 x 2 x/y selector
@@ -134,6 +193,28 @@ n = nest_:new {
         end,
         action = function(s, v)
             print(s.x, s.y)
+        end
+    }
+}:connect { g = grid.connect() }
+
+
+-----------------------
+
+-- simple custom grid control, 2 x 2 x/y selector (no new)
+
+n = nest_ {
+    gc = _grid.control {
+        x = { 1, 2 }, y = { 1, 2 }, lvl = 15, v = { x = 0, y = 0 },
+        handler = function(s,v,x,y,z)
+            if z == 1 then 
+                return { x = x - x[1], y = y - y[1] }
+            end
+        end,
+        redraw = function(s,v,g)
+            g:led(s.x[1] + v.x, s.y[1] + v.y, s.lvl)
+        end,
+        action = function(s,v)
+            print(v.x, v.y)
         end
     }
 }:connect { g = grid.connect() }

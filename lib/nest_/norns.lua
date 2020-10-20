@@ -19,7 +19,7 @@ nest_.connect = function(self, objects, fps)
                 object = vv,
                 redraw = function() 
                     vv:all(0)
-                    self:draw(kk) 
+                    self:draw(kk, elapsed) 
                     vv:refresh()
                 end,
                 handler = function(...)
@@ -56,7 +56,7 @@ nest_.connect = function(self, objects, fps)
                 object = screen,
                 redraw = function()
                     screen.clear()
-                    self:draw('screen')
+                    self:draw('screen', elapsed)
                     screen.update()
                 end
             }
@@ -74,9 +74,11 @@ nest_.connect = function(self, objects, fps)
             
             for k,v in pairs(devs) do 
                 if v.dirty then 
-                    v.redraw()
                     v.dirty = false
+                    v.redraw()
                 end
+
+                --v.animate(elapsed)
             end
         end   
     end)
