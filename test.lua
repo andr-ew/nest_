@@ -6,17 +6,6 @@ end
 include 'lib/nest_/norns'
 tab = require 'tabutil'
 
---[[
-c = _control:new {
-    v = 3,
-    inputs = { _input:new() }
-}
-
-cc = c:new {
-    v = 4
-}
-]]
-
 include 'lib/nest_/grid'
 
 n = nest_:new {
@@ -28,13 +17,10 @@ n = nest_:new {
     },
     m = _grid.momentary:new {
         z = 3,
+        count = { 2, 3 },
         x = { 1, 16 },
-        y = { 2, 7 },
-        action = function(s, v) print(v) end
-    },
-    f = _grid.fill:new {
-        z = 1,
-        x = { 1, 16 },
-        y = 8
+        y = { 2, 8 },
+        --y = 2,
+        --action = function(s, v) print(v) end
     }
 } :connect { g = grid.connect() }

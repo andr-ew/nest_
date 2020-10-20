@@ -14,7 +14,11 @@ local function formattype(t, k, v, clone_type)
             v._.p = t
             v._.k = k
         end
-
+        
+        for i,w in ipairs(t._.zsort) do 
+            if w.k == k then table.remove(t._.zsort, i) end
+        end
+        
         t._.zsort[#t._.zsort + 1] = v
     end
 
@@ -45,7 +49,7 @@ function _obj_:new(o, clone_type)
     }
 
     o = o or {}
-    clone_type = clone_type or _obj_
+    _.clone_type = _.clone_type or _obj_
 
     setmetatable(o, {
         __index = function(t, k)
@@ -57,7 +61,7 @@ function _obj_:new(o, clone_type)
         __newindex = function(t, k, v)
             if _[k] ~= nil then rawset(_,k,v) 
             else
-                rawset(t, k, formattype(t, k, v, clone_type)) 
+                rawset(t, k, formattype(t, k, v, _.clone_type)) 
                 
                 table.sort(_.zsort, zcomp)
             end
@@ -93,7 +97,7 @@ function _obj_:new(o, clone_type)
         __newindex = function(t, k, v) o[k] = v end
     })
     
-    for k,v in pairs(o) do formattype(o, k, v, clone_type) end
+    for k,v in pairs(o) do formattype(o, k, v, _.clone_type) end
 
     for k,v in pairs(self) do 
         if not rawget(o, k) then
@@ -101,7 +105,7 @@ function _obj_:new(o, clone_type)
                 -- function pointers are not copied to child, instead they are referenced using metatables
             elseif type(v) == "table" and v.is_obj then
                 local clone = self[k]:new()
-                o[k] = formattype(o, k, clone, clone_type) ----
+                o[k] = formattype(o, k, clone, _.clone_type) ----
             else rawset(o,k,v) end 
         end
     end
@@ -117,6 +121,7 @@ _input = _obj_:new {
     devk = nil,
     filter = function(self, devk, args) return args end,
     update = function(self, devk, args, mc)
+        --print("input.update")
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
@@ -249,6 +254,8 @@ nest_ = _obj_:new {
 }
 
 function nest_:new(o, ...)
+    local clone_type
+
     if o ~= nil and type(o) ~= 'table' then 
         local arg = { o, ... }
         o = {}
@@ -270,9 +277,11 @@ function nest_:new(o, ...)
         else
             for _,k in arg do o[k] = nest_:new() end
         end
+    else
+       clone_type = ...
     end
 
-    o = _obj_.new(self, o, nest_)
+    o = _obj_.new(self, o, clone_type or nest_)
     local _ = o._ 
 
     _.is_nest = true
@@ -318,11 +327,12 @@ _control = nest_:new {
 }
 
 function _control:new(o)
-    o = nest_.new(self, o)
+    o = nest_.new(self, o, _obj_)
     local _ = o._    
 
     _.devs = {}
     _.is_control = true
+    --_.clone_type = _obj_
 
     local mt = getmetatable(o)
     local mtn = mt.__newindex

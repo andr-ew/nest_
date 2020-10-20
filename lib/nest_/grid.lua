@@ -163,7 +163,7 @@ _grid.momentary.new = function(self, o)
     o.theld = minit(axis)
     o.vinit = minit(axis)
 
-    if type(o.v) ~= type(v) or #o.v ~= #v then o.v = v end
+    if type(o.v) ~= 'table' or type(o.v) == 'table' and #o.v ~= #v then o.v = v end
     
     return o
 end
@@ -207,11 +207,11 @@ _grid.momentary.input.muxhandler = _obj_:new {
             end
             s.theld[i] = util.time() - s.tdown[i]
         end
-
+        
         if add then s.held[add] = 1 end
         if rem then s.held[rem] = 0 end
 
-        return #s.list >= min and s.held or s.init, add, rem, s.theld, s.list
+        return #s.list >= min and s.held or s.vinit, add, rem, s.theld, s.list
     end,
     plane = function(s, x, y, z)
         local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
@@ -224,7 +224,7 @@ _grid.momentary.input.muxhandler = _obj_:new {
             s.tlast[i.x][i.y] = s.tdown[i.x][i.y]
             s.tdown[i.x][i.y] = util.time()
             table.insert(s.list, i)
-            if max and #s.list > max then rem = table.remove(s.list, 1) end
+            if max and (#s.list > max) then rem = table.remove(s.list, 1) end
         else
             rem = i
             for j,w in ipairs(s.list) do
