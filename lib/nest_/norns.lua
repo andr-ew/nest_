@@ -5,6 +5,11 @@ nest_.connect = function(self, objects, fps)
 
     local devs = {}
 
+    local fps = fps or 30
+    local elapsed = 0
+
+    -- elapsed // 3 % 2
+
     for k,v in pairs(objects) do
         if k == 'g' or k == 'a' then
             local kk = k
@@ -48,6 +53,7 @@ nest_.connect = function(self, objects, fps)
             v = devs[kk].handler
         elseif k == 'screen' then
             devs[kk] = _dev:new {
+                object = screen,
                 redraw = function()
                     screen.clear()
                     self:draw('screen')
@@ -61,11 +67,10 @@ nest_.connect = function(self, objects, fps)
         end
     end
 
-    local fps = fps or 30
-
     clock.run(function() 
         while true do 
             clock.sleep(1/fps)
+            elapsed = elapsed + 1/fps
             
             for k,v in pairs(devs) do 
                 if v.dirty then 
@@ -79,11 +84,12 @@ nest_.connect = function(self, objects, fps)
     local function linkdevs(obj) 
         if type(obj) == 'table' and obj.is_obj then
             rawset(obj._, 'devs', devs)
-
+            
+            --might not be needed with _output.redraw args
             for k,v in pairs(objects) do 
                 rawset(obj._, k, v)
             end
-
+            
             for k,v in pairs(obj) do 
                 linkdevs(v)
             end
