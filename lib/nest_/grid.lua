@@ -242,6 +242,29 @@ _grid.momentary.input.muxhandler = _obj_:new {
     end
 }
 
+local lvl = function(s, i)
+    local x = s.p_.lvl
+    -- come back later and understand or not understand ? :)
+    return (type(x) ~= 'table') and ((i > 0) and x or 0) or x[i + 1] or 15
+end
+
+_grid.momentary.output.muxredraw = _obj_:new {
+    point = function(s, g, v)
+        g:led(s.p_.x, s.p_.y, lvl(s, v))
+    end,
+    line_x = function(s, g, v)
+        for x,l in ipairs(v) do g:led(x + s.p_.x[1] - 1, s.p_.y, lvl(s, l)) end
+    end,
+    line_y = function(s, g, v)
+        for y,l in ipairs(v) do g:led(s.p_.x, y + s.p_.y[1] - 1, lvl(s, l)) end
+    end,
+    plane = function(s, g, v)
+        for x,r in ipairs(v) do 
+            for y,l in ipairs(r) do g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl(s, l)) end
+        end
+    end
+}
+
 _grid.toggle = _grid.momentary:new { edge = 1 }
 
 _grid.toggle.new = function(self, o) 
@@ -258,7 +281,7 @@ _grid.toggle.new = function(self, o)
 end
 
 local function toggle(s, v)
-    return (v + 1) % ((type(s.lvl == 'table') and #s.lvl > 1) and (#s.lvl - 1) or 1)
+    return (v + 1) % (((type(s.lvl) == 'table') and #s.lvl > 1) and (#s.lvl) or 2)
 end
 
 _grid.toggle.input.muxhandler = _obj_:new {
@@ -280,10 +303,16 @@ _grid.toggle.input.muxhandler = _obj_:new {
        
         if s.edge == 1 and hadd then i = hadd end
         if s.edge == 0 and hrem then i = hrem end
-        
+           
+        print('toglist')
+        tab.print(s.toglist)
+        print('hlist')
+        tab.print(hlist)
+ 
         if i then   
             if #s.toglist >= min then
-                local v = toggle(s.v[i])
+                local v = toggle(s, s.v[i])
+                print(v, s.v[i]) 
                 
                 if v > 0 then
                     add = i
@@ -307,7 +336,9 @@ _grid.toggle.input.muxhandler = _obj_:new {
                     s.toglist[j] = w
                     s.v[w] = 1
                 end
-            else 
+            end
+            
+            if #s.toglist < min then
                 for j,w in ipairs(s.v) do s.v[j] = 0 end
                 s.toglist = {}
             end
@@ -327,7 +358,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
         
         if i then   
             if #s.toglist >= min then
-                local v = toggle(s.v[i.x][i.y])
+                local v = toggle(s, s.v[i.x][i.y])
                 
                 if v > 0 then
                     add = i
@@ -337,12 +368,12 @@ _grid.toggle.input.muxhandler = _obj_:new {
                 else 
                     for j,w in ipairs(s.toglist) do
                         if w.x == i.x and w.y == i.y then 
-                            rem = table.remove(s.list, j)
+                            rem = table.remove(s.toglist, j)
                         end
                     end
                 end
             
-                s.ttog[i] = util.time() - s.tlast[i]
+                s.ttog[i.x][i.y] = util.time() - s.tlast[i.x][i.y]
 
                 if add then s.v[add.x][add.y] = v end
                 if rem then s.v[rem.x][rem.y] = 0 end
@@ -352,7 +383,9 @@ _grid.toggle.input.muxhandler = _obj_:new {
                     s.toglist[j] = w
                     s.v[w.x][w.y] = 1
                 end
-            else 
+            end
+
+            if #s.toglist < min then
                 for x,w in ipairs(s.v) do 
                     for y,_ in ipairs(w) do
                         s.v[x][y] = 0
@@ -362,29 +395,6 @@ _grid.toggle.input.muxhandler = _obj_:new {
             end
 
             return s.v, add, rem, s.ttog, theld, s.toglist
-        end
-    end
-}
-
-local lvl = function(s, i)
-    local x = s.p_.lvl
-    -- come back later and understand or not understand ? :)
-    return (type(x) ~= 'table') and ((i > 0) and x or 0) or x[i + 1] or 15
-end
-
-_grid.momentary.output.muxredraw = _obj_:new {
-    point = function(s, g, v)
-        g:led(s.p_.x, s.p_.y, lvl(s, v * 2 + 1))
-    end,
-    line_x = function(s, g, v)
-        for x,l in ipairs(v) do g:led(x + s.p_.x[1] - 1, s.p_.y, lvl(s, l)) end
-    end,
-    line_y = function(s, g, v)
-        for y,l in ipairs(v) do g:led(s.p_.x, y + s.p_.y[1] - 1, lvl(s, l)) end
-    end,
-    plane = function(s, g, v)
-        for x,r in ipairs(v) do 
-            for y,l in ipairs(r) do g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl(s, l)) end
         end
     end
 }

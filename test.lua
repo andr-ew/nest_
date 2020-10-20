@@ -15,10 +15,11 @@ n = nest_:new {
         y = 1,
         action = function(s, v) print(v) end
     },
-    m = _grid.momentary:new {
+    m = _grid.toggle:new {
         z = 3,
         count = { 2, 3 },
         x = { 1, 16 },
+        --x = 1,
         y = { 2, 8 },
         --y = 2,
         --action = function(s, v) print(v) end
