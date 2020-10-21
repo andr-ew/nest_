@@ -1,9 +1,5 @@
 # grid
 ```
-TEST
-
-_grid.value
-
 ADD
 
 _grid.range
@@ -28,7 +24,7 @@ preset
 
 REFACTOR
 
-consider changing count to count and fingers - in momentary they are the same but in toggle, trigger they are kind of different. count is the range of values which can be > 0 at one time, fingers the range of simultaneous finger presses required to interact with the control
+seperate count into count and fingers. fingers sets a range of held keys requred for an action to occur, count sets the range of values that may be present at one time. in momentary these are the same concept, but in the other objects they are seperate. in order to impliment the ideas seprately the reused guts of momentary need to be abstracted into more flexble utility functions
 
 ```
 
