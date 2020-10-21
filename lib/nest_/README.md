@@ -1,9 +1,11 @@
 # grid
-
 ```
+TEST
+
+_grid.value
+
 ADD
 
-_grid.value: count, t
 _grid.range
 _grid.fader
 
@@ -18,9 +20,15 @@ momentary
 toggle
 fader { range = { 0, 1 } }
 
+grid.andrew.glide (2nd input inside a value)
+
 metacontrol
 pattern
 preset
+
+REFACTOR
+
+consider changing count to count and fingers - in momentary they are the same but in toggle, trigger they are kind of different. count is the range of values which can be > 0 at one time, fingers the range of simultaneous finger presses required to interact with the control
 
 ```
 
@@ -43,7 +51,7 @@ preset
 ```
 ADD
 
-replace bang() with update() w/ no args
+rename _device back to _group lol
 
 nest_ get/set: table macros nest = { nest = { control = value } } 
 

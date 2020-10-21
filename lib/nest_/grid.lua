@@ -627,23 +627,110 @@ _grid.fill.output.muxredraw = _obj_:new {
     plane = _grid.momentary.output.muxredraw.plane
 }
 
---init v, support edge, if edge == 0 support count, theld
-_grid.value = _grid.muxcontrol:new()
+_grid.value = _grid.muxcontrol:new { edge = 1, count = nil, tdown = 0, filtersame = true }
+
+_grid.value.new = function(self, o) 
+    o = _grid.muxcontrol.new(self, o)
+
+    rawset(o, 'hlist', {})
+
+    local _, axis = input_contained(o, { -1, -1 })
+   
+    if axis.x and axis.y then o.v = type(o.v) == 'table' and o.v or { x = 0, y = 0 } end
+ 
+    return o
+end
+
 _grid.value.input.muxhandler = _obj_:new {
     point = function(s, x, y, z) 
         if z > 0 then return 0 end
     end,
     line = function(s, x, y, z) 
+        local i = x - s.p_.x[1]
+        local min, max = count(s)
+
         if z > 0 then
-            return x - s.p_.x[1]
+            if #s.hlist == 0 then s.tdown = util.time() end
+            table.insert(s.hlist, i)
+           
+            if s.edge == 1 then 
+                if i ~= s.v or (not s.filtersame) then 
+                    local len = #s.hlist
+                    s.hlist = {}
+
+                    if max == nil or len <= max then
+                        return i, len > 1 and util.time() - s.tdown or 0
+                    end
+                end
+            end
+        else
+            if s.edge == 0 then
+                if #s.hlist >= min then
+                    i = s.hlist[#s.hlist]
+                    local len = #s.hlist
+                    s.hlist = {}
+
+                    if max == nil or len <= max then
+                        if i ~= s.v or (not s.filtersame) then 
+                           return i, util.time() - s.tdown
+                        end
+                    end
+                else
+                    local k = tab.key(s.hlist, i)
+                    if k then
+                        rem = table.remove(s.hlist, k)
+                    end
+                end
+            end
         end
     end,
     plane = function(s, x, y, z) 
+        local i = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
+
+        local min, max = count(s)
+
         if z > 0 then
-            return { x = x - s.p_.x[1], y = y - s.p_.y[1] }
+            if #s.hlist == 0 then s.tdown = util.time() end
+            table.insert(s.hlist, i)
+           
+            if s.edge == 1 then 
+                if (not (i.x == s.v.x and i.y == s.v.y)) or (not s.filtersame) then 
+                    local len = #s.hlist
+                    s.hlist = {}
+                    s.v.x = i.x
+                    s.v.y = i.y
+
+                    if max == nil or len <= max then
+                        return s.v, len > 1 and util.time() - s.tdown or 0
+                    end
+                end
+            end
+        else
+            if s.edge == 0 then
+                if #s.hlist >= min then
+                    i = s.hlist[#s.hlist]
+                    local len = #s.hlist
+                    s.hlist = {}
+
+                    if max == nil or len <= max then
+                        if (not (i.x == s.v.x and i.y == s.v.y)) or (not s.filtersame) then 
+                            s.v.x = i.x
+                            s.v.y = i.y
+                            return i, util.time() - s.tdown
+                        end
+                    end
+                else
+                    for j,w in ipairs(s.hlist) do
+                        if w.x == i.x and w.y == i.y then 
+                            table.remove(s.hlist, j)
+                        end
+                    end
+                end
+            end
         end
     end
 }
+
 _grid.value.output.muxredraw = _obj_:new {
     point = function(s, g, v)
         local lvl = lvl(s, 1)
@@ -662,10 +749,10 @@ _grid.value.output.muxredraw = _obj_:new {
         end
     end,
     plane = function(s, g, v)
-        for i = s.x[1], s.x[2] do
+        for i = s.p_.x[1], s.p_.x[2] do
             for j = s.p_.y[1], s.p_.y[2] do
-                local lvl = lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 0)
-                if lvl > 0 then g:led(i, j, lvl) end
+                local l = lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 0)
+                if l > 0 then g:led(i, j, l) end
             end
         end
     end
