@@ -3,10 +3,11 @@
 ```
 ADD
 
-_grid.trigger
 _grid.value: count, t
 _grid.range
 _grid.fader
+
+action arg defaults
 
 control
 fill (output only)

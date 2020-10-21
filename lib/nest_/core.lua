@@ -194,7 +194,7 @@ _output = _obj_:new {
     devk = nil,
     draw = function(self, devk, t)
         if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
-            if self.redraw then self.devs[devk].dirty = self.devs[devk].dirty or self:redraw(self.devs[devk].object, self.v, t) end
+            if self.redraw then self.devs[devk].dirty = self:redraw(self.devs[devk].object, self.v, t) or self.devs[devk].dirty end
         end
     end
 }

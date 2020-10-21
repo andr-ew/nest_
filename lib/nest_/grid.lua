@@ -108,14 +108,14 @@ _grid.muxcontrol.output.redraw = function(s, g, v)
     end
 
     if has_axis.x == false and has_axis.y == false then
-        s.muxredraw.point(s, g, v)
+        return s.muxredraw.point(s, g, v)
     elseif has_axis.x and has_axis.y then
-        s.muxredraw.plane(s, g, v)
+        return s.muxredraw.plane(s, g, v)
     else
         if has_axis.x then
-            s.muxredraw.line_x(s, g, v)
+            return s.muxredraw.line_x(s, g, v)
         elseif has_axis.y then
-            s.muxredraw.line_y(s, g, v)
+            return s.muxredraw.line_y(s, g, v)
         end
     end
 end
@@ -250,17 +250,27 @@ end
 
 _grid.momentary.output.muxredraw = _obj_:new {
     point = function(s, g, v)
-        g:led(s.p_.x, s.p_.y, lvl(s, v))
+        local lvl = lvl(s, v)
+        if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
     end,
     line_x = function(s, g, v)
-        for x,l in ipairs(v) do g:led(x + s.p_.x[1] - 1, s.p_.y, lvl(s, l)) end
+        for x,l in ipairs(v) do 
+            local lvl = lvl(s, l)
+            if lvl > 0 then g:led(x + s.p_.x[1] - 1, s.p_.y, lvl) end
+        end
     end,
     line_y = function(s, g, v)
-        for y,l in ipairs(v) do g:led(s.p_.x, y + s.p_.y[1] - 1, lvl(s, l)) end
+        for y,l in ipairs(v) do 
+            local lvl = lvl(s, l)
+            if lvl > 0 then g:led(s.p_.x, y + s.p_.y[1] - 1, lvl) end
+        end
     end,
     plane = function(s, g, v)
         for x,r in ipairs(v) do 
-            for y,l in ipairs(r) do g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl(s, l)) end
+            for y,l in ipairs(r) do 
+                local lvl = lvl(s, l)
+                if lvl > 0 then g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl) end
+            end
         end
     end
 }
@@ -288,9 +298,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
     point = function(s, x, y, z)
         local held = _grid.momentary.input.muxhandler.point(s, x, y, z)
 
-        if s.edge == 1 and held == 1 then
-            return toggle(s, s.v), util.time() - s.tlast
-        elseif s.edge == 0 and held == 0 then
+        if s.edge == held then
             return toggle(s, s.v), util.time() - s.tlast, s.theld
         end
     end,
@@ -399,18 +407,187 @@ _grid.toggle.input.muxhandler = _obj_:new {
     end
 }
 
-_grid.trigger = _grid.momentary:new { edge = 1, blinktime = 0.5 }
+_grid.trigger = _grid.momentary:new { edge = 1, blinktime = 0.1 }
 
 _grid.trigger.new = function(self, o) 
     o = _grid.momentary.new(self, o)
 
-    local _, axis = input_contained(o, { -1, -1 })
+    rawset(o, 'triglist', {})
 
-    o.blink = minit(axis)
+    local _, axis = input_contained(o, { -1, -1 })
+    o.tdelta = minit(axis)
     
     return o
 end
 
+_grid.trigger.input.muxhandler = _obj_:new {
+    point = function(s, x, y, z)
+        local held = _grid.momentary.input.muxhandler.point(s, x, y, z)
+        
+        if s.edge == held then
+            print("handler")
+            return 1, util.time() - s.tlast, s.theld
+        end
+    end,
+    line = function(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.line(s, x, y, z)
+        local min, max = count(s)
+        local ret = false
+        local lret
+
+        if s.edge == 1 and #hlist > min and hadd then
+            s.v[hadd] = 1
+            s.tdelta[hadd] = util.time() - s.tlast[hadd]
+
+            ret = true
+            lret = hlist
+        elseif s.edge == 1 and #hlist == min and hadd then
+            for i,w in ipairs(hlist) do 
+                s.v[w] = 1
+
+                s.tdelta[w] = util.time() - s.tlast[w]
+            end
+
+            ret = true
+            lret = hlist
+        elseif s.edge == 0 and #hlist >= min - 1 and hrem and not hadd then
+            s.triglist = {}
+
+            for i,w in ipairs(hlist) do 
+                if s.v[w] <= 0 then
+                    s.v[w] = 1
+                    s.tdelta[w] = util.time() - s.tlast[w]
+                    table.insert(s.triglist, w)
+                end
+            end
+            
+            if s.v[hrem] <= 0 then
+                ret = true
+                lret = s.triglist
+                s.v[hrem] = 1 
+                s.tdelta[hrem] = util.time() - s.tlast[hrem]
+                table.insert(s.triglist, hrem)
+            end
+        end
+            
+        if ret then return s.v, s.tdelta, s.theld, lret end
+    end,
+    plane = function(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.plane(s, x, y, z)
+        local min, max = count(s)
+        local ret = false
+        local lret
+
+        if s.edge == 1 and #hlist > min and hadd then
+            s.v[hadd.x][hadd.y] = 1
+            s.tdelta[hadd.x][hadd.y] = util.time() - s.tlast[hadd.x][hadd.y]
+
+            ret = true
+            lret = hlist
+        elseif s.edge == 1 and #hlist == min and hadd then
+            for i,w in ipairs(hlist) do 
+                s.v[w.x][w.y] = 1
+
+                s.tdelta[w.x][w.y] = util.time() - s.tlast[w.x][w.y]
+            end
+
+            ret = true
+            lret = hlist
+        elseif s.edge == 0 and #hlist >= min - 1 and hrem and not hadd then
+            s.triglist = {}
+
+            for i,w in ipairs(hlist) do 
+                if s.v[w.x][w.y] <= 0 then
+                    s.v[w.x][w.y] = 1
+                    s.tdelta[w.x][w.y] = util.time() - s.tlast[w.x][w.y]
+                    table.insert(s.triglist, w)
+                end
+            end
+            
+            if s.v[hrem.x][hrem.y] <= 0 then
+                ret = true
+                lret = s.triglist
+                s.v[hrem.x][hrem.y] = 1 
+                s.tdelta[hrem.x][hrem.y] = util.time() - s.tlast[hrem.x][hrem.y]
+                table.insert(s.triglist, hrem)
+            end
+        end
+            
+        if ret then return s.v, s.tdelta, s.theld, lret end
+    end
+}
+
+_grid.trigger.output.muxredraw = _obj_:new {
+    point = function(s, g, v)
+        local l = lvl(s, 0)
+        if v > 0 then
+            s.v = v - 1/30/s.blinktime
+            l = lvl(s, s.v > 0 and 1 or 0)
+        else
+            s.v = 0
+        end
+        
+        if l > 0 then g:led(s.p_.x, s.p_.y, l) end
+        
+        return s.v > 0
+    end,
+    line_x = function(s, g, v)
+        local ret = false
+
+        for x,w in ipairs(v) do 
+            local l = lvl(s, 0)
+            if w > 0 then 
+                s.v[x] = w - 1/30/s.blinktime
+                l = lvl(s, s.v[x] > 0 and 1 or 0)
+            else
+                s.v[x] = 0
+            end
+            
+            if l > 0 then g:led(x + s.p_.x[1] - 1, s.p_.y, l) end
+            ret = true
+        end
+
+        return ret
+    end,
+    line_y = function(s, g, v)
+        local ret = false
+
+        for x,w in ipairs(v) do 
+            local l = lvl(s, 0)
+            if w > 0 then 
+                s.v[x] = w - 1/30/s.blinktime
+                l = lvl(s, s.v[x] > 0 and 1 or 0)
+            else
+                s.v[x] = 0
+            end
+            
+            if l > 0 then g:led(s.p_.x, y + s.p_.y[1] - 1, l) end
+            ret = true
+        end
+
+        return ret
+    end,
+    plane = function(s, g, v)
+        local ret = false
+
+        for x,r in ipairs(v) do 
+            for y,w in ipairs(r) do 
+                local l = lvl(s, 0)
+                if w > 0 then 
+                    s.v[x][y] = w - 1/30/s.blinktime
+                    l = lvl(s, s.v[x][y] > 0 and 1 or 0)
+                else
+                    s.v[x][y] = 0
+                end
+                
+                if l > 0 then g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, l) end
+                ret = true
+            end
+        end
+
+        return ret
+    end
+}
 
 _grid.fill = _grid.muxcontrol:new()
 _grid.fill.input = nil
@@ -469,22 +646,26 @@ _grid.value.input.muxhandler = _obj_:new {
 }
 _grid.value.output.muxredraw = _obj_:new {
     point = function(s, g, v)
-        g:led(s.p_.x, s.p_.y, lvl(s, 1))
+        local lvl = lvl(s, 1)
+        if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
     end,
     line_x = function(s, g, v)
         for i = s.p_.x[1], s.p_.x[2] do
-            g:led(i, s.p_.y, lvl(s, (s.v == i - s.p_.x[1]) and 1 or 0))
+            local lvl = lvl(s, (s.v == i - s.p_.x[1]) and 1 or 0)
+            if lvl > 0 then g:led(i, s.p_.y, lvl) end
         end
     end,
     line_y = function(s, g, v)
         for i = s.p_.y[1], s.p_.y[2] do
-            g:led(s.p_.x, i, lvl(s, (s.v == i - s.p_.y[1]) and 1 or 0))
+            local lvl = lvl(s, (s.v == i - s.p_.y[1]) and 1 or 0)
+            if lvl > 0 then g:led(s.p_.x, i, lvl) end
         end
     end,
     plane = function(s, g, v)
         for i = s.x[1], s.x[2] do
             for j = s.p_.y[1], s.p_.y[2] do
-                g:led(i, j, lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 0))
+                local lvl = lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 0)
+                if lvl > 0 then g:led(i, j, lvl) end
             end
         end
     end

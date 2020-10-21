@@ -9,19 +9,10 @@ tab = require 'tabutil'
 include 'lib/nest_/grid'
 
 n = nest_ {
-    v = _grid.value {
-        z = 2,
-        x = function() return { 1, 16 } end,
-        y = 1,
-        action = function(s, v) print(v) end
-    },
-    m = _grid.toggle {
-        z = 3,
-        count = { 2, 3 },
+    v = _grid.trigger {
         x = { 1, 16 },
-        --x = 1,
-        y = { 2, 8 },
-        --y = 2,
-        --action = function(s, v) print(v) end
+        y = { 1, 8 },
+        edge = 0,
+        action = function(s, v, t, t2, l) if l then print(#l) end end
     }
 } :connect { g = grid.connect() }
