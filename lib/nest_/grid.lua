@@ -125,7 +125,8 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
     output = _grid.muxcontrol.output:new()
 }
 
-_grid.momentary = _grid.muxcontrol:new({ count = nil })
+local binary = _grid.muxcontrol:new({ count = nil, fingers = nil }) -- local supertype for binary, toggle, trigger
+binary.devk = 'g'
 
 local function minit(axis) 
     local v
@@ -149,7 +150,7 @@ local function minit(axis)
     return v
 end
 
-_grid.momentary.new = function(self, o) 
+binary.new = function(self, o) 
     o = _grid.muxcontrol.new(self, o)
 
     rawset(o, 'list', {})
@@ -168,6 +169,7 @@ _grid.momentary.new = function(self, o)
     return o
 end
 
+--[[
 local function count(s) 
     local min = 0
     local max = nil
@@ -179,18 +181,18 @@ local function count(s)
 
     return min, max
 end
+]]
 
-_grid.momentary.input.muxhandler = _obj_:new {
-    point = function(s, x, y, z)
+_grid.binary.input.muxhandler = _obj_:new {
+    point = function(s, x, y, z, min, max)
         if z > 0 then 
             s.tlast = s.tdown
             s.tdown = util.time()
         else s.theld = util.time() - s.tdown end
         return z, s.theld
     end,
-    line = function(s, x, y, z)
+    line = function(s, x, y, z, min, max)
         local i = x - s.p_.x[1] + 1
-        local min, max = count(s)
         local add
         local rem
 
@@ -213,9 +215,8 @@ _grid.momentary.input.muxhandler = _obj_:new {
 
         return #s.list >= min and s.held or s.vinit, add, rem, s.theld, s.list
     end,
-    plane = function(s, x, y, z)
+    plane = function(s, x, y, z, min, max)
         local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
-        local min, max = count(s)
         local add
         local rem
 
@@ -248,7 +249,7 @@ local lvl = function(s, i)
     return (type(x) ~= 'table') and ((i > 0) and x or 0) or x[i + 1] or 15
 end
 
-_grid.momentary.output.muxredraw = _obj_:new {
+_grid.binary.output.muxredraw = _obj_:new {
     point = function(s, g, v)
         local lvl = lvl(s, v)
         if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
@@ -275,10 +276,12 @@ _grid.momentary.output.muxredraw = _obj_:new {
     end
 }
 
-_grid.toggle = _grid.momentary:new { edge = 1 }
+---
+
+_grid.toggle = _grid.binary:new { edge = 1 }
 
 _grid.toggle.new = function(self, o) 
-    o = _grid.momentary.new(self, o)
+    o = _grid.binary.new(self, o)
 
     rawset(o, 'toglist', {})
 
@@ -296,14 +299,14 @@ end
 
 _grid.toggle.input.muxhandler = _obj_:new {
     point = function(s, x, y, z)
-        local held = _grid.momentary.input.muxhandler.point(s, x, y, z)
+        local held = _grid.binary.input.muxhandler.point(s, x, y, z)
 
         if s.edge == held then
             return toggle(s, s.v), util.time() - s.tlast, s.theld
         end
     end,
     line = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.line(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.line(s, x, y, z)
         local min, max = count(s)
         local i
         local add
@@ -355,7 +358,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
         end
     end,
     plane = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.plane(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z)
         local min, max = count(s)
         local i
         local add
@@ -407,10 +410,10 @@ _grid.toggle.input.muxhandler = _obj_:new {
     end
 }
 
-_grid.trigger = _grid.momentary:new { edge = 1, blinktime = 0.1 }
+_grid.trigger = _grid.binary:new { edge = 1, blinktime = 0.1 }
 
 _grid.trigger.new = function(self, o) 
-    o = _grid.momentary.new(self, o)
+    o = _grid.binary.new(self, o)
 
     rawset(o, 'triglist', {})
 
@@ -422,7 +425,7 @@ end
 
 _grid.trigger.input.muxhandler = _obj_:new {
     point = function(s, x, y, z)
-        local held = _grid.momentary.input.muxhandler.point(s, x, y, z)
+        local held = _grid.binary.input.muxhandler.point(s, x, y, z)
         
         if s.edge == held then
             print("handler")
@@ -430,7 +433,7 @@ _grid.trigger.input.muxhandler = _obj_:new {
         end
     end,
     line = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.line(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.line(s, x, y, z)
         local min, max = count(s)
         local ret = false
         local lret
@@ -473,7 +476,7 @@ _grid.trigger.input.muxhandler = _obj_:new {
         if ret then return s.v, s.tdelta, s.theld, lret end
     end,
     plane = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.momentary.input.muxhandler.plane(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z)
         local min, max = count(s)
         local ret = false
         local lret
@@ -621,10 +624,10 @@ _grid.fill.new = function(self, o)
 end
 
 _grid.fill.output.muxredraw = _obj_:new {
-    point = _grid.momentary.output.muxredraw.point,
-    line_x = _grid.momentary.output.muxredraw.line_x,
-    line_y = _grid.momentary.output.muxredraw.line_y,
-    plane = _grid.momentary.output.muxredraw.plane
+    point = _grid.binary.output.muxredraw.point,
+    line_x = _grid.binary.output.muxredraw.line_x,
+    line_y = _grid.binary.output.muxredraw.line_y,
+    plane = _grid.binary.output.muxredraw.plane
 }
 
 _grid.value = _grid.muxcontrol:new { edge = 1, count = nil, tdown = 0, filtersame = true }
