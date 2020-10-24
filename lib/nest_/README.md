@@ -1,8 +1,8 @@
 # grid
 ```
-REFACTOR
+TEST
 
-seperate count into count and fingers. fingers sets a range of held keys requred for an action to occur, count sets the range of values that may be present at one time. in momentary these are the same concept, but in the other objects they are seperate. in order to impliment the ideas seprately the reused guts of momentary need to be abstracted into more flexble utility functions
+fingers, count
 
 ADD
 
