@@ -125,8 +125,7 @@ _grid.muxmetacntrl = _grid.metacontrol:new {
     output = _grid.muxcontrol.output:new()
 }
 
-local binary = _grid.muxcontrol:new({ count = nil, fingers = nil }) -- local supertype for binary, toggle, trigger
-binary.devk = 'g'
+_grid.binary = _grid.muxcontrol:new({ count = nil, fingers = nil }) -- local supertype for binary, toggle, trigger
 
 local function minit(axis) 
     local v
@@ -150,7 +149,7 @@ local function minit(axis)
     return v
 end
 
-binary.new = function(self, o) 
+_grid.binary.new = function(self, o) 
     o = _grid.muxcontrol.new(self, o)
 
     rawset(o, 'list', {})
@@ -169,29 +168,15 @@ binary.new = function(self, o)
     return o
 end
 
---[[
-local function count(s) 
-    local min = 0
-    local max = nil
-
-    if type(s.p_.count) == "table" then 
-        max = s.p_.count[#s.p_.count]
-        min = #s.p_.count > 1 and s.p_.count[1] or 0
-    else max = s.p_.count end
-
-    return min, max
-end
-]]
-
 _grid.binary.input.muxhandler = _obj_:new {
-    point = function(s, x, y, z, min, max)
+    point = function(s, x, y, z, min, max, wrap)
         if z > 0 then 
             s.tlast = s.tdown
             s.tdown = util.time()
         else s.theld = util.time() - s.tdown end
         return z, s.theld
     end,
-    line = function(s, x, y, z, min, max)
+    line = function(s, x, y, z, min, max, wrap)
         local i = x - s.p_.x[1] + 1
         local add
         local rem
@@ -201,7 +186,7 @@ _grid.binary.input.muxhandler = _obj_:new {
             s.tlast[i] = s.tdown[i]
             s.tdown[i] = util.time()
             table.insert(s.list, i)
-            if max and #s.list > max then rem = table.remove(s.list, 1) end
+            if wrap and #s.list > wrap then rem = table.remove(s.list, 1) end
         else
             local k = tab.key(s.list, i)
             if k then
@@ -213,9 +198,9 @@ _grid.binary.input.muxhandler = _obj_:new {
         if add then s.held[add] = 1 end
         if rem then s.held[rem] = 0 end
 
-        return #s.list >= min and s.held or s.vinit, add, rem, s.theld, s.list
+        return (#s.list >= min and (max == nil or #s.list <= max)) and s.held or s.vinit, add, rem, s.theld, s.list
     end,
-    plane = function(s, x, y, z, min, max)
+    plane = function(s, x, y, z, min, max, wrap)
         local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
         local add
         local rem
@@ -225,7 +210,7 @@ _grid.binary.input.muxhandler = _obj_:new {
             s.tlast[i.x][i.y] = s.tdown[i.x][i.y]
             s.tdown[i.x][i.y] = util.time()
             table.insert(s.list, i)
-            if max and (#s.list > max) then rem = table.remove(s.list, 1) end
+            if wrap and (#s.list > wrap) then rem = table.remove(s.list, 1) end
         else
             rem = i
             for j,w in ipairs(s.list) do
@@ -239,7 +224,7 @@ _grid.binary.input.muxhandler = _obj_:new {
         if add then s.held[add.x][add.y] = 1 end
         if rem then s.held[rem.x][rem.y] = 0 end
 
-        return #s.list >= min and s.held or s.vinit, add, rem, s.theld, s.list
+        return (#s.list >= min and (max == nil or #s.list <= max)) and s.held or s.vinit, add, rem, s.theld, s.list
     end
 }
 
@@ -276,7 +261,55 @@ _grid.binary.output.muxredraw = _obj_:new {
     end
 }
 
----
+_grid.momentary = _grid.binary:new()
+
+local function count(s) 
+    local min = 0
+    local max = nil
+
+    if type(s.p_.count) == "table" then 
+        max = s.p_.count[#s.p_.count]
+        min = #s.p_.count > 1 and s.p_.count[1] or 0
+    else max = s.p_.count end
+
+    return min, max
+end
+
+local function fingers(s)
+    local min = 0
+    local max = nil
+
+    if type(s.p_.fingers) == "table" then 
+        max = s.p_.fingers[#s.p_.fingers]
+        min = #s.p_.fingers > 1 and s.p_.fingers[1] or 0
+    else max = s.p_.fingers end
+
+    return min, max
+end
+
+_grid.momentary.input.muxhandler = _obj_:new {
+    point = function(s, x, y, z)
+        local max
+        local min, wrap = count(s)
+        min, max = fingers(s)
+
+        return _grid.binary.input.muxhandler.point(s, x, y, z, min, max, wrap)
+    end,
+    line = function(s, x, y, z)
+        local max
+        local min, wrap = count(s)
+        min, max = fingers(s)
+
+        return _grid.binary.input.muxhandler.point(s, x, y, z, min, max, wrap)
+    end,
+    plane = function(s, x, y, z)
+        local max
+        local min, wrap = count(s)
+        min, max = fingers(s)
+
+        return _grid.binary.input.muxhandler.point(s, x, y, z, min, max, wrap)
+    end
+}
 
 _grid.toggle = _grid.binary:new { edge = 1 }
 
@@ -306,7 +339,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
         end
     end,
     line = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.line(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.line(s, x, y, z, fingers(s))
         local min, max = count(s)
         local i
         local add
@@ -314,11 +347,6 @@ _grid.toggle.input.muxhandler = _obj_:new {
        
         if s.edge == 1 and hadd then i = hadd end
         if s.edge == 0 and hrem then i = hrem end
-           
-        print('toglist')
-        tab.print(s.toglist)
-        print('hlist')
-        tab.print(hlist)
  
         if i then   
             if #s.toglist >= min then
@@ -358,7 +386,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
         end
     end,
     plane = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z)
+        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z, fingers(s))
         local min, max = count(s)
         local i
         local add
@@ -428,13 +456,12 @@ _grid.trigger.input.muxhandler = _obj_:new {
         local held = _grid.binary.input.muxhandler.point(s, x, y, z)
         
         if s.edge == held then
-            print("handler")
             return 1, util.time() - s.tlast, s.theld
         end
     end,
     line = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.line(s, x, y, z)
-        local min, max = count(s)
+        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.line(s, x, y, z, fingers(s))
+        local min, max = count(s) --------
         local ret = false
         local lret
 
@@ -476,8 +503,8 @@ _grid.trigger.input.muxhandler = _obj_:new {
         if ret then return s.v, s.tdelta, s.theld, lret end
     end,
     plane = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z)
-        local min, max = count(s)
+        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z, fingers(s))
+        local min, max = count(s) ---------
         local ret = false
         local lret
 
@@ -630,12 +657,13 @@ _grid.fill.output.muxredraw = _obj_:new {
     plane = _grid.binary.output.muxredraw.plane
 }
 
-_grid.value = _grid.muxcontrol:new { edge = 1, count = nil, tdown = 0, filtersame = true }
+_grid.value = _grid.muxcontrol:new { edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 } }
 
 _grid.value.new = function(self, o) 
     o = _grid.muxcontrol.new(self, o)
 
     rawset(o, 'hlist', {})
+    o.count = { 1, 1 }
 
     local _, axis = input_contained(o, { -1, -1 })
    
@@ -650,7 +678,7 @@ _grid.value.input.muxhandler = _obj_:new {
     end,
     line = function(s, x, y, z) 
         local i = x - s.p_.x[1]
-        local min, max = count(s)
+        local min, max = fingers(s)
 
         if z > 0 then
             if #s.hlist == 0 then s.tdown = util.time() end
@@ -690,7 +718,7 @@ _grid.value.input.muxhandler = _obj_:new {
     plane = function(s, x, y, z) 
         local i = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
 
-        local min, max = count(s)
+        local min, max = fingers(s)
 
         if z > 0 then
             if #s.hlist == 0 then s.tdown = util.time() end
