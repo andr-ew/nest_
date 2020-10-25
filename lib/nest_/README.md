@@ -1,17 +1,19 @@
 # grid
 ```
-considering droping fingers bc it adds to complexiy for toggle ? 
-
-REFACTOR
-
-for now, let's just get toggle to ignore pressed outside the fingers range, then just proceed as normal once things are in ranage. build some null behavior into binary and just ignore that stuff
-
 ADD
 
 _grid.range
 _grid.fader
 
 action arg defaults
+
+BUG
+
+toggle.fingers unsupported, toggle.egde == 0 & toggle.count don't work as expected, trigger.count unsuported, trigger.fingers[2] does not work as expected (works more like count)
+
+need refactor of toggle + binary
+
+COLLECTION
 
 control
 fill (output only)
@@ -21,8 +23,6 @@ trigger
 momentary
 toggle
 fader { range = { 0, 1 } }
-
-grid.andrew.glide (2nd input inside a value)
 
 metacontrol
 pattern
