@@ -1,8 +1,5 @@
 # grid
 ```
-TEST
-
-fingers, count
 
 ADD
 
