@@ -300,14 +300,14 @@ _grid.momentary.input.muxhandler = _obj_:new {
         local min, wrap = count(s)
         min, max = fingers(s)
 
-        return _grid.binary.input.muxhandler.point(s, x, y, z, min, max, wrap)
+        return _grid.binary.input.muxhandler.line(s, x, y, z, min, max, wrap)
     end,
     plane = function(s, x, y, z)
         local max
         local min, wrap = count(s)
         min, max = fingers(s)
 
-        return _grid.binary.input.muxhandler.point(s, x, y, z, min, max, wrap)
+        return _grid.binary.input.muxhandler.plane(s, x, y, z, min, max, wrap)
     end
 }
 
