@@ -1,5 +1,10 @@
 # grid
 ```
+considering droping fingers bc it adds to complexiy for toggle ? 
+
+REFACTOR
+
+for now, let's just get toggle to ignore pressed outside the fingers range, then just proceed as normal once things are in ranage. build some null behavior into binary and just ignore that stuff
 
 ADD
 

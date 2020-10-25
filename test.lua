@@ -13,7 +13,7 @@ n = nest_ {
         x = { 1, 16 },
         y = { 1, 8 },
         --y = 1,
-        count = { 2, 3 },
+        fingers = { 2, 2 },
         --edge = 0,
         action = function(s, v, t, t2, l) print('v', v, "t", t) end
     }
