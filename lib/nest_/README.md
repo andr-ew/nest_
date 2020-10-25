@@ -1,15 +1,19 @@
 # grid
 ```
-REFACTOR
-
-seperate count into count and fingers. fingers sets a range of held keys requred for an action to occur, count sets the range of values that may be present at one time. in momentary these are the same concept, but in the other objects they are seperate. in order to impliment the ideas seprately the reused guts of momentary need to be abstracted into more flexble utility functions
-
 ADD
 
 _grid.range
 _grid.fader
 
 action arg defaults
+
+BUG
+
+toggle.fingers unsupported, toggle.egde == 0 & toggle.count don't work as expected, trigger.count unsuported, trigger.fingers[2] does not work as expected (works more like count)
+
+need refactor of toggle + binary
+
+COLLECTION
 
 control
 fill (output only)
@@ -19,8 +23,6 @@ trigger
 momentary
 toggle
 fader { range = { 0, 1 } }
-
-grid.andrew.glide (2nd input inside a value)
 
 metacontrol
 pattern
