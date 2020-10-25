@@ -350,7 +350,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
         end
     end,
     line = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.line(s, x, y, z, fingers(s))
+        local held, theld, _, hadd, hrem, hlist = _grid.binary.input.muxhandler.line(s, x, y, z, fingers(s))
         local min, max = count(s)
         local i
         local add
@@ -396,7 +396,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
         end
     end,
     plane = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z, fingers(s))
+        local held, theld, _, hadd, hrem, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z, fingers(s))
         local min, max = count(s)
         local i
         local add
