@@ -9,13 +9,11 @@ tab = require 'tabutil'
 include 'lib/nest_/grid'
 
 n = nest_ {
-    v = _grid.value {
-        x = { 1, 16 },
-        y = { 1, 8 },
+    v = _grid.fader {
+        x = { 1, 7 },
+        y = { 1, 7 },
         --y = 1,
-        --fingers = { 2, 2 },
-        fingers = { 2, 2 },
-        edge = 0,
-        action = function(s, v, t, t2, add, rem, l) print('v', v, "t", t, '#l', l and #l) end
+        range = { -1, 1 },
+        action = function(s, v, t, t2, add, rem, l) print('v', v, "t", t, "d", t2) end
     }
 } :connect { g = grid.connect() }

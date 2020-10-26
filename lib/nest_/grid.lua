@@ -677,7 +677,7 @@ _grid.fill.output.muxredraw = _obj_:new {
     plane = _grid.binary.output.muxredraw.plane
 }
 
-_grid.value = _grid.muxcontrol:new { edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 } }
+_grid.value = _grid.muxcontrol:new { edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 }, vlast = 0 }
 
 _grid.value.new = function(self, o) 
     o = _grid.muxcontrol.new(self, o)
@@ -688,6 +688,7 @@ _grid.value.new = function(self, o)
     local _, axis = input_contained(o, { -1, -1 })
    
     if axis.x and axis.y then o.v = type(o.v) == 'table' and o.v or { x = 0, y = 0 } end
+    if axis.x and axis.y then o.vlast = type(o.vlast) == 'table' and o.vlast or { x = 0, y = 0 } end
  
     return o
 end
@@ -710,7 +711,8 @@ _grid.value.input.muxhandler = _obj_:new {
                     s.hlist = {}
 
                     if max == nil or len <= max then
-                        return i, len > 1 and util.time() - s.tdown or 0
+                        s.vlast = s.v
+                        return i, len > 1 and util.time() - s.tdown or 0, i - s.vlast
                     end
                 end
             end
@@ -723,7 +725,8 @@ _grid.value.input.muxhandler = _obj_:new {
 
                     if max == nil or len <= max then
                         if i ~= s.v or (not s.filtersame) then 
-                           return i, util.time() - s.tdown
+                            s.vlast = s.v
+                            return i, util.time() - s.tdown, i - s.vlast
                         end
                     end
                 else
@@ -748,11 +751,13 @@ _grid.value.input.muxhandler = _obj_:new {
                 if (not (i.x == s.v.x and i.y == s.v.y)) or (not s.filtersame) then 
                     local len = #s.hlist
                     s.hlist = {}
+                    s.vlast.x = s.v.x
+                    s.vlast.y = s.v.y
                     s.v.x = i.x
                     s.v.y = i.y
 
                     if max == nil or len <= max then
-                        return s.v, len > 1 and util.time() - s.tdown or 0
+                        return s.v, len > 1 and util.time() - s.tdown or 0, { s.v.x - s.vlast.x, s.v.y - s.vlast.y }
                     end
                 end
             end
@@ -765,9 +770,11 @@ _grid.value.input.muxhandler = _obj_:new {
 
                     if max == nil or len <= max then
                         if (not (i.x == s.v.x and i.y == s.v.y)) or (not s.filtersame) then 
+                            s.vlast.x = s.v.x
+                            s.vlast.y = s.v.y
                             s.v.x = i.x
                             s.v.y = i.y
-                            return i, util.time() - s.tdown
+                            return i, util.time() - s.tdown, { s.v.x - s.vlast.x, s.v.y - s.vlast.y }
                         end
                     end
                 else
@@ -803,6 +810,89 @@ _grid.value.output.muxredraw = _obj_:new {
         for i = s.p_.x[1], s.p_.x[2] do
             for j = s.p_.y[1], s.p_.y[2] do
                 local l = lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 0)
+                if l > 0 then g:led(i, j, l) end
+            end
+        end
+    end
+}
+
+_grid.fader = _grid.value:new { range = { 0, 1 }, lvl = { 0, 4, 15 } }
+
+_grid.fader.input.muxhandler = _obj_:new {
+    point = function(s, x, y, z) 
+        return _grid.value.input.muxhandler.point(s, x, y, z)
+    end,
+    line = function(s, x, y, z) 
+        local v,t,d = _grid.value.input.muxhandler.line(s, x, y, z)
+        if v then
+            local r1 = type(s.x) == 'table' and s.x or s.y
+            local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
+            return util.linlin(r1[1], r1[2], r2[1], r2[2], v + 1), t, d
+        end
+    end,
+    plane = function(s, x, y, z) 
+        local v,t,d = _grid.value.input.muxhandler.plane(s, x, y, z)
+        if v then
+            local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
+            s.v.x = util.linlin(s.x[1], s.x[2], r2[1], r2[2], v.x + 1)
+            s.v.y = util.linlin(s.y[1], s.y[2], r2[1], r2[2], v.y + 1)
+            return s.v, t, d
+        end
+    end
+}
+
+_grid.fader.output.muxredraw = _obj_:new {
+    point = function(s, g, v)
+        local lvl = lvl(s, 1)
+        if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
+    end,
+    line_x = function(s, g, v)
+        for i = s.p_.x[1], s.p_.x[2] do
+            local l = lvl(s, 0)
+            local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
+            local m = util.linlin(s.p_.x[1], s.p_.x[2], r2[1], r2[2], i)
+            --print("m", i - s.p_.x[1], m)
+            if m == v then l = lvl(s, 2)
+            elseif m > v and m <= 0 then l = lvl(s, 1)
+            elseif m < v and m >= 0 then l = lvl(s, 1) end
+            if l > 0 then g:led(i, s.p_.y, l) end
+        end
+    end,
+    line_y = function(s, g, v)
+        for i = s.p_.y[1], s.p_.y[2] do
+            local l = lvl(s, 0)
+            local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
+            local m = util.linlin(s.p_.y[1], s.p_.y[2], r2[1], r2[2], i)
+            --print("m", i - s.p_.x[1], m)
+            if m == v then l = lvl(s, 2)
+            elseif m > v and m <= 0 then l = lvl(s, 1)
+            elseif m < v and m >= 0 then l = lvl(s, 1) end
+            if l > 0 then g:led(i, s.p_.y, l) end
+        end
+    end,
+    plane = function(s, g, v)
+        for i = s.p_.x[1], s.p_.x[2] do
+            for j = s.p_.y[1], s.p_.y[2] do
+                local l = lvl(s, 0)
+                local r = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
+                local m = {
+                    x = util.linlin(s.p_.x[1], s.p_.x[2], r[1], r[2], i),
+                    y = util.linlin(s.p_.y[1], s.p_.y[2], r[1], r[2], j)
+                }
+                if m.x == v.x and m.y == v.y then l = lvl(s, 2)
+                --[[
+
+                alt draw method:
+
+                elseif m.x >= v.x and m.y >= v.y and m.x <= 0 and m.y <= 0 then l = lvl(s, 1)
+                elseif m.x >= v.x and m.y <= v.y and m.x <= 0 and m.y >= 0 then l = lvl(s, 1)
+                elseif m.x <= v.x and m.y <= v.y and m.x >= 0 and m.y >= 0 then l = lvl(s, 1)
+                elseif m.x <= v.x and m.y >= v.y and m.x >= 0 and m.y <= 0 then l = lvl(s, 1)
+
+                ]]
+                elseif m.x == r[1] or m.y == r[1] or m.x == r[2] or m.y == r[2] then l = lvl(s, 1)
+                elseif m.x == 0 or m.y == 0 then l = lvl(s, 1)
+                end
                 if l > 0 then g:led(i, j, l) end
             end
         end
