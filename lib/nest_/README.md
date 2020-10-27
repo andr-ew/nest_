@@ -1,13 +1,7 @@
 # grid
 ```
-ADD
 
-_grid.range
-
-action arg defaults
 value, time, delta, add, rem, list
-
-COLLECTION
 
 control
 fill (output only)
@@ -22,12 +16,10 @@ metacontrol
 pattern
 preset
 
-BUG
+ADD
 
-toggle.fingers unsupported, toggle.egde == 0 & toggle.count don't work as expected, trigger.count unsuported, trigger.fingers[2] does not work as expected (works more like count)
-
-need refactor of toggle + binary
-
+_grid.pattern
+_grid.preset
 
 ```
 

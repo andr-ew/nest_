@@ -123,7 +123,6 @@ _input = _obj_:new {
     handler = nil,
     devk = nil,
     filter = function(self, devk, args) return args end,
-    arg_defaults = {},
     update = function(self, devk, args, mc)
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
@@ -146,8 +145,9 @@ _input = _obj_:new {
                 end
             end
         elseif devk == nil or args == nil then -- called w/o arguments
-
-            self.control.v = self.action and self:action(self.control.v, table.unpack(self.arg_defaults)) or self.control.v
+            
+            local defaults = self.arg_defaults or {}
+            self.control.v = self.action and self:action(self.control.v, table.unpack(defaults)) or self.control.v
             
             if self.devs[self.devk] then self.devs[self.devk].dirty = true end
 

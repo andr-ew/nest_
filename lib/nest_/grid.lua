@@ -164,6 +164,14 @@ _grid.binary.new = function(self, o)
     o.vinit = minit(axis)
     o.blank = {}
 
+    o.arg_defaults = {
+        minit(axis),
+        minit(axis),
+        nil,
+        nil,
+        o.list
+    }
+
     if type(o.v) ~= 'table' or type(o.v) == 'table' and #o.v ~= #v then o.v = v end
     
     return o
@@ -339,6 +347,14 @@ _grid.toggle.new = function(self, o)
 
     --o.tog = minit(axis)
     o.ttog = minit(axis)
+
+    o.arg_defaults = {
+        minit(axis),
+        minit(axis),
+        nil,
+        nil,
+        o.toglist
+    }
     
     return o
 end
@@ -463,6 +479,14 @@ _grid.trigger.new = function(self, o)
 
     local _, axis = input_contained(o, { -1, -1 })
     o.tdelta = minit(axis)
+
+    o.arg_defaults = {
+        minit(axis),
+        minit(axis),
+        nil,
+        nil,
+        o.triglist
+    }
     
     return o
 end
@@ -690,6 +714,11 @@ _grid.value.new = function(self, o)
     if axis.x and axis.y then o.v = type(o.v) == 'table' and o.v or { x = 0, y = 0 } end
     if axis.x and axis.y then o.vlast = type(o.vlast) == 'table' and o.vlast or { x = 0, y = 0 } end
  
+    o.arg_defaults = {
+        0,
+        0
+    }
+
     return o
 end
 
@@ -907,6 +936,11 @@ _grid.range.new = function(self, o)
     rawset(o, 'hlist', {})
     o.count = { 1, 1 }
     o.fingers = { 1, 1 }
+    
+    o.arg_defaults = {
+        0,
+        0
+    }
 
     local _, axis = input_contained(o, { -1, -1 })
  
