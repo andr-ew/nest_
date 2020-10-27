@@ -3,7 +3,6 @@
 ADD
 
 _grid.range
-_grid.fader
 
 action arg defaults
 value, time, delta, add, rem, list

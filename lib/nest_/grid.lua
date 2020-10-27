@@ -732,7 +732,7 @@ _grid.value.input.muxhandler = _obj_:new {
                 else
                     local k = tab.key(s.hlist, i)
                     if k then
-                        rem = table.remove(s.hlist, k)
+                        table.remove(s.hlist, k)
                     end
                 end
             end
@@ -867,7 +867,7 @@ _grid.fader.output.muxredraw = _obj_:new {
             if m == v then l = lvl(s, 2)
             elseif m > v and m <= 0 then l = lvl(s, 1)
             elseif m < v and m >= 0 then l = lvl(s, 1) end
-            if l > 0 then g:led(i, s.p_.y, l) end
+            if l > 0 then g:led(s.p_.x, i, l) end
         end
     end,
     plane = function(s, g, v)
@@ -892,6 +892,128 @@ _grid.fader.output.muxredraw = _obj_:new {
                 ]]
                 elseif m.x == r[1] or m.y == r[1] or m.x == r[2] or m.y == r[2] then l = lvl(s, 1)
                 elseif m.x == 0 or m.y == 0 then l = lvl(s, 1)
+                end
+                if l > 0 then g:led(i, j, l) end
+            end
+        end
+    end
+}
+
+_grid.range = _grid.muxcontrol:new { edge = 1, fingers = { 2, 2 }, tdown = 0, count = { 1, 1 }, v = { 0, 0 } }
+
+_grid.range.new = function(self, o) 
+    o = _grid.muxcontrol.new(self, o)
+
+    rawset(o, 'hlist', {})
+    o.count = { 1, 1 }
+    o.fingers = { 1, 1 }
+
+    local _, axis = input_contained(o, { -1, -1 })
+ 
+    if axis.x and axis.y then o.v = type(o.v[1]) == 'table' and o.v or { { x = 0, y = 0 }, { x = 0, y = 0 } } end
+ 
+    return o
+end
+
+_grid.range.input.muxhandler = _obj_:new {
+    point = function(s, x, y, z) 
+        if z > 0 then return 0 end
+    end,
+    line = function(s, x, y, z) 
+        local i = x - s.p_.x[1]
+
+        if z > 0 then
+            if #s.hlist == 0 then s.tdown = util.time() end
+            table.insert(s.hlist, i)
+           
+            if s.edge == 1 then 
+                if #s.hlist >= 2 then 
+                    local v = { s.hlist[1], s.hlist[#s.hlist] }
+                    table.sort(v)
+                    s.hlist = {}
+                    return v, util.time() - s.tdown 
+                end
+            end
+        else
+            if #s.hlist >= 2 then 
+                if s.edge == 0 then
+                    local v = { s.hlist[1], s.hlist[#s.hlist] }
+                    table.sort(v)
+                    s.hlist = {}
+                    return v, util.time() - s.tdown 
+                end
+            else
+                local k = tab.key(s.hlist, i)
+                if k then
+                    table.remove(s.hlist, k)
+                end
+            end
+        end
+    end,
+    plane = function(s, x, y, z) 
+        local i = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
+
+        if z > 0 then
+            if #s.hlist == 0 then s.tdown = util.time() end
+            table.insert(s.hlist, i)
+           
+            if s.edge == 1 then 
+                if #s.hlist >= 2 then 
+                    local v = { s.hlist[1], s.hlist[#s.hlist] }
+                    table.sort(v, function(a, b) 
+                        return a.x < b.x
+                    end)
+                    s.hlist = {}
+                    return v, util.time() - s.tdown 
+                end
+            end
+        else
+            if #s.hlist >= 2 then 
+                if s.edge == 0 then
+                    local v = { s.hlist[1], s.hlist[#s.hlist] }
+                    table.sort(v, function(a, b) 
+                        return a.x < b.x
+                    end)
+                    s.hlist = {}
+                    return v, util.time() - s.tdown 
+                end
+            else
+                for j,w in ipairs(s.hlist) do
+                    if w.x == i.x and w.y == i.y then 
+                        table.remove(s.hlist, j)
+                    end
+                end
+            end
+        end
+    end
+}
+
+_grid.range.output.muxredraw = _obj_:new {
+    point = function(s, g, v)
+        local lvl = lvl(s, 1)
+        if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
+    end,
+    line_x = function(s, g, v)
+        for i = s.p_.x[1], s.p_.x[2] do
+            local l = lvl(s, 0)
+            if i >= v[1] + 1 and i <= v[2] + 1 then l = lvl(s, 1) end
+            if l > 0 then g:led(i, s.p_.y, l) end
+        end
+    end,
+    line_y = function(s, g, v)
+        for i = s.p_.y[1], s.p_.y[2] do
+            local l = lvl(s, 0)
+            if i >= v[1] + 1 and i <= v[2] + 1 then l = lvl(s, 1) end
+            if l > 0 then g:led(s.p_.x, i, l) end
+        end
+    end,
+    plane = function(s, g, v)
+        for i = s.p_.x[1], s.p_.x[2] do
+            for j = s.p_.y[1], s.p_.y[2] do
+                local l = lvl(s, 0)
+                if (i == v[1].x + 1 or i == v[2].x + 1) and j >= v[1].y + 1 and j <= v[2].y + 1 then l = lvl(s, 1)
+                elseif (j == v[1].y + 1 or j == v[2].y + 1) and i >= v[1].x + 1 and i <= v[2].x + 1 then l = lvl(s, 1)
+                elseif v[2].y < v[1].y and (i == v[1].x + 1 or i == v[2].x + 1) and j >= v[2].y + 1 and j <= v[1].y + 1 then l = lvl(s, 1)
                 end
                 if l > 0 then g:led(i, j, l) end
             end
