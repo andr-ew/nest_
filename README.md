@@ -1,11 +1,29 @@
 # Nest_
 
-`nest_` is an object language and library for building user interface structures on the monome norns sound computer
+`nest_` is an object language and library for building user interface structures in lua for monome devices
+
+```
+n = nest_ {
+    control = _grid.toggle {
+        x = { 1, 4 },
+        y = 1,
+        edge = 0,
+        action = function(s, v, t)
+            print("v")
+            tab.print(v)
+            print('t')
+            tab.print(t)
+        end
+    }
+} :connect { g = grid.connect() }
+```
 
 ### [RELEASES](https://github.com/andr-ew/nest_/releases/)
 
 # Docs
 ## Modules
+
+the various types and interface buidling blocks of nestworld are split up into a growing collection files or `modules`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read on !
 
 - [`nest_/core`](./doc/core.md)
 - `nest_/norns`
@@ -13,7 +31,6 @@
 - `nest_/arc`
 - `nest_/txt`
 
-the various types and interface buidling tools of nestworld are split up into a growing collection files or `modules` inside `lib/nest_`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read on !
 
 ## Including
 
