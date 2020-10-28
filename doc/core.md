@@ -32,19 +32,12 @@
   
 }
 
- 
-```
-_group {}
-```
+[_group](#_control) { }
 
 # nest_
 
-
-
-
-
-
-
-
+one of the two basic types in `nest_`. for introductory info, see 
 
 # _control
+
+# _group
