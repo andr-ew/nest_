@@ -1,6 +1,6 @@
 # types
 
-[_grid.control](#_grid.control) {
+[_grid.control](#control) {
   - [x](#x)
   - [y](#y)
   - [value](#value)
@@ -13,30 +13,30 @@
 
 }
 
-[_grid.fill](#_grid.fill) { ... }
+[_grid.fill](#fill) { ... }
 
-[_grid.value](#_grid.value) { ... }
+[_grid.value](#value) { ... }
 
-[_grid.fader](#_grid.fader) {
+[_grid.fader](#fader) {
   - ...
-  - [range](#range)
+  - range
   
 }
 
-[_grid.trigger](#_grid.trigger) { ... }
+[_grid.trigger](#trigger) { ... }
 
-[_grid.momentary](#_grid.momentary) { ... }
+[_grid.momentary](#momentary) { ... }
 
-[_grid.toggle](#_grid.toggle) { ... }
+[_grid.toggle](#toggle) { ... }
 
-[_grid.range](#_grid.toggle) { ... }
+[_grid.range](#range) { ... }
 
 _grid.pattern { ... }
 
 _grid.preset { ... }
 
 
-### _grid.control
+### control
 
 the base control type for the grid module - all other grid controls inherit from this device and share common properties. the user may extend this type in order to define a custom grid control:
 
@@ -57,25 +57,21 @@ two_by_two = _grid.control {
 }
 ```
 
-### _grid.fill
-
-### _grid.value
-
-### _grid.fader
-
-### _grid.trigger
-
-### _grid.momentary
-
-### _grid.toggle
-
-### _grid.range
-
-# properties
+### fill
 
 ### value
 
-the control value. the format of value depends on the control type and the `x` and `y` dimentions. it is always either a number or a table of numbers - see types for details
+### fader
+
+### trigger
+
+### momentary
+
+### toggle
+
+### range
+
+# properties
 
 # methods
 
