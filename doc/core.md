@@ -36,8 +36,10 @@
 
 # nest_
 
-one of the two basic types in `nest_`. for introductory info, see 
+one of the two basic types in `nest_`. for introductory info, see [nests and controls](../study/study1.md)
 
 # _control
+
+one of the two basic types in `nest_`. for introductory info, see [nests and controls](../study/study1.md)
 
 # _group
