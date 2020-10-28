@@ -31,10 +31,10 @@ dave = nest_ {
     age = 4
   },
   walter = _control {
-    age = 7
+    age = 5
   },
   elanore = _control {
-    age = 8
+    age = 6
   }
 }
 ```
@@ -54,17 +54,56 @@ dave = nest_ {
     end
   },
   walter = _control {
-    age = 7,
+    age = 5,
     action = funtion(self, value)
       print(self.age)
     end
   },
   elanore = _control {
-    age = 8,
+    age = 6,
     action = funtion(self, value)
       print(self.age)
     end
   }
 }
 ```
-now what are _those_ arguments ? 
+now what are _those_ arguments ? as with all methods, the first argument is `self`. that way, no matter what, we'll never lose track of who we are. in this case, self contains `age` and `action` (and usually more under the hood), and we're acessing `self.age` to print our age to the maiden REPL. in addition, every `_control` contains a property called `value`, which is passed to the `action` method for convenience. whenever `value` is changed, `action` is called, it's a cause an effect sort of scenario. we can rewrite the above as:
+
+```
+dave = nest_ {
+  tommy = _control {
+    value = 4,
+    action = function(self, value)
+      print("I am " .. tostring(value) .. " years old!")
+    end
+  },
+  walter = _control {
+    value = 5,
+    action = function(self, value)
+      print("I am " .. tostring(value) .. " years old!")
+    end
+  },
+  elanore = _control {
+    value = 6,
+    action = function(self, value)
+      print("I am " .. tostring(value) .. " years old!")
+    end
+  }
+}
+```
+
+in this case, perhaps the user updates `value` whenever a year goes by, and so child announces their age. pretty cool, but it's kind of a hastle to rewrite that same action function three times, especially if we need to head back and make changes later. to remedy this, we need to construct a child-making factory. a lua `for` loop would suffice, but for convenience there's also the `nest_:each()` method, which frequently comes in handly. check this out:
+
+
+```
+dave = nest_(3):each(function(i)
+  return _control {
+    value = i + 3,
+    action = function(self, value) 
+      print("I am " .. tostring(value) .. " years old!")
+    end
+  }
+end)
+```
+
+here we initialize dave with three blank children (numbered 1-3), call the `each` function and send it a _callback function_ which returns a `_control` to each blank child slot (the number of which is stored in the `i` variable). asending values and the action function can be generated for all three in one efficient swoop.
