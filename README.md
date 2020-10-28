@@ -23,7 +23,7 @@ n = nest_ {
 # Studies
 
 
-- [nests and controls](./study/study1.md)
+1. [nests and controls](./study/study1.md)
 
 # Docs
 
