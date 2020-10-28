@@ -73,11 +73,12 @@ two_by_two = _grid.control {
 
 # properties
 
-# methods
-
 ### value
 
 the control value. the format of value depends on the control type and the `x` and `y` dimentions - it may either be a single number or a table of numbers. see types for details.
+
+
+# methods
 
 ### action
 
