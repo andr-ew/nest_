@@ -57,13 +57,13 @@ the key of a child object
 
 the order of children within a `nest_` when drawn or updated by a device input. higher z values will be drawn or updated first, default = 0
 
-### value
-
-the definitive datapoint of a control. this is the only property expected to change dynamically, though it can be initialized just like any other property. different controls will expect different datatypes and range constraints. along with `p`, `k`, and `z`, a pointer function cannot be assigned to `value`.
-
 ### enabled
 
 boolean value, sets whether a given object and its children are drawn + updated. useful for pagination !
+
+### value
+
+the definitive datapoint of a control. this is the only property expected to change dynamically, though it can be initialized just like any other property. different controls will expect different datatypes and range constraints. along with `p`, `k`, and `z`, a pointer function cannot be assigned to `value`.
 
 # methods
 
