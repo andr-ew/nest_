@@ -29,7 +29,7 @@ n = nest_ {
 - `nest_/arc`
 - `nest_/txt`
 
-the various types and interface buidling tools of nestworld are split up into a growing collection files or `modules` inside `lib/nest_`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read on !
+the various types and interface buidling tools of nestworld are split up into a growing collection files or `modules`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read on !
 
 ## Including
 
