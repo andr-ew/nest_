@@ -65,11 +65,11 @@ a simple container type for grouping controls by device or module. ex: `_grid.va
 
 ### _input
 
-stores in input behaviors of a `_control`
+stores input behaviors of a `_control`
 
 ### _output
 
-stores in output behaviors of a `_control`
+stores output behaviors of a `_control`
 
 # properties
 
