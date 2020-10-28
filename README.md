@@ -1,6 +1,6 @@
 # Nest_
 
-`nest_` is an object language and library for building user interface structures in lua
+`nest_` is an object language and library for building user interface structures in lua for monome devices
 
 ```
 n = nest_ {
