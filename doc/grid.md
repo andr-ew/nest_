@@ -82,8 +82,11 @@ the control value. the format of value depends on the control type and the `x` a
 ### action
 
 there may be up to six arguments passed to any grid action in addition to `self`:
-
-`action = function(self, value, time, delta, add, rem, list)`
+```
+action = function(self, value, time, delta, add, rem, list)
+  print(value, time, delta, add, rem, list)
+end
+```
 
 1. `value`: the control value. the format of value depends on the control type and the `x` and `y` dimentions - see types for details.
 2. `time`: the amount of time in seconds that a control is held before releasing. may be either a single number or a table of numbers following the format of `value`.
