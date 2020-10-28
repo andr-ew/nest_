@@ -3,7 +3,7 @@
 [_grid.control](#_grid.control) {
   - [x](#x)
   - [y](#y)
-  - [value](#v)
+  - [value](#value)
   - [lvl](#x)
   - [edge](#edge)
   - [count](#count)
@@ -13,9 +13,9 @@
 
 }
 
-[_grid.fill](#_grid.fader) { ... }
+[_grid.fill](#_grid.fill) { ... }
 
-[_grid.value](#_grid.fader) { ... }
+[_grid.value](#_grid.value) { ... }
 
 [_grid.fader](#_grid.fader) {
   - ...
