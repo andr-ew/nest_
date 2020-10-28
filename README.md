@@ -20,10 +20,17 @@ n = nest_ {
 
 ### [RELEASES](https://github.com/andr-ew/nest_/releases/)
 
-# Docs
-## Modules
+# Studies
 
 the various types and interface buidling blocks of nestworld are split up into a growing collection files or `modules`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read on !
+
+- [`nest_/core`](./study/core.md)
+- `nest_/norns`
+- `nest_/grid`
+- `nest_/arc`
+- `nest_/txt`
+
+# Docs
 
 - [`nest_/core`](./doc/core.md)
 - `nest_/norns`
@@ -32,7 +39,7 @@ the various types and interface buidling blocks of nestworld are split up into a
 - `nest_/txt`
 
 
-## Including
+# Including
 
 typically, it will make the most sense to include nest_ by dropping the required module files into your script's `/lib/nest_` folder and including them like so:
 
