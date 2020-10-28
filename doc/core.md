@@ -69,7 +69,8 @@ assigns a table of device keys and values to a nest structure and initializes it
 
 ```
 nest_{
-...
+  ...
+
 } :connect {
   g = grid.connect(),
   screen = screen,
