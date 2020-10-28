@@ -4,7 +4,7 @@
   - [x](#x)
   - [y](#y)
   - value
-  - [lvl](#x)
+  - [lvl](#lvl)
   - [edge](#edge)
   - [count](#count)
   - [fingers](#fingers)
@@ -73,9 +73,33 @@ two_by_two = _grid.control {
 
 # properties
 
+### x
+
+the horizontal component of a control's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys
+
+### y
+
+the vertical component of a control's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys
+
 ### value
 
 the control value. the format of value depends on the control type and the `x` and `y` dimentions - it may either be a single number or a table of numbers. see types for details.
+
+### lvl
+
+sets the brightness levels for the control. for most types, assigning a single integer sets the "on" level and assigning a table of two sets the "off" and "on" levels
+
+### edge
+
+an integer that sets whether to respond to the rising edge of an input (1), falling edge (0), or both edges (2). will likely affect the behavior of the `time` argument.
+
+### count
+
+when `value` is a table, restricts the number of concurrent 1 values to the range given by `count = { min, max }`
+
+### fingers
+
+restricts the number of simultaneous finger presses to which a control will respond to the range `fingers = { min, max }`
 
 
 # methods
