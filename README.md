@@ -23,13 +23,14 @@ n = nest_ {
 # Docs
 ## Modules
 
+the various types and interface buidling blocks of nestworld are split up into a growing collection files or `modules`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read on !
+
 - [`nest_/core`](./doc/core.md)
 - `nest_/norns`
 - [`nest_/grid`](./doc/grid.md)
 - `nest_/arc`
 - `nest_/txt`
 
-the various types and interface buidling blocks of nestworld are split up into a growing collection files or `modules`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read on !
 
 ## Including
 
