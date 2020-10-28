@@ -32,9 +32,9 @@
 
 [_grid.range](#_grid.toggle) { ... }
 
-_grid.pattern
+_grid.pattern { ... }
 
-_grid.preset
+_grid.preset { ... }
 
 
 ### _grid.control
