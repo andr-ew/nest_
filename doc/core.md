@@ -26,6 +26,26 @@
   - [value](#value)
   - [action](#action)
   - [update](#update)
+  - [handler](#handler)
+  - [redraw](#redraw)
+  
+}
+
+[_input](#_input) {
+  - [p](#p)
+  - [k](#k)
+  - [z](#z)
+  - [enabled](#enabled)
+  - [handler](#handler)
+  
+}
+
+[_output](#_output) {
+  - [p](#p)
+  - [k](#k)
+  - [z](#z)
+  - [enabled](#enabled)
+  - [redraw](#redraw)
   
 }
 
@@ -42,6 +62,14 @@ one of the two basic types in `nest_`. for introductory info, see [nests and con
 ### _group
 
 a simple container type for grouping controls by device or module. ex: `_grid.value`, `_enc.txt.number`
+
+### _input
+
+stores in input behaviors of a `_control`
+
+### _output
+
+stores in output behaviors of a `_control`
 
 # properties
 
@@ -104,11 +132,39 @@ user-defined method called immediately after a nest structure has been initializ
 
 ### update
 
-should be ran after updating `_control.value` in order call the `action` method and signal a device to be redrawn
+this should be ran after updating `_control.value` in order call the `action` method and signal a device to be redrawn.
 
 ### action
 
-user-defined method called whenever `update` is called either manually or by a device, usually when `value` has changed. any return value will in turn assigned `value`, so the action can be used as a filter if desired
+a typically user-defined method called whenever `update` is called either manually or by a device, usually when `value` has changed. any return value will in turn assigned `value`, so the action can be used as a filter if desired
+
+### handler
+
+user-defined or type-defined method to convert device input (as arguments) into a value. additional return values are sent as arguments to `action`. this might look something like:
+
+```
+handler = function(s,v,x,y,z)
+  if z == 1 then 
+    return 1
+  else
+    return 0
+  end
+end
+```
+
+### redraw
+
+user-defined or type-defined method to convert a value into device output. `value` and a device object are sent as arguments. this might look something like:
+
+```
+redraw = function(self, value, g)
+  if value == 1 then
+    g:led(self.x, self.y, 15)
+  else
+    g:led(self.x, self.y, 0)
+  end
+end
+```
 
 ### set
 
