@@ -20,16 +20,23 @@ n = nest_ {
 
 ### [RELEASES](https://github.com/andr-ew/nest_/releases/)
 
+# Studies
+
+
+- [nests and controls](./study/core.md)
+
 # Docs
+
 ## Modules
 
 the various types and interface buidling blocks of nestworld are split up into a growing collection files or `modules`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read on !
 
+
 - [`nest_/core`](./doc/core.md)
-- `nest_/norns`
+- [`nest_/norns`](./doc/norns.md)
 - [`nest_/grid`](./doc/grid.md)
-- `nest_/arc`
-- `nest_/txt`
+- [`nest_/arc`](./doc/arc.md)
+- [`nest_/txt`](./doc/txt.md)
 
 
 ## Including
