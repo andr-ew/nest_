@@ -14,7 +14,10 @@
 
 ## Including
 
-typically, it will make the most sense to icmlude nest_ by dropping the required module files into your script's `/lib/nest_` folder and including them like so:
+typically, it will make the most sense to include nest_ by dropping the required module files into your script's `/lib/nest_` folder and including them like so:
 
 ```
+include 'lib/nest_/norns' -- the core module, formatted for norns
+include 'lib/nest_/grid'
+include 'lib/nest_/txt'
 ```
