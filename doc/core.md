@@ -28,6 +28,8 @@
   - [update](#update)
   - [handler](#handler)
   - [redraw](#redraw)
+  - [input](#_input)
+  - [output](#_output)
   
 }
 
