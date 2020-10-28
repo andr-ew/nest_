@@ -1,14 +1,14 @@
-# NEST_
+# Nest_
 
 `nest_` is an object language and library for building user interface structures on the monome norns sound computer
 
 ### [RELEASES](https://github.com/andr-ew/nest_/releases/)
 
-# BETA DOCS
+# Docs
 ## Modules
 
-- [`nest_/core`](./core.md)
-- [`nest_/grid`](./grid.md)
+- [`nest_/core`](./doc/core.md)
+- [`nest_/grid`](./doc/grid.md)
 - `nest_/arc`
 - `nest_/txt`
 
