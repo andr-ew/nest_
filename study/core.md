@@ -92,7 +92,11 @@ dave = nest_ {
 }
 ```
 
-in this case, perhaps the user updates `value` whenever a year goes by, and so child announces their age. pretty cool, but it's kind of a hastle to rewrite that same action function three times, especially if we need to head back and make changes later. to remedy this, we need to construct a child-making factory. a lua `for` loop would suffice, but for convenience there's also the `nest_:each()` method, which frequently comes in handly. check this out:
+in this case, perhaps the user updates `value` whenever a year goes by, and so child announces their age. 
+
+# automagic
+
+pretty cool, but it's kind of a hastle to rewrite that same action function three times, especially if we need to head back and make changes later. to remedy this, we need to construct a child-making factory. a lua `for` loop would suffice, but for convenience there's also the `nest_:each()` method, which frequently comes in handly. check this out:
 
 
 ```
