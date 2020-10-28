@@ -19,8 +19,9 @@
 [_grid.value](#_grid.fader) { ... }
 
 [_grid.fader](#_grid.fader) {
-  ...
+  - ...
   - [range](#range)
+  
 }
 
 [_grid.trigger](#_grid.trigger) { ... }
