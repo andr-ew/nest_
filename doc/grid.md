@@ -23,7 +23,11 @@
   
 }
 
-[_grid.trigger](#trigger) { ... }
+[_grid.trigger](#trigger) { 
+  - ... 
+  - blinktime
+  
+}
 
 [_grid.momentary](#momentary) { ... }
 
@@ -59,23 +63,31 @@ two_by_two = _grid.control {
 
 ### fill
 
-a simple output-only control which draws the provided area to the provided brightness level
+a simple output-only control which draws the provided `x` and `y` dimentions to the provided brightness level
 
 ### value
 
-a "radio button" style control for which an integer `value` is assinged to index of the last key pressed
+a "radio button" style control for which an integer `value` is assinged to index of the last key pressed. `x` and `y` dimentions set the size of the control and the range of `value`.
 
 ### fader
 
-a fader style value with a decimal `value` in the range of `range = { min, max }`
+a fader style value with a decimal `value` in the range of `range = { min, max }`. `x` and `y` dimentions set the size of the control.
 
 ### trigger
 
+a control that blinks for `blinktime` seconds and runs `action` on keypress. `x` and `y` dimentions set up a matrix of values.
+
 ### momentary
+
+a "held" button where `value` goes high where a key is depressed, low where a key is released. `x` and `y` dimentions set up a matrix of values.
 
 ### toggle
 
+a button where `value` toggles between high and low on a keypress. `x` and `y` dimentions set up a matrix of values. if `lvl` has a table length greater than two, a `toggle` button will cycle forward through those brightness values.
+
 ### range
+
+a two-finger press fills a range of keys and sets `value = { start, end } `
 
 # properties
 
@@ -97,7 +109,7 @@ sets the brightness levels for the control. for most types, assigning a single i
 
 ### edge
 
-an integer that sets whether to respond to the rising edge of an input (1), falling edge (0), or both edges (2). will likely affect the behavior of the `time` argument.
+an integer that sets whether to respond to the rising edge of an input (1), falling edge (0), or both edges (2). will sometimes affect the behavior of the `time` argument.
 
 ### count
 
