@@ -18,7 +18,7 @@ n = nest_ {
 } :connect { g = grid.connect() }
 ```
 
-currently in beta ! provided documentation matches current features, will continue to grow w/ progress over the next few months
+currently in beta ! current documentation covers existing features, will continue to grow w/ progress over the next few months
 
 ### [RELEASES](https://github.com/andr-ew/nest_/releases/)
 
