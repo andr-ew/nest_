@@ -77,22 +77,36 @@ end
 ```
 so we can take a look. yep, that's a table of 16 1's and 0's corresponding to the state of the buttons. if we made it a 2D control with `y = { 1, 8 }` we'd get a a table of tables, a grid press setting `value[x][y] = 1`.
 
-# lotsa
+# enablers
 
-let's make a bunch of varying values
+in the example code try passing ramona the propery `enabled = false`. she's gone ! boring. but let's make it less boring:
 
 ```
-dave = nest_(16):each(function(i)
-  return _grid.fader {
-    x = i,
-    y = { 1, 8 },
-    action = function(self, value) 
-      print('fader number ' .. i .. ' value: ' .. value)
-    end
+dave = nest_ {
+  tab = _grid.value {
+    x = { 1, 2 },
+    y = 1
+  },
+  ramona1 = _grid.toggle {
+    x = 2,
+    y = 4,
+    lvl = { 4, 15 },
+    enabled = function(self) return dave.tab.value == 0 end
+  },
+  ramona2 = _grid.toggle {
+    x = 4,
+    y = 4,
+    lvl = { 4, 15 },
+    enabled = function(self) return dave.tab.value == 1 end
   }
-end) :connect {
+} :connect {
   g = grid.connect()
 }
 ```
 
-we can use `each` to automate 16 independent controls of `fader`, a fader-looking variation of `value`.
+oh ? we can show and hide the two ramonas with the tab value. indeed `enabled` can be a "pointer method" if it wants, fetching and returning data of the appropriate type (the same goes for most properties). in this case, we're asking about `dave.tab`'s value to decide whether to enable.
+
+with the power of the nest we can quickly set up some serious multi-paginated scenarios:
+
+```
+```
