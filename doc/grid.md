@@ -67,7 +67,7 @@ a "radio button" style control which a single integer `value` assinged to index 
 
 ### fader
 
-a fader style value with a decimal value in the range of `range = { min, max }`
+a fader style value with a decimal `value` in the range of `range = { min, max }`
 
 ### trigger
 
