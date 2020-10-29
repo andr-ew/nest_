@@ -87,7 +87,7 @@ a button where `value` toggles between high and low on a keypress. `x` and `y` d
 
 ### range
 
-a two-finger press fills a range of keys and sets `value = { start, end } `
+responds only to a two-finger press and fills a range of keys, setting `value = { finger1, finger2 } `
 
 # properties
 
