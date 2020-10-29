@@ -71,7 +71,7 @@ a "radio button" style control for which an integer `value` is assinged to index
 
 ### fader
 
-a fader style value with a decimal `value` in the range of `range = { min, max }`. `x` and `y` dimentions set the size of the control.
+a fader style value with a decimal `value` in the range of `range = { min, max }`. `range = { -1, 1 }` will yeild a crossfader/pan style. `x` and `y` dimentions set the size of the control.
 
 ### trigger
 
