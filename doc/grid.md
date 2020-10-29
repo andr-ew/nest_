@@ -63,7 +63,7 @@ a simple output-only control which draws the provided area to the provided brigh
 
 ### value
 
-a "radio button" style control which a single integer `value` assinged to index of the last key pressed
+a "radio button" style control for which an integer `value` is assinged to index of the last key pressed
 
 ### fader
 
@@ -81,11 +81,11 @@ a fader style value with a decimal `value` in the range of `range = { min, max }
 
 ### x
 
-the horizontal component of a control's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys. all grid controls can thus be 0-dimentional, 1-dimentional, or 2-dimentional.
+the horizontal component of a control's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys on the x axis. all grid controls can thus be 0-dimentional, 1-dimentional, or 2-dimentional.
 
 ### y
 
-the vertical component of a control's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys. all grid controls can thus be 0-dimentional, 1-dimentional, or 2-dimentional.
+the vertical component of a control's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys on the y axis. all grid controls can thus be 0-dimentional, 1-dimentional, or 2-dimentional.
 
 ### value
 
