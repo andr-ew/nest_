@@ -66,7 +66,9 @@ dave = nest_ {
 }
 ```
 
-hit a key on the top row aaand - the light ! it moves ! ... ! you should also see the value being printed to the REPL in the range 0-15 as per our action function. try switching out `ramona = _grid.toggle`. now not just one light, but up to 16, toggled on and off by fingers. our value is being printed as something like  `table: 0x7fd7fd508010` as indeed it is now a table. add `tab = require 'tabutil'` up top and set `action = function(self, value) tab.print(value) end` so we can take a look. yep, that's a table of 16 1's and 0's corresponding to the state of the buttons. if we made it a 2D control with `y = { 1, 8 }` we'd get a a table of tables, a press setting `value[x][y] = 1`.
+hit a key on the top row aaand - the light ! it moves ! ... ! you should also see the value being printed to the REPL in the range 0-15 as per our action function.
+
+try switching out `ramona = _grid.toggle`. now not just one light, but up to 16, toggled on and off by fingers. our value is being printed as something like  `table: 0x7fd7fd508010` as indeed it is now a table. add `tab = require 'tabutil'` up top and set `action = function(self, value) tab.print(value) end` so we can take a look. yep, that's a table of 16 1's and 0's corresponding to the state of the buttons. if we made it a 2D control with `y = { 1, 8 }` we'd get a a table of tables, a press setting `value[x][y] = 1`.
 
 # lotsa
 
