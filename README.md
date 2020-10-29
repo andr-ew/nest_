@@ -52,3 +52,9 @@ include 'lib/nest_/txt'
 ```
 
 alternatively, if this repo lives in your code folder, you can incude modules externally: `include 'nest_/lib/nest_/core'`
+
+# Examples
+
+- [various](https://github.com/andr-ew/nest_/tree/master/examples)
+- [ndls (full app)](https://github.com/andr-ew/ndls/blob/master/ndls.lua)
+- [brds (full app)](https://github.com/andr-ew/brds/blob/main/brds.lua)
