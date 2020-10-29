@@ -22,7 +22,7 @@ n = nest_ {
 
 # Studies
 
-1. [nests and controls](./study/study1.md)
+1. [nests of controls](./study/study1.md)
 
 2. [the grid module](./study/study2.md)
 
