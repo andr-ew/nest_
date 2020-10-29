@@ -18,6 +18,8 @@ n = nest_ {
 } :connect { g = grid.connect() }
 ```
 
+currently in beta ! provided documentation matches current features, will continue to grow w/ progress over the next few months
+
 ### [RELEASES](https://github.com/andr-ew/nest_/releases/)
 
 # Studies
@@ -25,6 +27,10 @@ n = nest_ {
 1. [nests of controls](./study/study1.md)
 
 2. [the grid module](./study/study2.md)
+
+3. the txt module
+
+4. controls controlling controls
 
 # Docs
 
