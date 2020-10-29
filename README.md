@@ -32,6 +32,8 @@ currently in beta ! provided documentation matches current features, will contin
 
 4. controls controlling controls
 
+5. mixing inputs
+
 # Docs
 
 ## Modules
