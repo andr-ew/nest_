@@ -109,6 +109,54 @@ oh ? we can show and hide the two ramonas with the tab value. indeed `enabled` c
 with the power of the nest we can quickly set up some serious multi-paginated scenarios:
 
 ```
+dave = nest_ {
+  tab = _grid.value {
+    x = { 1, 16 },
+    y = 1
+  },
+  pages = nest_(4):each(function(page)
+    return nest_ {
+      ramona1 = _grid.value {
+        x = 1,
+        y = { 2, 8 },
+        action = function(self, value)
+          print("value of page " .. page: " .. value)
+        end
+      },
+      ramona2 = _grid.value {
+        x = 3,
+        y = { 2, 8 },
+        action = function(self, value)
+          print("value of page " .. page: " .. value)
+        end
+      },
+      enabled = function(self) return dave.tab.value == page end
+    }
+  end)
+}
 ```
 
-breaking this down -
+this is 4 pages as nests, each with two independent values. just like before, we're setting up a tab value and using an `enabled` function to ask about the tab.
+
+```
+dave = nest_ {
+  tab = _grid.value {
+    x = { 1, 16 },
+    y = 1
+  },
+  pages = nest_(16):each(function(page)
+    return nest_ (16):each(function(i)
+      return _grid.value {
+        x = i,
+        y = { 2, 8 },
+        action = function(self, value)
+          print("value of page " .. page .. " control " .. i ": " .. value)
+        end,
+        enabled = function(self) return dave.tab.value == page end
+      }
+    end)
+  end)
+}
+```
+
+BAM - 16 pages of 16 values, totalling 256 independent controls. 
