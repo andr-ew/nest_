@@ -46,7 +46,7 @@ dave = nest_ {
 }
 ```
 
-here we've shown that `x` can accept a value range to grow the control across multiple keys. if we set `y = { 1, 8 }`, the control will fill the whole grid.
+here we've shown that `x` can accept a value range to grow the control across multiple keys. if we set `y = { 1, 8 }`, the control will fill the whole grid. every grid control comes with 0D (`x = 1, y = 1`), 1D (`x = { 1, 4 }, y = 1`), and 2D (`x = { 1, 4 }, y = { 1, 4 }`) varitities.
 
 # doooo somethingggggggg
 
@@ -136,7 +136,7 @@ dave = nest_ {
 }
 ```
 
-this is 4 pages as nests, each with two independent values. just like before, we're setting up a tab value and using an `enabled` function to ask about the tab.
+this is 4 pages as nests, each with two independent values. just like before, we're setting up a tab value and using an `enabled` function (in the `nest_` this time) to ask about the tab. want 16 pages of 16 values, totalling 256 independent controls?
 
 ```
 dave = nest_ {
@@ -159,4 +159,4 @@ dave = nest_ {
 }
 ```
 
-BAM - 16 pages of 16 values, totalling 256 independent controls. 
+BAM ! 
