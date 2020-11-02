@@ -113,7 +113,7 @@ an integer that sets whether to respond to the rising edge of an input (1), fall
 
 ### count
 
-when `value` is a table, restricts the number of concurrent 1 values to the range given by `count = { min, max }`
+when `value` is a table, restricts the number of simultaneous 1 values to the range given by `count = { min, max }`
 
 ### fingers
 
