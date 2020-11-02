@@ -2,22 +2,6 @@
 
 `nest_` is an object language and library for building user interface structures in lua for monome devices
 
-```
-n = nest_ {
-    control = _grid.toggle {
-        x = { 1, 4 },
-        y = 1,
-        edge = 0,
-        action = function(s, v, t)
-            print("v")
-            tab.print(v)
-            print('t')
-            tab.print(t)
-        end
-    }
-} :connect { g = grid.connect() }
-```
-
 currently in beta ! current documentation covers existing features, will continue to grow w/ progress over the next few months
 
 ### [RELEASES](https://github.com/andr-ew/nest_/releases/)
