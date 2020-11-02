@@ -136,7 +136,7 @@ dave = nest_ {
 }
 ```
 
-this is 4 pages as nests, each with two independent values. just like before, we're setting up a tab value and using an `enabled` function (in the `nest_` this time) to ask about the tab. want 16 pages of 16 values, totalling 256 independent controls?
+this is 4 pages as nests, each with two independent values. we're using the `each()` method to fill out four identical nests auto-magically, and just like before, we're setting up a tab value and using an `enabled` function (in the `nest_` this time) to ask about the tab. want 16 pages of 16 values, totalling 256 independent controls?
 
 ```
 dave = nest_ {
