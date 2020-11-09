@@ -134,10 +134,6 @@ _txt.et24
 # grid
 ```
 
-RENAME
-
-_grid.value -> _grid.number
-
 ADD
 
 _grid.control.wrap
@@ -168,21 +164,13 @@ preset
 # core
 
 ```
-RENAME
-
-v -> value
-
 ADD
-
-bring back single letter aliases
 
 nest_ get/set: table macros nest = { nest = { control = value } } 
 
 _obj_:put() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
 
 add path functionality to _obj_: construct relative string path from parent to child and evalue string path to child
-
-consider mapping new to _obj_.__call and switching the get/set macro to nest_.v()
 
 add actions{} list of action function keys in self
 add inits{} list of init function keys in self, return table members assigned to self

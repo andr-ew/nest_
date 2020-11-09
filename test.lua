@@ -11,6 +11,6 @@ include 'lib/nest_/grid'
 
 n = nest_ {
     c = _control {
-        v = 5
+        value = 5
     }
 } :connect { g = grid.connect() }
