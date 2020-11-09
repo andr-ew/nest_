@@ -134,7 +134,7 @@ _input = _obj_:new {
                     local aargs = table.pack(self:handler(table.unpack(hargs)))
 
                     if aargs[1] then 
-                        self.control.v = self.action and self:action(table.unpack(aargs)) or aargs[1]
+                        self.control.v = self.action and self.action(self.control or self, table.unpack(aargs)) or aargs[1]
 
                         if self.metacontrols_enabled then
                             for i,w in ipairs(mc) do
@@ -147,7 +147,7 @@ _input = _obj_:new {
         elseif devk == nil or args == nil then -- called w/o arguments
             
             local defaults = self.arg_defaults or {}
-            self.control.v = self.action and self:action(self.control.v, table.unpack(defaults)) or self.control.v
+            self.control.v = self.action and self.action(self.control or self, self.control.v, table.unpack(defaults)) or self.control.v
             
             if self.devs[self.devk] then self.devs[self.devk].dirty = true end
 

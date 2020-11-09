@@ -689,7 +689,8 @@ _grid.fill.new = function(self, o)
         v = 1
     end
 
-    if type(o.v) ~= type(v) then o.v = v end
+    if type(o.v) ~= type(v) then o.v = v
+    elseif o.v == 0 then o.v = v end
 
     return o
 end
@@ -856,15 +857,15 @@ _grid.fader.input.muxhandler = _obj_:new {
         if v then
             local r1 = type(s.x) == 'table' and s.x or s.y
             local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
-            return util.linlin(r1[1], r1[2], r2[1], r2[2], v + 1), t, d
+            return util.linlin(0, r1[2] - r1[1], r2[1], r2[2], v), t, d
         end
     end,
     plane = function(s, x, y, z) 
         local v,t,d = _grid.value.input.muxhandler.plane(s, x, y, z)
         if v then
             local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
-            s.v.x = util.linlin(s.x[1], s.x[2], r2[1], r2[2], v.x + 1)
-            s.v.y = util.linlin(s.y[1], s.y[2], r2[1], r2[2], v.y + 1)
+            s.v.x = util.linlin(0, s.x[2] - s.x[1], r2[1], r2[2], v.x)
+            s.v.y = util.linlin(0, s.y[2] - s.y[1], r2[1], r2[2], v.y)
             return s.v, t, d
         end
     end
@@ -1028,28 +1029,28 @@ _grid.range.output.muxredraw = _obj_:new {
         if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
     end,
     line_x = function(s, g, v)
-        for i = s.p_.x[1], s.p_.x[2] do
+        for i = 0, s.p_.x[2] - s.p_.x[1] do
             local l = lvl(s, 0)
-            if i >= v[1] + 1 and i <= v[2] + 1 then l = lvl(s, 1) end
-            if l > 0 then g:led(i, s.p_.y, l) end
+            if i >= v[1] and i <= v[2] then l = lvl(s, 1) end
+            if l > 0 then g:led(i + s.p_.x[1], s.p_.y, l) end
         end
     end,
     line_y = function(s, g, v)
-        for i = s.p_.y[1], s.p_.y[2] do
+        for i = 0, s.p_.y[2] - s.p_.y[1] do
             local l = lvl(s, 0)
-            if i >= v[1] + 1 and i <= v[2] + 1 then l = lvl(s, 1) end
-            if l > 0 then g:led(s.p_.x, i, l) end
+            if i >= v[1] and i <= v[2] then l = lvl(s, 1) end
+            if l > 0 then g:led(s.p_.x, i + s.p_.y[1], l) end
         end
     end,
     plane = function(s, g, v)
-        for i = s.p_.x[1], s.p_.x[2] do
-            for j = s.p_.y[1], s.p_.y[2] do
+        for i = 0, s.p_.x[2] - s.p_.x[1] do
+            for j = 0, s.p_.y[2] - s.p_.y[1] do
                 local l = lvl(s, 0)
-                if (i == v[1].x + 1 or i == v[2].x + 1) and j >= v[1].y + 1 and j <= v[2].y + 1 then l = lvl(s, 1)
-                elseif (j == v[1].y + 1 or j == v[2].y + 1) and i >= v[1].x + 1 and i <= v[2].x + 1 then l = lvl(s, 1)
-                elseif v[2].y < v[1].y and (i == v[1].x + 1 or i == v[2].x + 1) and j >= v[2].y + 1 and j <= v[1].y + 1 then l = lvl(s, 1)
+                if (i == v[1].x or i == v[2].x) and j >= v[1].y and j <= v[2].y then l = lvl(s, 1)
+                elseif (j == v[1].y or j == v[2].y) and i >= v[1].x and i <= v[2].x then l = lvl(s, 1)
+                elseif v[2].y < v[1].y and (i == v[1].x or i == v[2].x) and j >= v[2].y and j <= v[1].y then l = lvl(s, 1)
                 end
-                if l > 0 then g:led(i, j, l) end
+                if l > 0 then g:led(i + s.p_.x[1], j + s.p_.y[1], l) end
             end
         end
     end

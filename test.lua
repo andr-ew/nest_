@@ -3,22 +3,21 @@ function r()
 end
 --norns.script.load('/home/we/dust/code/nest_/test.lua')
 
+include 'lib/nest_/core'
 include 'lib/nest_/norns'
 tab = require 'tabutil'
 
 include 'lib/nest_/grid'
 
 n = nest_ {
-    v = _grid.toggle {
-        x = { 1, 4 },
-        --y = { 1, 8 },
-        y = 1,
-        edge = 0,
+    v = _grid.range {
+        x = { 9, 16 },
+        y = { 1, 8 },
+        --y = 1,
+        --edge = 0,
         action = function(s, v, t, t2, add, rem, l) 
             print("v")
             tab.print(v)
-            print('t')
-            tab.print(t)
          end
     }
 } :connect { g = grid.connect() }
