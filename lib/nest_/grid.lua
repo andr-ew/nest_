@@ -702,9 +702,9 @@ _grid.fill.output.muxredraw = _obj_:new {
     plane = _grid.binary.output.muxredraw.plane
 }
 
-_grid.value = _grid.muxcontrol:new { edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 }, vlast = 0 }
+_grid.number = _grid.muxcontrol:new { edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 }, vlast = 0 }
 
-_grid.value.new = function(self, o) 
+_grid.number.new = function(self, o) 
     o = _grid.muxcontrol.new(self, o)
 
     rawset(o, 'hlist', {})
@@ -723,7 +723,7 @@ _grid.value.new = function(self, o)
     return o
 end
 
-_grid.value.input.muxhandler = _obj_:new {
+_grid.number.input.muxhandler = _obj_:new {
     point = function(s, x, y, z) 
         if z > 0 then return 0 end
     end,
@@ -819,7 +819,7 @@ _grid.value.input.muxhandler = _obj_:new {
     end
 }
 
-_grid.value.output.muxredraw = _obj_:new {
+_grid.number.output.muxredraw = _obj_:new {
     point = function(s, g, v)
         local lvl = lvl(s, 1)
         if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
@@ -846,14 +846,14 @@ _grid.value.output.muxredraw = _obj_:new {
     end
 }
 
-_grid.fader = _grid.value:new { range = { 0, 1 }, lvl = { 0, 4, 15 } }
+_grid.fader = _grid.number:new { range = { 0, 1 }, lvl = { 0, 4, 15 } }
 
 _grid.fader.input.muxhandler = _obj_:new {
     point = function(s, x, y, z) 
-        return _grid.value.input.muxhandler.point(s, x, y, z)
+        return _grid.number.input.muxhandler.point(s, x, y, z)
     end,
     line = function(s, x, y, z) 
-        local v,t,d = _grid.value.input.muxhandler.line(s, x, y, z)
+        local v,t,d = _grid.number.input.muxhandler.line(s, x, y, z)
         if v then
             local r1 = type(s.x) == 'table' and s.x or s.y
             local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
@@ -861,7 +861,7 @@ _grid.fader.input.muxhandler = _obj_:new {
         end
     end,
     plane = function(s, x, y, z) 
-        local v,t,d = _grid.value.input.muxhandler.plane(s, x, y, z)
+        local v,t,d = _grid.number.input.muxhandler.plane(s, x, y, z)
         if v then
             local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
             s.v.x = util.linlin(0, s.x[2] - s.x[1], r2[1], r2[2], v.x)

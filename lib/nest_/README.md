@@ -170,10 +170,7 @@ preset
 ```
 RENAME
 
-_device -> _group
 v -> value
-_grid.value -> _grid.number
-
 
 ADD
 

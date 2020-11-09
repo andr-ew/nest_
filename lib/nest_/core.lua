@@ -422,13 +422,13 @@ function _pattern:new(o)
     --o.pattern_time = pt.new()
 end
 
-_device = _obj_:new {}
+_group = _obj_:new {}
 
-function _device:new(o)
-    o = _obj_.new(self, o, _device)
+function _group:new(o)
+    o = _obj_.new(self, o, _group)
     local _ = o._ 
 
-    _.is_device = true
+    _.is_group = true
     _.devk = ""
 
     local mt = getmetatable(o)
@@ -448,7 +448,7 @@ function _device:new(o)
                 end
 
                 v.devk = _.devk
-            elseif v.is_device then
+            elseif v.is_group then
                 v._.devk = _.devk
             end
         end 
