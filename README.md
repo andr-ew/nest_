@@ -16,7 +16,7 @@ currently in beta ! current documentation covers existing features, will continu
 
 4. controls controlling controls
 
-5. mixing inputs
+5. customization
 
 # Docs
 
