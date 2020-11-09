@@ -17,7 +17,7 @@ include 'nest_/lib/nest_/norns'
 include 'nest_/lib/nest_/grid'
 
 n = nest_ {
-    tab = _grid.value {
+    tab = _grid.number {
         x = { 1, 7 },
         y = 1,
         lvl = { 4, 15 }
@@ -42,9 +42,9 @@ n = nest_ {
             },
             enabled = function(self) return n.tab.v + 1 == self.k end
         },
-        -----------------------------------------value (number)
+        -----------------------------------------number
         nest_ {
-            value_0d = _grid.value {
+            number_0d = _grid.number {
                 x = 1,
                 y = 3,
                 lvl = { 4, 15 },
@@ -52,7 +52,7 @@ n = nest_ {
                     print(self.k, value) 
                 end
             }, 
-            value_1d = _grid.value {
+            number_1d = _grid.number {
                 x = { 1, 7 },
                 y = 5,
                 lvl = { 4, 15 },
@@ -60,7 +60,7 @@ n = nest_ {
                     print(self.k, value) 
                 end
             }, 
-            value_2d = _grid.value {
+            number_2d = _grid.number {
                 x = { 9, 15 },
                 y = { 2, 8 },
                 lvl = { 4, 15 },
