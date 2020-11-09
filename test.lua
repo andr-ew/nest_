@@ -1,5 +1,5 @@
 function r()
-  norns.script.load(norns.state.script)
+    norns.script.load(norns.state.script)
 end
 --norns.script.load('/home/we/dust/code/nest_/test.lua')
 
@@ -10,14 +10,7 @@ tab = require 'tabutil'
 include 'lib/nest_/grid'
 
 n = nest_ {
-    v = _grid.range {
-        x = { 9, 16 },
-        y = { 1, 8 },
-        --y = 1,
-        --edge = 0,
-        action = function(s, v, t, t2, add, rem, l) 
-            print("v")
-            tab.print(v)
-         end
+    c = _control {
+        v = 5
     }
 } :connect { g = grid.connect() }

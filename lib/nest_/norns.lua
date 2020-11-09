@@ -103,4 +103,5 @@ nest_.connect = function(self, objects, fps)
     return self
 end
 
--- create screen, enc, key _devices
+_grid = _group:new()
+_grid.devk = 'g'

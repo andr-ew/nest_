@@ -31,6 +31,23 @@ local function zcomp(a, b)
     else return false end
 end
 
+local function nickname(k) 
+    if k == 'v' then return 'value' else return k end
+end
+
+local function index_nickname(t, k) 
+    if k == 'v' then return t.value end
+end
+
+local function format_nickname(t, k, v) 
+    if k == 'v' and not rawget(t, 'value') then
+        rawset(t, 'value', v)
+        t['v'] = nil
+    end
+    
+    return v
+end
+
 _obj_ = {
     print = function(self) print(tostring(self)) end,
     replace = function(self, k, v)
@@ -54,6 +71,7 @@ function _obj_:new(o, clone_type)
     setmetatable(o, {
         __index = function(t, k)
             if k == "_" then return _
+            elseif index_nickname(t,k) then return index_nickname(t,k)
             elseif _[k] ~= nil then return _[k]
             elseif self[k] ~= nil then return self[k]
             else return nil end
@@ -61,7 +79,7 @@ function _obj_:new(o, clone_type)
         __newindex = function(t, k, v)
             if _[k] ~= nil then rawset(_,k,v) 
             else
-                rawset(t, k, formattype(t, k, v, _.clone_type)) 
+                rawset(t, nickname(k), formattype(t, nickname(k), v, _.clone_type)) 
                 
                 table.sort(_.zsort, zcomp)
             end
@@ -100,7 +118,10 @@ function _obj_:new(o, clone_type)
         __newindex = function(t, k, v) o[k] = v end
     })
     
-    for k,v in pairs(o) do formattype(o, k, v, _.clone_type) end
+    for k,v in pairs(o) do 
+        formattype(o, k, v, _.clone_type) 
+        format_nickname(o, k, v)
+    end
 
     for k,v in pairs(self) do 
         if not rawget(o, k) then
@@ -299,7 +320,7 @@ function nest_:new(o, ...)
 end
 
 _control = nest_:new {
-    v = 0,
+    value = 0,
     devk = nil,
     action = function(s, v) end,
     init = function(s) end,

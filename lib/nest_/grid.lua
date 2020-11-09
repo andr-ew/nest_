@@ -1,8 +1,5 @@
 local tab = require 'tabutil'
 
-_grid = _device:new()
-_grid.devk = 'g'
-
 _grid.control = _control:new {
     v = 0,
     x = 1,
@@ -55,7 +52,6 @@ _grid.metacontrol = _metacontrol:new {
     input = _input:new(),
     output = _output:new()
 }
-
 _grid.muxcontrol = _grid.control:new()
 
 -- update -> filter -> handler -> muxhandler -> action -> v
