@@ -1,6 +1,4 @@
-function r()
-  norns.script.load(norns.state.script)
-end
+-- paginated demo of each standard control type included in the grid module
 
 function stringrow(i) 
     o = ""
