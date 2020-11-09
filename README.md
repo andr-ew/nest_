@@ -47,7 +47,7 @@ alternatively, if this repo lives in your code folder, you can incude modules ex
 
 # Examples
 
-- [grid demo](https://github.com/andr-ew/nest_/blob/master/examples/grid.lua)
-- [ndls (full app)](https://github.com/andr-ew/ndls/blob/master/ndls.lua)
-- [brds (full app)](https://github.com/andr-ew/brds/blob/main/brds.lua)
+- [grid demo (functional)](https://github.com/andr-ew/nest_/blob/master/examples/grid.lua)
+- [ndls (full app, nonfunctional)](https://github.com/andr-ew/ndls/blob/master/ndls.lua)
+- [brds (full app, nonfunctional)](https://github.com/andr-ew/brds/blob/main/brds.lua)
 - [various](https://github.com/andr-ew/nest_/tree/master/examples)
