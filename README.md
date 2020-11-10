@@ -32,7 +32,7 @@ the various types and interface buidling blocks of nestworld are split up into a
 
 ## Including
 
-typically, it will make the most sense to include nest_ by [downloading the .zip()](https://github.com/andr-ew/nest_/archive/master.zip) and dropping the required module files into your script's `/lib/nest_` folder, including them like so:
+typically, it will make the most sense to include nest_ by [downloading the .zip](https://github.com/andr-ew/nest_/archive/master.zip) and dropping the required module files into your script's `/lib/nest_` folder, including them like so:
 
 ```
 include 'lib/nest_/core'
