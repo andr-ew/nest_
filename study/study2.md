@@ -54,7 +54,7 @@ time for a doing things control
 
 ```
 dave = nest_ {
-  ramona = _grid.value {
+  ramona = _grid.number {
     x = { 1, 16 },
     y = 1,
     action = function(self, value) 
@@ -83,7 +83,7 @@ in the example code try passing ramona the propery `enabled = false`. she's gone
 
 ```
 dave = nest_ {
-  tab = _grid.value {
+  tab = _grid.number {
     x = { 1, 2 },
     y = 1
   },
@@ -104,26 +104,26 @@ dave = nest_ {
 }
 ```
 
-oh ? we can show and hide the two ramonas with the tab value. indeed `enabled` can be a "pointer method" if it wants, fetching and returning data of the appropriate type (the same goes for most properties). in this case, we're asking about `dave.tab`'s value to decide whether to enable.
+oh ? we can show and hide the two ramonas with the tab `number`. indeed `enabled` can be a "pointer method" if it wants, fetching and returning data of the appropriate type (the same goes for most properties). in this case, we're asking about `dave.tab`'s value to decide whether to enable.
 
 with the power of the nest we can quickly set up some serious multi-paginated scenarios:
 
 ```
 dave = nest_ {
-  tab = _grid.value {
+  tab = _grid.number {
     x = { 1, 16 },
     y = 1
   },
   pages = nest_(4):each(function(page)
     return nest_ {
-      ramona1 = _grid.value {
+      ramona1 = _grid.number {
         x = 1,
         y = { 2, 8 },
         action = function(self, value)
           print("value of page " .. page: " .. value)
         end
       },
-      ramona2 = _grid.value {
+      ramona2 = _grid.number {
         x = 3,
         y = { 2, 8 },
         action = function(self, value)
@@ -136,7 +136,7 @@ dave = nest_ {
 }
 ```
 
-this is 4 pages as nests, each with two independent values. we're using the `each()` method to fill out four identical nests auto-magically, and just like before, we're setting up a tab value and using an `enabled` function (in the `nest_` this time) to ask about the tab. want 16 pages of 16 values, totalling 256 independent controls?
+this is 4 pages as nests, each with two independent values. we're using the `each()` method to fill out four identical nests auto-magically, and just like before, we're setting up a tab `number` and using an `enabled` function (in the `nest_` this time) to ask about the tab. want 16 pages of 16 values, totalling 256 independent controls?
 
 ```
 dave = nest_ {
@@ -146,7 +146,7 @@ dave = nest_ {
   },
   pages = nest_(16):each(function(page)
     return nest_ (16):each(function(i)
-      return _grid.value {
+      return _grid.number {
         x = i,
         y = { 2, 8 },
         action = function(self, value)
@@ -160,3 +160,7 @@ dave = nest_ {
 ```
 
 BAM ! 
+
+# the gang's all here
+
+right now, there are 7 control types included in the grid module all with thier own input/output behaviors and interpretations of a common set of properties and **action arguments**, which are additional informative arguments sent to the defined action function. for more information on all of this, see the [grid module documentation](../doc/grid.md) and the [grid module demo script](../examples/grid.lua)
