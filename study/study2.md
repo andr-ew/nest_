@@ -140,7 +140,7 @@ this is 4 pages as nests, each with two independent values. we're using the `eac
 
 ```
 dave = nest_ {
-  tab = _grid.value {
+  tab = _grid.number {
     x = { 1, 16 },
     y = 1
   },
