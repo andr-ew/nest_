@@ -37,10 +37,12 @@ _arc.preset
 
 # txt
 ```
+
+redraw = function()
+    self:placer(self:txt())
+end
+
 _screen.txt.control {
-    input1
-    input2
-    input3
     n = 2 or { 2, 3 } or { { 2, 3 }, 3 }
     font = 1
     size = 4
@@ -48,24 +50,37 @@ _screen.txt.control {
     border = 0
     fill = 0
     padding ?
-    align = 'left' or 'center' or 'right'
-    x = 1
-    y = 1
+    x = 1 or {}
+    y = 1 or {}
+    flow = 'x' or 'y'
+    wrap = nil or 5
     label = self.k or {}
 }
 
 _screen.txt.label { value = '' }
 
-_enc.txt.scrollbox {
+
+_enc.txt.list_ {
     x = 1 or {}
     y = 1 or {}
-    n = 2 or { 2, 3 }
     lvl = { 2, 15 }
     border = {}
     fill = {}
-    cell = self.size + ? or { self.size + ?, self.size + ? } 
+    cellsize = self.size + ? or { self.size + ?, self.size + ? } 
     flow = 'x' or 'y'
-    fixed = nil
+    items = nest_ {} or { {}, ... }
+}
+
+_enc.txt.scroll_ {
+    x = 1 or {}
+    y = 1 or {}
+    lvl = { 2, 15 }
+    border = {}
+    fill = {}
+    cellsize = self.size + ? or { self.size + ?, self.size + ? } 
+    flow = 'x' or 'y'
+    window = 6 or { 6, 6 }
+    scroller = _enc.txt.number { output = false }
     items = nest_ {} or { {}, ... }
 }
 
@@ -86,8 +101,6 @@ _enc.txt.option {
 
 _enc.txt.radio {
     list = {} or { {}, ... }
-    wrap = 4
-    flow = 'x' or 'y'
 }
 
 _key.txt.option {
@@ -99,29 +112,24 @@ _key.txt.option {
 _key.txt.radio {
     n = 2 or { 2, 3 }
     list = {}
-    wrap = 4
-    flow = 'x' or 'y'
     inc
 }
 
 _key.txt.trigger {
     n = 2 or { 2, 3 } or { 1, 2, 3 }
     fingers = { 0, 3 }
-    flow = 'x' or 'y'
     edge = 1
 }
 
 _key.txt.momentary {
     n = 2 or { 2, 3 } or { 1, 2, 3 }
     fingers = { 0, 3 }
-    flow = 'x' or 'y'
     edge = 1
 }
 
 _key.txt.toggle {
     n = 2 or { 2, 3 } or { 1, 2, 3 }
     lvl = { 0, ..., 15 } 
-    flow = 'x' or 'y'
     fingers = { 0, 3 }
     edge = 1
 }
@@ -165,6 +173,8 @@ preset
 
 ```
 ADD
+
+support nest_.redraw, overrides draw children
 
 nest_ get/set: table macros nest = { nest = { control = value } } 
 

@@ -1,5 +1,8 @@
 local tab = require 'tabutil'
 
+_grid = _group:new()
+_grid.devk = 'g'
+
 _grid.control = _control:new {
     v = 0,
     x = 1,

@@ -103,5 +103,7 @@ nest_.connect = function(self, objects, fps)
     return self
 end
 
-_grid = _group:new()
-_grid.devk = 'g'
+_enc = _group:new()
+_enc.devk = 'enc'
+
+_enc.control = _control:new { n = 1 }
