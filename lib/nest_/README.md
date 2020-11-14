@@ -1,37 +1,37 @@
 # norns
 ```
-_enc.control { n = 1 }
-_enc.muxcontrol
-_enc.metacontrol
-_enc.muxmetacontrol
-_enc.preset
+_enc.number {
+    controlspec
+    range = { 0, 1 }
+    step = 1
+    warp = 1
+}
 
-_key.control { n = 2, edge = 1 }
-_key.muxcontrol
-_key.metacontrol
-_key.muxmetacontrol
-_key.pattern
-_key.preset
+_key.trigger {
+    n = 2 or { 2, 3 } or { 1, 2, 3 }
+    fingers = { 0, 3 }
+    edge = 1
+}
 
-_screen.control { lvl = 15, aa = 0 }
-_screen.output
+_key.momentary {
+    n = 2 or { 2, 3 } or { 1, 2, 3 }
+    fingers = { 0, 3 }
+    edge = 1
+}
 
-_grid.control
-_grid.output
-_grid.input
-_grid.muxcontrol
-_grid.metacontrol
-_grid.muxmetacontrol
-_grid.preset
-_grid.pattern
-_grid.muxpattern
+_key.toggle {
+    n = 2 or { 2, 3 } or { 1, 2, 3 }
+    lvl = { 0, ..., 15 } 
+    fingers = { 0, 3 }
+    edge = 1
+}
 
-_arc.control
-_arc.output
-_arc.input
-_arc.metacontrol
-_arc.pattern
-_arc.preset
+_key.number {
+    n = 2 or { 2, 3 }
+    minval = 0,
+    maxval = 5,
+    step = 1
+}
 
 ```
 
@@ -134,10 +134,14 @@ _key.txt.toggle {
     edge = 1
 }
 
-_txt.et24
-
 ```
 
+# etc
+```
+_etc.et24
+_etc.fselect
+
+```
 
 # grid
 ```
@@ -151,6 +155,11 @@ _grid.numtog ?
 _grid.pattern
 _grid.switchpat --switch btw multiple patterns
 _grid.preset
+
+REFACTOR
+
+embed controlspec in grid.fader, align properties with argument names
+add min and max to number
 
 ```
 
@@ -187,5 +196,10 @@ add inits{} list of init function keys in self, return table members assigned to
 add targets{} list of target nest keys in self 
 
 add :link(_control or function() return control end) to _control, link two controls by appending actions when values are the same type. also allow link to param (overwrites param action)
+
+RENAME
+
+control -> affordance ???
+in this case, fader can become control + get a little closer to the norns standard. we can name certain affordances the same as the params name and make the possible linkages clearer. I'm lichen it !
 
 ```

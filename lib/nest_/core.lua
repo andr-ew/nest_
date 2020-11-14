@@ -462,15 +462,15 @@ function _group:new(o)
             if v.is_control then
                 for l,w in pairs(v) do
                     if type(w) == 'table' then
-                        if w.is_input or w.is_output then 
+                        if w.is_input or w.is_output and not w.devk then 
                             w.devk = _.devk 
                         end
                     end
                 end
 
                 v.devk = _.devk
-            elseif v.is_group then
-                v._.devk = _.devk
+            elseif v.is_group or v.is_input or v.is_output then
+                v.devk = _.devk
             end
         end 
     end
