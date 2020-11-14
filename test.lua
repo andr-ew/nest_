@@ -7,10 +7,9 @@ include 'lib/nest_/core'
 include 'lib/nest_/norns'
 tab = require 'tabutil'
 
-include 'lib/nest_/grid'
-
 n = nest_ {
-    c = _control {
-        value = 5
+    _key.momentary {
+        n = 2,
+        action = function(s, v, t) print(v, t) end
     }
-} :connect { g = grid.connect() }
+} :connect { key = key, enc = enc }

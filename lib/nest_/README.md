@@ -1,19 +1,14 @@
 # norns
 ```
-_enc.number {
-    controlspec
-    range = { 0, 1 }
-    step = 1
-    warp = 1
-}
+_key.binary
 
-_key.trigger {
+_key.momentary {
     n = 2 or { 2, 3 } or { 1, 2, 3 }
     fingers = { 0, 3 }
     edge = 1
 }
 
-_key.momentary {
+_key.trigger {
     n = 2 or { 2, 3 } or { 1, 2, 3 }
     fingers = { 0, 3 }
     edge = 1
@@ -28,9 +23,20 @@ _key.toggle {
 
 _key.number {
     n = 2 or { 2, 3 }
-    minval = 0,
-    maxval = 5,
+    inc = 1
+}
+
+_enc.number {
+    range = { 0, 1 },
+    wrap = false
+}
+
+_enc.control {
+    controlspec
+    range = { 0, 1 }
     step = 1
+    warp = 1
+    wrap = false
 }
 
 ```
