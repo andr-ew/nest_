@@ -120,14 +120,14 @@ dave = nest_ {
         x = 1,
         y = { 2, 8 },
         action = function(self, value)
-          print("value of page " .. page: " .. value)
+          print("value of page " .. page .. ": " .. value)
         end
       },
       ramona2 = _grid.number {
         x = 3,
         y = { 2, 8 },
         action = function(self, value)
-          print("value of page " .. page: " .. value)
+          print("value of page " .. page .. ": " .. value)
         end
       },
       enabled = function(self) return dave.tab.value == page end
