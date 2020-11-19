@@ -12,7 +12,7 @@ n = nest_ {
         property = 5,
         value = 1,
         action = function(self, value)
-          dosomething(value)
+            dosomething(value)
         end
     }
 }
