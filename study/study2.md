@@ -32,7 +32,7 @@ dave = nest_ {
 }
 ```
 
-well, just one light, it's something though ! you should see it pop up on the top left corner of the grid. we've covertly introduced the `_grid` group, which is holding our first library control, `fill`. `fill` comes pre-populated with the not-so-complicated code to render an led to the grid device that we've hooked up to its nest via `connect`. it's an output-only device, as nothing is happening when we press the lit key on the grid. it's just creating output based on properties. want more lights ? dim ones ? no problem !
+well, just one light, it's something though ! you should see it pop up on the top left corner of the grid. we've covertly introduced the `_grid` group, which is holding our first library affordance, `fill`. `fill` comes pre-populated with the not-so-complicated code to render an led to the grid device that we've hooked up to its nest via `connect`. it's an output-only device, as nothing is happening when we press the lit key on the grid. it's just creating output based on properties. want more lights ? dim ones ? no problem !
 
 ```
 dave = nest_ {
@@ -46,11 +46,11 @@ dave = nest_ {
 }
 ```
 
-here we've shown that `x` can accept a value range to grow the control across multiple keys. if we set `y = { 1, 8 }`, the control will fill the whole grid. every grid control comes with 0D (`x = 1, y = 1`), 1D (`x = { 1, 4 }, y = 1`), and 2D (`x = { 1, 4 }, y = { 1, 4 }`) varitities.
+here we've shown that `x` can accept a value range to grow the affordance across multiple keys. if we set `y = { 1, 8 }`, the affordance will fill the whole grid. every grid affordance comes with 0D (`x = 1, y = 1`), 1D (`x = { 1, 4 }, y = 1`), and 2D (`x = { 1, 4 }, y = { 1, 4 }`) varitities.
 
 # doooo somethingggggggg
 
-time for a doing things control
+time for a doing things affordance
 
 ```
 dave = nest_ {
@@ -75,7 +75,7 @@ action = function(self, value)
   tab.print(value) 
 end
 ```
-so we can take a look. yep, that's a table of 16 1's and 0's corresponding to the state of the buttons. if we made it a 2D control with `y = { 1, 8 }` we'd get a a table of tables, a grid press setting `value[x][y] = 1`.
+so we can take a look. yep, that's a table of 16 1's and 0's corresponding to the state of the buttons. if we made it a 2D affordance with `y = { 1, 8 }` we'd get a a table of tables, a grid press setting `value[x][y] = 1`.
 
 # enablers
 
@@ -136,7 +136,7 @@ dave = nest_ {
 }
 ```
 
-this is 4 pages as nests, each with two independent values. we're using the `each()` method to fill out four identical nests auto-magically, and just like before, we're setting up a tab `number` and using an `enabled` function (in the `nest_` this time) to ask about the tab. want 16 pages of 16 values, totalling 256 independent controls?
+this is 4 pages as nests, each with two independent values. we're using the `each()` method to fill out four identical nests auto-magically, and just like before, we're setting up a tab `number` and using an `enabled` function (in the `nest_` this time) to ask about the tab. want 16 pages of 16 values, totalling 256 independent affordances?
 
 ```
 dave = nest_ {
@@ -150,7 +150,7 @@ dave = nest_ {
         x = i,
         y = { 2, 8 },
         action = function(self, value)
-          print("value of page " .. page .. " control " .. i ": " .. value)
+          print("value of page " .. page .. " affordance " .. i ": " .. value)
         end,
         enabled = function(self) return dave.tab.value == page end
       }
@@ -163,4 +163,4 @@ BAM !
 
 # the gang's all here
 
-right now, there are 7 control types included in the grid module all with thier own input/output behaviors and interpretations of a common set of **properties** and **action arguments** (which are additional informative arguments sent to the defined action function). for more information on all of this, see the [grid module documentation](../doc/grid.md) and the [grid module demo script](../examples/grid.lua)
+right now, there are 7 affordance types included in the grid module all with thier own input/output behaviors and interpretations of a common set of **properties** and **action arguments** (which are additional informative arguments sent to the defined action function). for more information on all of this, see the [grid module documentation](../doc/grid.md) and the [grid module demo script](../examples/grid.lua)

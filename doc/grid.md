@@ -1,6 +1,6 @@
 # types
 
-[_grid.control](#control) {
+[_grid.affordance](#affordance) {
   - [x](#x)
   - [y](#y)
   - value
@@ -40,12 +40,12 @@ _grid.pattern { ... }
 _grid.preset { ... }
 
 
-### control
+### affordance
 
-the base control type for the grid module - all other grid controls inherit from this device and share common properties. the user may extend this type in order to define a custom grid control:
+the base affordance type for the grid module - all other grid affordances inherit from this device and share common properties. the user may extend this type in order to define a custom grid affordance:
 
 ```
-two_by_two = _grid.control {
+two_by_two = _grid.affordance {
   x = { 1, 2 }, y = { 1, 2 }, lvl = 15, v = { x = 0, y = 0 },
   handler = function(s,v,x,y,z)
     if z == 1 then 
@@ -63,19 +63,19 @@ two_by_two = _grid.control {
 
 ### fill
 
-a simple output-only control which draws the provided `x` and `y` dimentions to the provided brightness level
+a simple output-only affordance which draws the provided `x` and `y` dimentions to the provided brightness level
 
 ### value
 
-a "radio button" style control for which an integer `value` is assinged to index of the last key pressed. `x` and `y` dimentions set the size of the control and the range of `value`.
+a "radio button" style affordance for which an integer `value` is assinged to index of the last key pressed. `x` and `y` dimentions set the size of the affordance and the range of `value`.
 
 ### fader
 
-a fader style value with a decimal `value` in the range of `range = { min, max }`. `range = { -1, 1 }` will yeild a crossfader/pan style. `x` and `y` dimentions set the size of the control.
+a fader style value with a decimal `value` in the range of `range = { min, max }`. `range = { -1, 1 }` will yeild a crossfader/pan style. `x` and `y` dimentions set the size of the affordance.
 
 ### trigger
 
-a control that blinks for `blinktime` seconds and runs `action` on keypress. `x` and `y` dimentions set up a matrix of values.
+an affordance that blinks for `blinktime` seconds and runs `action` on keypress. `x` and `y` dimentions set up a matrix of values.
 
 ### momentary
 
@@ -93,19 +93,19 @@ responds only to a two-finger press and fills a range of keys, setting `value = 
 
 ### x
 
-the horizontal component of a control's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys on the x axis. all grid controls can thus be 0-dimentional, 1-dimentional, or 2-dimentional.
+the horizontal component of an affordance's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys on the x axis. all grid affordances can thus be 0-dimentional, 1-dimentional, or 2-dimentional.
 
 ### y
 
-the vertical component of a control's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys on the y axis. all grid controls can thus be 0-dimentional, 1-dimentional, or 2-dimentional.
+the vertical component of an affordance's location. can assign either a single integer for a single key or a table of two integers specifying start and end keys on the y axis. all grid affordances can thus be 0-dimentional, 1-dimentional, or 2-dimentional.
 
 ### value
 
-the control value. the format of value depends on the control type and the `x` and `y` dimentions - it may either be a single number or a table of numbers. see types for details.
+the affordance value. the format of value depends on the affordance type and the `x` and `y` dimentions - it may either be a single number or a table of numbers. see types for details.
 
 ### lvl
 
-sets the brightness levels for the control. for most types, assigning a single integer sets the "on" level and assigning a table of two sets the "off" and "on" levels
+sets the brightness levels for the affordance. for most types, assigning a single integer sets the "on" level and assigning a table of two sets the "off" and "on" levels
 
 ### edge
 
@@ -117,7 +117,7 @@ when `value` is a table, restricts the number of simultaneous 1 values to the ra
 
 ### fingers
 
-restricts the number of simultaneous finger presses to which a control will respond to the range `fingers = { min, max }`
+restricts the number of simultaneous finger presses to which an affordance will respond to the range `fingers = { min, max }`
 
 
 # methods
@@ -131,8 +131,8 @@ action = function(self, value, time, delta, add, rem, list)
 end
 ```
 
-1. `value`: the control value. the format of value depends on the control type and the `x` and `y` dimentions - see types for details.
-2. `time`: the amount of time in seconds that a control is held before releasing. may be either a single number or a table of numbers following the format of `value`.
+1. `value`: the affordance value. the format of value depends on the affordance type and the `x` and `y` dimentions - see types for details.
+2. `time`: the amount of time in seconds that an affordance is held before releasing. may be either a single number or a table of numbers following the format of `value`.
 3. `delta`: a bit of a wildcard - this may eiter represent the change in `value` or the change in time between sucessive interactions. may be either a single number or a table of numbers following the format of `value`.
 4. `add`: when `value` is a table of numbers, `add` is passed the index that has turned from 0 to 1 if it exists
 5. `rem`: when `value` is a table of numbers, `rem` is passed the index that has turned from 1 to 0 if it exists
