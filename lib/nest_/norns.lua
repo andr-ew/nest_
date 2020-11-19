@@ -259,16 +259,15 @@ _key.binary.new = function(self, o)
     o.tlast = minit(axis)
     o.theld = minit(axis)
     o.vinit = minit(axis)
+    o.blank = {}
 
-    rawset(o, 'blank', {})
-
-    rawset(o, 'arg_defaults', {
+    o.arg_defaults =  {
         minit(axis),
         minit(axis),
         nil,
         nil,
         o.list
-    })
+    }
 
     if type(v) == 'table' and (type(o.v) ~= 'table' or (type(o.v) == 'table' and #o.v ~= #v)) then o.v = v end
     
@@ -367,13 +366,13 @@ _key.toggle.new = function(self, o)
     --o.tog = minit(axis)
     o.ttog = minit(axis)
 
-    rawset(o, 'arg_defaults', {
+    o.arg_defaults = {
         minit(axis),
         minit(axis),
         nil,
         nil,
         o.toglist
-    })
+    }
 
     return o
 end

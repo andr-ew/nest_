@@ -14,7 +14,7 @@ local function formattype(t, k, v, clone_type)
             v._.p = t
             v._.k = k
         end
-        
+
         for i,w in ipairs(t._.zsort) do 
             if w.k == k then table.remove(t._.zsort, i) end
         end
@@ -78,8 +78,10 @@ function _obj_:new(o, clone_type)
         end,
         __newindex = function(t, k, v)
             if _[k] ~= nil then rawset(_,k,v) 
-            else
+            elseif index_nickname(t, k) then
                 rawset(t, nickname(k), formattype(t, nickname(k), v, _.clone_type)) 
+            else
+                rawset(t, k, formattype(t, k, v, _.clone_type)) 
                 
                 table.sort(_.zsort, zcomp)
             end
