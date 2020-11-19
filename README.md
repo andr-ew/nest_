@@ -26,7 +26,7 @@ currently in beta ! current documentation covers existing features, will continu
 
 2. [the grid module](./study/study2.md)
 
-3. the txt module
+3. the norns interface
 
 4. affordances controlling affordances
 
