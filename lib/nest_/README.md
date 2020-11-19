@@ -205,6 +205,10 @@ preset
 # core
 
 ```
+REFACTOR
+
+remove auto-formmating child objects as nests. it's not neccesary and a source of wierd upredictable errors
+
 
 RENAME
 
