@@ -32,7 +32,7 @@ dave = nest_ {
 }
 ```
 
-well, just one light, it's something though ! you should see it pop up on the top left corner of the grid. we've covertly introduced the `_grid` group, which is holding our first library affordance, `fill`. `fill` comes pre-populated with the not-so-complicated code to render an led to the grid device that we've hooked up to its nest via `connect`. it's an output-only device, as nothing is happening when we press the lit key on the grid. it's just creating output based on properties. want more lights ? dim ones ? no problem !
+well, just one light, it's something though ! you should see it pop up on the top left corner of the grid. we've covertly introduced the `_grid` group, which is holding our first library affordance, `fill`. `fill` comes pre-populated with the not-so-complicated code to render an led to the grid device that we've hooked up to its nest via `connect`. it's an output-only affordance, as nothing is happening when we press the lit key on the grid. it's just creating output based on properties. want more lights ? dim ones ? no problem !
 
 ```
 dave = nest_ {
