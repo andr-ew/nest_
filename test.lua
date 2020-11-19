@@ -8,8 +8,13 @@ include 'lib/nest_/norns'
 tab = require 'tabutil'
 
 n = nest_ {
-    _key.momentary {
+    _key.toggle {
+        --n = { 2, 3 },
         n = 2,
-        action = function(s, v, t) print(v, t) end
+        action = function(s, v, t) 
+            print('v') 
+            print(v)
+            --tab.print(v) 
+        end
     }
 } :connect { key = key, enc = enc }

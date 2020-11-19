@@ -166,7 +166,6 @@ _input = _obj_:new {
                 end
             end
         elseif devk == nil or args == nil then -- called w/o arguments
-            
             local defaults = self.arg_defaults or {}
             self.control.v = self.action and self.action(self.control or self, self.control.v, table.unpack(defaults)) or self.control.v
             
@@ -244,7 +243,9 @@ nest_ = _obj_:new {
 
             local ret = nil
             for i,w in ipairs(self.zsort) do 
-                if w.update then ret = w:update() end
+                if w.update then 
+                    ret = w:update()
+                end
             end
             
             return ret

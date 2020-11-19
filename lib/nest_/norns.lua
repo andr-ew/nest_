@@ -50,7 +50,7 @@ nest_.connect = function(self, objects, fps)
                 end
             }
 
-            v = devs[kk].handler
+            _G[kk] = devs[kk].handler
         elseif k == 'screen' then
             devs[kk] = _dev:new {
                 object = screen,
@@ -131,7 +131,7 @@ end
 _enc.muxcontrol = _enc.control:new()
 
 _enc.muxcontrol.input.filter = function(self, args) -- args = { n, d }
-    if type(n) == "table" then 
+    if type(self.p_.n) == "table" then 
         if tab.contains(self.p_.n, args[1]) then return { "line", args[1], args[2] } end
     elseif args[1] == self.p_.n then return { "point", args[1], args[2] }
     else return nil
@@ -214,9 +214,7 @@ _key.muxcontrol.input.muxhandler = _obj_:new {
     line = { function(s, v, z) end }
 }
 
-_key.muxcontrol.input.handler = function(s, k, ...)
-    return s.muxhandler[k](s, ...)
-end
+_key.muxcontrol.input.handler = _enc.muxcontrol.input.handler
 
 _key.metacontrol = _metacontrol:new { 
     n = 2,
@@ -235,10 +233,7 @@ _key.muxmetacontrol.input.muxhandler = _obj_:new {
     line = { function(s, v, z) end }
 }
 
-_key.muxmetacontrol.input.handler = function(s, k, ...)
-    print("handler", k, ...)
-    return s.muxhandler[k](s, ...)
-end
+_key.muxmetacontrol.input.handler = _enc.muxmetacontrol.input.handler
 
 _key.binary = _key.muxcontrol:new {
     fingers = nil
@@ -264,15 +259,16 @@ _key.binary.new = function(self, o)
     o.tlast = minit(axis)
     o.theld = minit(axis)
     o.vinit = minit(axis)
-    o.blank = {}
 
-    o.arg_defaults = {
+    rawset(o, 'blank', {})
+
+    rawset(o, 'arg_defaults', {
         minit(axis),
         minit(axis),
         nil,
         nil,
         o.list
-    }
+    })
 
     if type(v) == 'table' and (type(o.v) ~= 'table' or (type(o.v) == 'table' and #o.v ~= #v)) then o.v = v end
     
@@ -288,7 +284,7 @@ _key.binary.input.muxhandler = _obj_:new {
         return z, s.theld
     end,
     line = function(s, n, z, min, max, wrap)
-        local i = tab.key(n, z)
+        local i = tab.key(s.p_.n, n)
         local add
         local rem
 
@@ -371,26 +367,26 @@ _key.toggle.new = function(self, o)
     --o.tog = minit(axis)
     o.ttog = minit(axis)
 
-    o.arg_defaults = {
+    rawset(o, 'arg_defaults', {
         minit(axis),
         minit(axis),
         nil,
         nil,
         o.toglist
-    }
-    
+    })
+
     return o
 end
 
 local function toggle(s, v)
-    return (v + 1) % (((type(s.lvl) == 'table') and #s.lvl > 1) and (#s.lvl) or 2)
+    return (v + 1) % (((type(s.p_.lvl) == 'table') and #s.p_.lvl > 1) and (#s.p_.lvl) or 2)
 end
 
 _key.toggle.input.muxhandler = _obj_:new {
     point = function(s, n, z)
         local held = _key.binary.input.muxhandler.point(s, n, z)
 
-        if s.edge == held then
+        if s.p_.edge == held then
             return toggle(s, s.v), util.time() - s.tlast, s.theld
         end
     end,

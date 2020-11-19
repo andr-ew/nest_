@@ -1,5 +1,23 @@
+```
+nest_ 
+
+{.:}
+
+{_()}
+
+{_:}
+
+```
+
 # norns
 ```
+
+BUG
+
+_key.toggle is double triggering on edge :~/
+
+MAP
+
 _key.binary
 
 _key.momentary {
@@ -187,6 +205,13 @@ preset
 # core
 
 ```
+
+RENAME
+
+control -> affordance ???
+in this case, fader can become control + get a little closer to the norns standard. we can name certain affordances the same as the params name and make the possible linkages clearer. I'm lichen it !
+
+
 ADD
 
 support nest_.redraw, overrides draw children
@@ -202,10 +227,5 @@ add inits{} list of init function keys in self, return table members assigned to
 add targets{} list of target nest keys in self 
 
 add :link(_control or function() return control end) to _control, link two controls by appending actions when values are the same type. also allow link to param (overwrites param action)
-
-RENAME
-
-control -> affordance ???
-in this case, fader can become control + get a little closer to the norns standard. we can name certain affordances the same as the params name and make the possible linkages clearer. I'm lichen it !
 
 ```
