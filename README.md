@@ -8,13 +8,13 @@ it is a collection of common interface components (affordances) and nested objec
 
 ```
 n = nest_ {
-  _affordance {
-    property = 5,
-    value = 1,
-    action = function(self, value)
-      dosomething(value)
-    end
-  }
+    _affordance {
+        property = 5,
+        value = 1,
+        action = function(self, value)
+          dosomething(value)
+        end
+    }
 }
 ```
 
