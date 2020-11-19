@@ -3,7 +3,7 @@ local tab = require 'tabutil'
 _grid = _group:new()
 _grid.devk = 'g'
 
-_grid.control = _control:new {
+_grid.affordance = _affordance:new {
     v = 0,
     x = 1,
     y = 1,
@@ -41,13 +41,13 @@ local input_contained = function(s, inargs)
     return contained.x and contained.y, axis_size
 end
 
-_grid.control.input.filter = function(s, args)
+_grid.affordance.input.filter = function(s, args)
     if input_contained(s, args) then
         return args
     else return nil end
 end
 
-_grid.metacontrol = _metacontrol:new {
+_grid.metaaffordance = _metaaffordance:new {
     v = 0,
     x = 1,
     y = 1,
@@ -55,21 +55,21 @@ _grid.metacontrol = _metacontrol:new {
     input = _input:new(),
     output = _output:new()
 }
-_grid.muxcontrol = _grid.control:new()
+_grid.muxaffordance = _grid.affordance:new()
 
 -- update -> filter -> handler -> muxhandler -> action -> v
 
-_grid.muxcontrol.input.muxhandler = _obj_:new {
+_grid.muxaffordance.input.muxhandler = _obj_:new {
     point = { function(s, z) end },
     line = { function(s, v, z) end },
     plane = { function(s, x, y, z) end }
 }
 
-_grid.muxcontrol.input.handler = function(s, k, ...)
+_grid.muxaffordance.input.handler = function(s, k, ...)
     return s.muxhandler[k](s, ...)
 end
 
-_grid.muxcontrol.input.filter = function(s, args)
+_grid.muxaffordance.input.filter = function(s, args)
     local contained, axis_size = input_contained(s, args)
 
     if contained then
@@ -87,14 +87,14 @@ _grid.muxcontrol.input.filter = function(s, args)
     else return nil end
 end
 
-_grid.muxcontrol.output.muxredraw = _obj_:new {
+_grid.muxaffordance.output.muxredraw = _obj_:new {
     point = function(s) end,
     line_x = function(s) end,
     line_y = function(s) end,
     plane = function(s) end
 }
 
-_grid.muxcontrol.output.redraw = function(s, g, v)
+_grid.muxaffordance.output.redraw = function(s, g, v)
     local has_axis = { x = false, y = false }
 
     for i,v in ipairs{"x", "y"} do
@@ -119,12 +119,12 @@ _grid.muxcontrol.output.redraw = function(s, g, v)
     end
 end
 
-_grid.muxmetacntrl = _grid.metacontrol:new {
-    input = _grid.muxcontrol.input:new(),
-    output = _grid.muxcontrol.output:new()
+_grid.muxmetacntrl = _grid.metaaffordance:new {
+    input = _grid.muxaffordance.input:new(),
+    output = _grid.muxaffordance.output:new()
 }
 
-_grid.binary = _grid.muxcontrol:new({ count = nil, fingers = nil }) -- local supertype for binary, toggle, trigger
+_grid.binary = _grid.muxaffordance:new({ count = nil, fingers = nil }) -- local supertype for binary, toggle, trigger
 
 local function minit(axis) 
     local v
@@ -149,7 +149,7 @@ local function minit(axis)
 end
 
 _grid.binary.new = function(self, o) 
-    o = _grid.muxcontrol.new(self, o)
+    o = _grid.muxaffordance.new(self, o)
 
     rawset(o, 'list', {})
 
@@ -662,11 +662,11 @@ _grid.trigger.output.muxredraw = _obj_:new {
     end
 }
 
-_grid.fill = _grid.muxcontrol:new()
+_grid.fill = _grid.muxaffordance:new()
 _grid.fill.input = nil
 
 _grid.fill.new = function(self, o) 
-    o = _grid.muxcontrol.new(self, o)
+    o = _grid.muxaffordance.new(self, o)
 
     local _, axis = input_contained(o, { -1, -1 })
     local v
@@ -701,10 +701,10 @@ _grid.fill.output.muxredraw = _obj_:new {
     plane = _grid.binary.output.muxredraw.plane
 }
 
-_grid.number = _grid.muxcontrol:new { edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 }, vlast = 0 }
+_grid.number = _grid.muxaffordance:new { edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 }, vlast = 0 }
 
 _grid.number.new = function(self, o) 
-    o = _grid.muxcontrol.new(self, o)
+    o = _grid.muxaffordance.new(self, o)
 
     rawset(o, 'hlist', {})
     o.count = { 1, 1 }
@@ -928,10 +928,10 @@ _grid.fader.output.muxredraw = _obj_:new {
     end
 }
 
-_grid.range = _grid.muxcontrol:new { edge = 1, fingers = { 2, 2 }, tdown = 0, count = { 1, 1 }, v = { 0, 0 } }
+_grid.range = _grid.muxaffordance:new { edge = 1, fingers = { 2, 2 }, tdown = 0, count = { 1, 1 }, v = { 0, 0 } }
 
 _grid.range.new = function(self, o) 
-    o = _grid.muxcontrol.new(self, o)
+    o = _grid.muxaffordance.new(self, o)
 
     rawset(o, 'hlist', {})
     o.count = { 1, 1 }

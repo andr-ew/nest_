@@ -150,18 +150,18 @@ _input = _obj_:new {
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
-            if hargs ~= nil and self.control then
+            if hargs ~= nil and self.affordance then
                 if self.devs[self.devk] then self.devs[self.devk].dirty = true end
  
                 if self.handler then 
                     local aargs = table.pack(self:handler(table.unpack(hargs)))
 
                     if aargs[1] then 
-                        self.control.v = self.action and self.action(self.control or self, table.unpack(aargs)) or aargs[1]
+                        self.affordance.v = self.action and self.action(self.affordance or self, table.unpack(aargs)) or aargs[1]
 
-                        if self.metacontrols_enabled then
+                        if self.metaaffordances_enabled then
                             for i,w in ipairs(mc) do
-                                w:pass(self.control, self.control.v, aargs)
+                                w:pass(self.affordance, self.affordance.v, aargs)
                             end
                         end
                     end
@@ -169,11 +169,11 @@ _input = _obj_:new {
             end
         elseif devk == nil or args == nil then -- called w/o arguments
             local defaults = self.arg_defaults or {}
-            self.control.v = self.action and self.action(self.control or self, self.control.v, table.unpack(defaults)) or self.control.v
+            self.affordance.v = self.action and self.action(self.affordance or self, self.affordance.v, table.unpack(defaults)) or self.affordance.v
             
             if self.devs[self.devk] then self.devs[self.devk].dirty = true end
 
-            return self.control.v
+            return self.affordance.v
         end
     end
 }
@@ -182,7 +182,7 @@ function _input:new(o)
     o = _obj_.new(self, o, _obj_)
     local _ = o._
 
-    _.control = nil
+    _.affordance = nil
     _.devs = {}
     
     local mt = getmetatable(o)
@@ -192,18 +192,18 @@ function _input:new(o)
         if k == "_" then return _
         elseif _[k] ~= nil then return _[k]
         else
-            local c = _.control and _.control[k]
+            local c = _.affordance and _.affordance[k]
             
-            -- catch shared keys, otherwise privilege control keys
+            -- catch shared keys, otherwise privilege affordance keys
             if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' then return self[k]
             else return c or self[k] end
         end
     end
 
     mt.__newindex = function(t, k, v)
-        local c = _.control and _.control[k]
+        local c = _.affordance and _.affordance[k]
     
-        if c and type(c) ~= 'function' then _.control[k] = v
+        if c and type(c) ~= 'function' then _.affordance[k] = v
         else mtn(t, k, v) end
     end
 
@@ -253,7 +253,7 @@ nest_ = _obj_:new {
             return ret
         
         elseif self.enabled == nil or self.p_.enabled == true then
-            if self.metacontrols_enabled then 
+            if self.metaaffordances_enabled then 
                 for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
             end 
 
@@ -313,7 +313,7 @@ function nest_:new(o, ...)
     _.is_nest = true
     _.enabled = true
     _.devs = {}
-    _.metacontrols_enabled = true
+    _.metaaffordances_enabled = true
     _.mc_links = {}
 
     local mt = getmetatable(o)
@@ -322,7 +322,7 @@ function nest_:new(o, ...)
     return o
 end
 
-_control = nest_:new {
+_affordance = nest_:new {
     value = 0,
     devk = nil,
     action = function(s, v) end,
@@ -342,30 +342,30 @@ _control = nest_:new {
     end
 }
 
-function _control:new(o)
+function _affordance:new(o)
     o = nest_.new(self, o, _obj_)
     local _ = o._    
 
     _.devs = {}
-    _.is_control = true
+    _.is_affordance = true
     --_.clone_type = _obj_
 
     local mt = getmetatable(o)
     local mtn = mt.__newindex
 
-    --mt.__tostring = function(t) return '_control' end
+    --mt.__tostring = function(t) return '_affordance' end
 
     mt.__newindex = function(t, k, v) 
         mtn(t, k, v)
         if type(v) == 'table' then if v.is_input or v.is_output then
-            rawset(v._, 'control', o)
+            rawset(v._, 'affordance', o)
             v.devk = v.devk or o.devk
         end end
     end
 
     for k,v in pairs(o) do
         if type(v) == 'table' then if v.is_input or v.is_output then
-            rawset(v._, 'control', o)
+            rawset(v._, 'affordance', o)
             v.devk = v.devk or o.devk
         end end
     end
@@ -373,19 +373,19 @@ function _control:new(o)
     return o
 end
 
-_metacontrol = _control:new {
+_metaaffordance = _affordance:new {
     pass = function(self, sender, v, handler_args) end,
     target = nil,
     mode = 'handler' -- or 'v'
 }
 
-function _metacontrol:new(o)
-    o = _control.new(self, o)
+function _metaaffordance:new(o)
+    o = _affordance.new(self, o)
 
     local mt = getmetatable(o)
     local mtn = mt.__newindex
     
-    --mt.__tostring = function() return '_metacontrol' end
+    --mt.__tostring = function() return '_metaaffordance' end
 
     mt.__newindex = function(t, k, v)
         mtn(t, k, v)
@@ -420,7 +420,7 @@ end
 
 --local pt = include 'lib/pattern_time'
 
-_pattern = _metacontrol:new {
+_pattern = _metaaffordance:new {
     event = _obj_:new {
         path = nil,
         package = nil
@@ -462,7 +462,7 @@ function _group:new(o)
         mtn(t, k, v)
 
         if type(v) == "table" then
-            if v.is_control then
+            if v.is_affordance then
                 for l,w in pairs(v) do
                     if type(w) == 'table' then
                         if w.is_input or w.is_output and not w.devk then 

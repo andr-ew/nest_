@@ -1,4 +1,4 @@
--- paginated demo of each standard control type included in the grid module
+-- paginated demo of each standard affordance type included in the grid module
 
 function stringrow(i) 
     o = ""
