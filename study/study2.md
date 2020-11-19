@@ -163,4 +163,6 @@ BAM !
 
 # the gang's all here
 
-right now, there are 7 affordance types included in the grid module all with thier own input/output behaviors and interpretations of a common set of **properties** and **action arguments** (which are additional informative arguments sent to the defined action function). for more information on all of this, see the [grid module documentation](../doc/grid.md) and the [grid module demo script](../examples/grid.lua)
+right now, there are 7 affordance types included in the grid module all with thier own input/output behaviors and interpretations of a common set of **properties** and **action arguments** (which are additional informative arguments sent to the defined action function). for more information on all of this, see the [`docs/grid`](../doc/grid.md) and [demos/grid](../examples/grid.lua)
+
+the norns interface ->
