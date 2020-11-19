@@ -17,7 +17,7 @@
   
 }
 
-[_control](#_control) {
+[_affordance](#_affordance) {
   - [p](#p)
   - [k](#k)
   - [z](#z)
@@ -51,27 +51,27 @@
   
 }
 
-[_group](#_control) { }
+[_group](#_affordance) { }
 
 ### nest_
 
-one of the two basic types in `nest_`. for introductory info, see [nests and controls](../study/study1.md)
+one of the two basic types in `nest_`. for introductory info, see [nests and affordances](../study/study1.md)
 
-### _control
+### _affordance
 
-one of the two basic types in `nest_`. for introductory info, see [nests and controls](../study/study1.md)
+one of the two basic types in `nest_`. for introductory info, see [nests and affordances](../study/study1.md)
 
 ### _group
 
-a simple container type for grouping controls by device or module. ex: `_grid.value`, `_enc.txt.number`
+a simple container type for grouping affordances by device or module. ex: `_grid.value`, `_enc.txt.number`
 
 ### _input
 
-stores input behaviors of a `_control`
+stores input behaviors of a `_affordance`
 
 ### _output
 
-stores output behaviors of a `_control`
+stores output behaviors of a `_affordance`
 
 # properties
 
@@ -93,7 +93,7 @@ boolean value, sets whether a given object and its children are drawn + updated.
 
 ### value
 
-the definitive datapoint of a control. this is the only property expected to change dynamically, though it can be initialized just like any other property. different controls will expect different datatypes and range constraints. along with `p`, `k`, and `z`, a pointer function cannot be assigned to `value`.
+the definitive datapoint of an affordance. this is the only property expected to change dynamically, though it can be initialized just like any other property. different affordances will expect different datatypes and range constraints. along with `p`, `k`, and `z`, a pointer function cannot be assigned to `value`.
 
 # methods
 
@@ -134,7 +134,7 @@ user-defined method called immediately after a nest structure has been initializ
 
 ### update
 
-this should be ran after updating `_control.value` in order call the `action` method and signal a device to be redrawn.
+this should be ran after updating `_affordance.value` in order call the `action` method and signal a device to be redrawn.
 
 ### action
 

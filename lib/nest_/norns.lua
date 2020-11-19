@@ -106,7 +106,7 @@ end
 _screen = _group:new()
 _screen.devk = 'screen'
 
-_screen.control = _control:new {
+_screen.affordance = _affordance:new {
     output = _output:new()
 }
 
@@ -115,12 +115,12 @@ _screen.control = _control:new {
 _enc = _group:new()
 _enc.devk = 'enc'
 
-_enc.control = _control:new { 
+_enc.affordance = _affordance:new { 
     n = 2,
     input = _input:new()
 }
 
-_enc.control.input.filter = function(self, args) -- args = { n, d }
+_enc.affordance.input.filter = function(self, args) -- args = { n, d }
     if type(n) == "table" then 
         if tab.contains(self.p_.n, args[1]) then return args end
     elseif args[1] == self.p_.n then return args
@@ -128,9 +128,9 @@ _enc.control.input.filter = function(self, args) -- args = { n, d }
     end
 end
 
-_enc.muxcontrol = _enc.control:new()
+_enc.muxaffordance = _enc.affordance:new()
 
-_enc.muxcontrol.input.filter = function(self, args) -- args = { n, d }
+_enc.muxaffordance.input.filter = function(self, args) -- args = { n, d }
     if type(self.p_.n) == "table" then 
         if tab.contains(self.p_.n, args[1]) then return { "line", args[1], args[2] } end
     elseif args[1] == self.p_.n then return { "point", args[1], args[2] }
@@ -138,39 +138,39 @@ _enc.muxcontrol.input.filter = function(self, args) -- args = { n, d }
     end
 end
 
-_enc.muxcontrol.input.muxhandler = _obj_:new {
+_enc.muxaffordance.input.muxhandler = _obj_:new {
     point = { function(s, z) end },
     line = { function(s, v, z) end }
 }
 
-_enc.muxcontrol.input.handler = function(s, k, ...)
+_enc.muxaffordance.input.handler = function(s, k, ...)
     return s.muxhandler[k](s, ...)
 end
 
-_enc.metacontrol = _metacontrol:new { 
+_enc.metaaffordance = _metaaffordance:new { 
     n = 2,
     input = _input:new()
 }
 
-_enc.metacontrol.input.filter = _enc.control.input.filter
+_enc.metaaffordance.input.filter = _enc.affordance.input.filter
 
-_enc.muxmetacontrol = _enc.metacontrol:new()
+_enc.muxmetaaffordance = _enc.metaaffordance:new()
 
-_enc.muxmetacontrol.input.filter = _enc.muxcontrol.input.filter
+_enc.muxmetaaffordance.input.filter = _enc.muxaffordance.input.filter
 
-_enc.muxmetacontrol.input.muxhandler = _obj_:new {
+_enc.muxmetaaffordance.input.muxhandler = _obj_:new {
     point = { function(s, z) end },
     line = { function(s, v, z) end }
 }
 
-_enc.muxmetacontrol.input.handler = function(s, k, ...)
+_enc.muxmetaaffordance.input.handler = function(s, k, ...)
     return s.muxhandler[k](s, ...)
 end
 
 --> _enc.number (like the param)
 
-_enc.number = _enc.muxcontrol:new { --> control? (control becomes affordance)
-    controlspec = nil,
+_enc.number = _enc.muxaffordance:new { --> affordance? (affordance becomes affordance)
+    affordancespec = nil,
     range = { 0, 1 },
     step = 0.01,
     units = '',
@@ -180,13 +180,13 @@ _enc.number = _enc.muxcontrol:new { --> control? (control becomes affordance)
 }
 
 _enc.number.new = function(self, o)
-    local cs = o.p_.controlspec
+    local cs = o.p_.affordancespec
 
-    o = _enc.muxcontrol.new(self, o)
-    o.controlspec = cs
+    o = _enc.muxaffordance.new(self, o)
+    o.affordancespec = cs
 
-    if not o.controlspec then
-        o.controlspec = controlspec:new(o.p_.range[1], o.p_.range[2], o.p_.warp, o.p_.step, o.v, o.p_.units, o.p_.quantum, o.p_.wrap)
+    if not o.affordancespec then
+        o.affordancespec = affordancespec:new(o.p_.range[1], o.p_.range[2], o.p_.warp, o.p_.step, o.v, o.p_.units, o.p_.quantum, o.p_.wrap)
     end
 
     return o
@@ -197,45 +197,45 @@ end
 _key = _group:new()
 _key.devk = 'key'
 
-_key.control = _control:new { 
+_key.affordance = _affordance:new { 
     n = 2,
     edge = 1,
     input = _input:new()
 }
 
-_key.control.input.filter = _enc.control.input.filter
+_key.affordance.input.filter = _enc.affordance.input.filter
 
-_key.muxcontrol = _key.control:new()
+_key.muxaffordance = _key.affordance:new()
 
-_key.muxcontrol.input.filter = _enc.muxcontrol.input.filter
+_key.muxaffordance.input.filter = _enc.muxaffordance.input.filter
 
-_key.muxcontrol.input.muxhandler = _obj_:new {
+_key.muxaffordance.input.muxhandler = _obj_:new {
     point = { function(s, z) end },
     line = { function(s, v, z) end }
 }
 
-_key.muxcontrol.input.handler = _enc.muxcontrol.input.handler
+_key.muxaffordance.input.handler = _enc.muxaffordance.input.handler
 
-_key.metacontrol = _metacontrol:new { 
+_key.metaaffordance = _metaaffordance:new { 
     n = 2,
     edge = 1,
     input = _input:new()
 }
 
-_key.metacontrol.input.filter = _key.control.input.filter
+_key.metaaffordance.input.filter = _key.affordance.input.filter
 
-_key.muxmetacontrol = _key.metacontrol:new()
+_key.muxmetaaffordance = _key.metaaffordance:new()
 
-_key.muxmetacontrol.input.filter = _key.muxcontrol.input.filter
+_key.muxmetaaffordance.input.filter = _key.muxaffordance.input.filter
 
-_key.muxmetacontrol.input.muxhandler = _obj_:new {
+_key.muxmetaaffordance.input.muxhandler = _obj_:new {
     point = { function(s, z) end },
     line = { function(s, v, z) end }
 }
 
-_key.muxmetacontrol.input.handler = _enc.muxmetacontrol.input.handler
+_key.muxmetaaffordance.input.handler = _enc.muxmetaaffordance.input.handler
 
-_key.binary = _key.muxcontrol:new {
+_key.binary = _key.muxaffordance:new {
     fingers = nil
 }
 
@@ -248,7 +248,7 @@ local function minit(n)
 end
 
 _key.binary.new = function(self, o) 
-    o = _key.muxcontrol.new(self, o)
+    o = _key.muxaffordance.new(self, o)
 
     rawset(o, 'list', {})
 
