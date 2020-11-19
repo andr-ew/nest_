@@ -7,7 +7,7 @@
 it is a collection of common interface components (affordances) and nested object-oriented heuristics that allow for quick assemblage of user interfaces on monome grids, norns, and arcs, which arbitrary functionalities bound by the artist programmer.
 
 ```
-n = nest_ {
+nest_ {
     _affordance {
         property = 5,
         value = 1,
