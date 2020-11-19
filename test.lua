@@ -9,12 +9,12 @@ tab = require 'tabutil'
 
 n = nest_ {
     _key.toggle {
-        --n = { 2, 3 },
-        n = 2,
+        n = { 2, 3 },
+        --n = 2,
         action = function(s, v, t) 
             print('v') 
-            print(v)
-            --tab.print(v) 
+            --print(v)
+            tab.print(v) 
         end
     }
 } :connect { key = key, enc = enc }
