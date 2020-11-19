@@ -110,4 +110,4 @@ dave = nest_(3):each(function(i)
 end)
 ```
 
-here we initialize dave with three blank children (numbered 1-3), call the `each` function and send it a _callback function_ which `return`s a `_affordance` to each blank child slot (the number of which is stored in the `i` variable). asending values and the action function can be generated for all three in one efficient swoop.
+here we initialize dave with three blank children (numbered 1-3), call the `each` function and send it a _callback function_ which `return`s an `_affordance` to each blank child slot (the number of which is stored in the `i` variable). asending values and the action function can be generated for all three in one efficient swoop.
