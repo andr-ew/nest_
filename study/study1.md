@@ -13,7 +13,7 @@ mynest = nest_()
 myaffordance = _affordance()
 ```
 
-this is actually a cheeky form of `object:new()`, for those familiar with [OOP](https://en.wikipedia.org/wiki/Object-oriented_programming). a lonely pair of sigur ros sausages doesn't do much on it's own though, generally we'll want to spice things up with some arguments. call `n = nest_(4)` to create a nest containing four blank **children**, labeled 1-4 (`n[1], n[2], n[3], n[4]`). call `dave = nest_('tommy', 'walter', 'elanore')` once you've decided that you're not a maniac, and want to give your children actual human names (`dave.tommy`, `dave.walter`, `dave.elanore`). but what are these children ? well, most of the time we'll want a say in that, so we can call `nest_` with an object argument using curly braces:
+this is actually a cheeky form of `object:new()`, for those familiar with [OOP](https://en.wikipedia.org/wiki/Object-oriented_programming). a lonely pair of sigur ros sausages doesn't do much on it's own though, generally we'll want to spice things up with some arguments. call `n = nest_(4)` to create a nest containing four blank **children**, labeled 1-4 (`n[1], n[2], n[3], n[4]`). you can call `dave = nest_('tommy', 'walter', 'elanore')` once you've decided that you're not a maniac, and want to give your children actual human names (`dave.tommy`, `dave.walter`, `dave.elanore`). but what are these children ? well, most of the time we'll want a say in that, so we can call `nest_` with an object argument using curly braces:
 
 ```
 dave = nest_ {
