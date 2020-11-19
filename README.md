@@ -2,7 +2,7 @@
 
 # nest_
 
-`nest_` is an object language and library for building user interface structures in lua for monome devices. it is a collection of common interface components (affordances) and nested object-oriented heuristics that allow for quick assemblage of user interfaces on monome grids, norns, and arcs, which arbitrary functionalities bound by the artist programmer.
+`nest_` is an object language and library for constructing user interface structures in lua for monome devices. it is a collection of common interface components (affordances) and nested object-oriented heuristics that allow for quick assemblage of user interfaces on monome grids, norns, and arcs, which arbitrary functionalities bound by the artist programmer.
 
 ```
 n = nest_ {
