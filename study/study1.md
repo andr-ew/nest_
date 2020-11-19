@@ -2,7 +2,7 @@
 
 oh hello, I didn't hear to come in. well, let's get started then. `core` is where things begin. nothing here is really useful on it's own - just like that grid you have there on the desk with nothing plugged in into it! no, these are the _building blocks_ of an interface. we leave the _doing things_ to be filled in by later modules. come, have a seat, grab yourself one of those yuzu teas I left by the door.
 
-there are two basic building blocks to every interface, `nest_`s and `_affordance`s. `_affordance`s are all the interactive components (or [affordances](https://jnd.org/affordances_and_design/)) that make up an [interface](https://en.wikipedia.org/wiki/User_interface). they are the main focus of the various `modules`. a `nest_` can be thought of as the interface itself, though in practice it's really just a container, not all that much different than a blank object (`{ }`). they are usuful for grouping `_affordances` - perhaps they are grouped by page on a paginated interface or serve similar roles. `nest_`s can contain `affordance_`s, other `nest_`s, or anything at all.
+there are two basic building blocks to every interface, `nest_`s and `_affordance`s. [affordances](https://jnd.org/affordances_and_design/) are all the interactive that make up an [interface](https://en.wikipedia.org/wiki/User_interface). they are the main focus of the various `modules`. a `nest_` can be thought of as the interface itself, though in practice it's really just a container, not all that much different than a blank object (`{ }`). they are usuful for grouping `_affordances` - perhaps they are grouped by page on a paginated interface or serve similar roles. `nest_`s can contain `affordance_`s, other `nest_`s, or anything at all.
 
 # what's new
 
