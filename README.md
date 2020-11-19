@@ -28,7 +28,7 @@ currently in beta ! current documentation covers existing features, will continu
 
 3. the norns interface
 
-4. affordances controlling affordances
+4. affordances affording
 
 5. customization
 
