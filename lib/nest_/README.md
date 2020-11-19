@@ -11,11 +11,6 @@ nest_
 
 # norns
 ```
-
-BUG
-
-_key.toggle is double triggering on edge :~/
-
 MAP
 
 _key.binary
@@ -205,10 +200,6 @@ preset
 # core
 
 ```
-REFACTOR
-
-remove auto-formmating child objects as nests. it's not neccesary and a source of wierd upredictable errors
-
 
 RENAME
 
