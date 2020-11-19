@@ -6,13 +6,13 @@ currently in beta ! current documentation covers existing features, will continu
 
 # Studies
 
-1. [nests of controls](./study/study1.md)
+1. [nests of affordances](./study/study1.md)
 
 2. [the grid module](./study/study2.md)
 
 3. the txt module
 
-4. controls controlling controls
+4. affordances controlling affordances
 
 5. customization
 
