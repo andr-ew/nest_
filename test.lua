@@ -8,9 +8,11 @@ include 'lib/nest_/norns'
 tab = require 'tabutil'
 
 n = nest_ {
-    _key.toggle {
+    _enc.control {
         n = { 2, 3 },
         --n = 2,
+        range = { 0, 1 },
+        --wrap = true,
         action = function(s, v, t) 
             print('v') 
             --print(v)
