@@ -1,56 +1,5 @@
 # norns
 ```
-MAP
-
-_key.binary
-
-_key.momentary {
-    n = 2 or { 2, 3 } or { 1, 2, 3 }
-    fingers = { 0, 3 }
-    edge = 1
-}
-
-_key.trigger {
-    n = 2 or { 2, 3 } or { 1, 2, 3 }
-    fingers = { 0, 3 }
-    edge = 1
-}
-
-_key.toggle {
-    n = 2 or { 2, 3 } or { 1, 2, 3 }
-    lvl = { 0, ..., 15 } 
-    fingers = { 0, 3 }
-    edge = 1
-}
-
-_key.number {
-    n = 2 or { 2, 3 }
-    inc = 1
-}
-
-_key.option {
-    options = {},
-    wrap = false
-}
-
-_enc.number {
-    range = { 0, 1 },
-    wrap = false
-}
-
-_enc.control {
-    controlspec
-    range = { 0, 1 }
-    step = 1
-    warp = 1
-    wrap = false
-}
-
-_enc.option {
-    options = {},
-    wrap = false
-}
-
 ```
 
 # txt
@@ -89,6 +38,7 @@ _txt.list_ {
 }
 
 _txt.select_ {
+    selector = _affordance
 }
 
 _txt.scroll_ {
@@ -100,6 +50,7 @@ _txt.scroll_ {
     cellsize = self.size + ? or { self.size + ?, self.size + ? } 
     flow = 'x' or 'y'
     window = 6 or { 6, 6 }
+    selector = _affordance
     items = nest_ {} or { {}, ... }
 }
 

@@ -409,8 +409,8 @@ _key.muxaffordance = _key.affordance:new()
 _key.muxaffordance.input.filter = _enc.muxaffordance.input.filter
 
 _key.muxaffordance.input.muxhandler = _obj_:new {
-    point = { function(s, z) end },
-    line = { function(s, v, z) end }
+    point = function(s, z) end,
+    line = function(s, v, z) end
 }
 
 _key.muxaffordance.input.handler = _enc.muxaffordance.input.handler
@@ -433,6 +433,67 @@ _key.muxmetaaffordance.input.muxhandler = _obj_:new {
 }
 
 _key.muxmetaaffordance.input.handler = _enc.muxmetaaffordance.input.handler
+
+_key.number = _key.muxaffordance:new {
+    inc = 1,
+    wrap = false,
+    range = { 0, 1 },
+    edge = 1,
+    tdown = 0
+}
+
+_key.number.input.muxhandler = _obj_:new {
+    point = function(s, n, z) 
+        if z == s.edge then
+            s.wrap = true
+            return delta_number(s, s.v, s.inc), util.time() - s.tdown, s.inc
+        else s.tdown = util.time()
+        end
+    end,
+    line = function(s, n, z) 
+        if z == s.edge then
+            local i = tab.key(s.p_.n, n)
+            local d = i == 2 and s.inc or -s.inc
+            return delta_number(s, s.v, d), util.time() - s.tdown, d
+        else s.tdown = util.time()
+        end
+    end
+}
+
+_key.option = _enc.muxaffordance:new {
+    value = "",
+    options = {},
+    wrap = false,
+    inc = 1,
+    edge = 1,
+    tdown = 0
+}
+
+_key.option.new = function(self, o) 
+    o = _enc.muxaffordance.new(self, o)
+
+    if not tab.contains(o.p_.options, o.v) then o.v = o.p_.options[1] or "" end
+
+    return o
+end
+
+_key.option.input.muxhandler = _obj_:new {
+    point = function(s, n, z) 
+        if z == s.edge then 
+            s.wrap = true
+            return delta_option_point(s, s.v, s.inc), util.time() - s.tdown, s.inc
+        else s.tdown = util.time()
+        end
+    end,
+    line = function(s, n, z) 
+        if z == s.edge then 
+            local i = tab.key(s.p_.n, n)
+            local d = i == 2 and s.inc or -s.inc
+            return delta_option_point(s, s.v, d), util.time() - s.tdown, d
+        else s.tdown = util.time()
+        end
+    end
+}
 
 _key.binary = _key.muxaffordance:new {
     fingers = nil

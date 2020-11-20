@@ -8,19 +8,16 @@ include 'lib/nest_/norns'
 tab = require 'tabutil'
 
 n = nest_ {
-    _enc.option {
+    _key.option {
         n = { 2, 3 },
         --n = 2,
-        --options = { 'a', 'b', 'c' },
-        options = { 
-            { 'a', 'b', 'c' },
-            { 'd', 'e', 'f' },
-            { 'g', 'h', 'i' }
-        },
-        wrap = true,
+        options = { 'a', 'b', 'c' },
+        --wrap = true,
+        --edge = 0,
         action = function(s, v, t) 
             --print('v') 
             print('v', v)
+            print('t', t)
             --tab.print(v) 
         end
     }
