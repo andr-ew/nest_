@@ -28,6 +28,10 @@ _key.number {
     inc = 1
 }
 
+_key.option {
+    options = {}
+}
+
 _enc.number {
     range = { 0, 1 },
     wrap = false
@@ -39,6 +43,10 @@ _enc.control {
     step = 1
     warp = 1
     wrap = false
+}
+
+_enc.option {
+    options = {}
 }
 
 ```
@@ -67,8 +75,7 @@ _screen.txt.control {
 
 _screen.txt.label { value = '' }
 
-
-_enc.txt.list_ {
+_txt.list_ {
     x = 1 or {}
     y = 1 or {}
     lvl = { 2, 15 }
@@ -79,7 +86,10 @@ _enc.txt.list_ {
     items = nest_ {} or { {}, ... }
 }
 
-_enc.txt.scroll_ {
+_txt.select_ {
+}
+
+_txt.scroll_ {
     x = 1 or {}
     y = 1 or {}
     lvl = { 2, 15 }
@@ -88,54 +98,53 @@ _enc.txt.scroll_ {
     cellsize = self.size + ? or { self.size + ?, self.size + ? } 
     flow = 'x' or 'y'
     window = 6 or { 6, 6 }
-    scroller = _enc.txt.number { output = false }
     items = nest_ {} or { {}, ... }
 }
 
-_enc.txt.control {
+_txt.enc.control {
     n = 2 or { 2, 3 }
 }
 
-_enc.txt.number {
+_txt.enc.number {
     controlspec
     range = { 0, 1 }
     step = 1
     warp = 1
 }
 
-_enc.txt.option {
-    list = {}
+_txt.enc.option {
+    options = {}
 }
 
-_enc.txt.radio {
-    list = {} or { {}, ... }
+_txt.enc.radio {
+    options = {} or { {}, ... }
 }
 
-_key.txt.option {
+_txt.key.option {
     n = 2 or { 2, 3 }
-    list = {}
+    options = {}
     inc
 }
 
-_key.txt.radio {
+_txt.key.radio {
     n = 2 or { 2, 3 }
-    list = {}
+    options = {}
     inc
 }
 
-_key.txt.trigger {
+_txt.key.trigger {
     n = 2 or { 2, 3 } or { 1, 2, 3 }
     fingers = { 0, 3 }
     edge = 1
 }
 
-_key.txt.momentary {
+_txt.key.momentary {
     n = 2 or { 2, 3 } or { 1, 2, 3 }
     fingers = { 0, 3 }
     edge = 1
 }
 
-_key.txt.toggle {
+_txt.key.toggle {
     n = 2 or { 2, 3 } or { 1, 2, 3 }
     lvl = { 0, ..., 15 } 
     fingers = { 0, 3 }
