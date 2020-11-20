@@ -175,11 +175,6 @@ local function minit(n)
     else return 0 end
 end
 
-_enc.number = _enc.muxaffordance:new {
-    range = { 0, 1 },
-    wrap = false
-}
-
 local function delta_number(self, value, d)
     local v = value + d
 
@@ -196,6 +191,20 @@ local function delta_number(self, value, d)
     if value ~= c then
         return c
     end
+end
+
+_enc.number = _enc.muxaffordance:new {
+    range = { 0, 1 },
+    wrap = false
+}
+
+_enc.number.new = function(self, o)
+    o = _enc.muxaffordance.new(self, o)
+
+    local v = minit(o.p_.n)
+    if type(v) == 'table' and (type(o.v) ~= 'table' or (type(o.v) == 'table' and #o.v ~= #v)) then o.v = v end
+
+    return o
 end
 
 _enc.number.input.muxhandler = _obj_:new {
@@ -269,6 +278,115 @@ _enc.control.input.muxhandler = _obj_:new {
             s.v[i] = v
             del[i] = v - last
             return s.v, del
+        end
+    end
+}
+
+local tab = require 'tabutil'
+
+local function delta_option_point(self, value, d)
+    local i = tab.key(self.p_.options, value) or 0
+    local v = i + d
+
+    if self.wrap then
+        while v > #self.p_.options do
+            v = v - #self.options
+        end
+        while v < 1 do
+            v = v + #self.p_.options + 1
+        end
+    end
+
+    local c = util.clamp(v, 1, #self.p_.options)
+    if i ~= c then
+        return self.p_.options[c]
+    end
+end
+
+local function delta_option_line(self, value, dx, dy)
+    local i = 0
+    local j = 0
+
+    for x, w in ipairs(self.p_.options) do
+        for y, z in ipairs(w) do
+            if z == value then
+                i = x
+                j = y
+            end
+        end
+    end
+
+    vx = i + (dx or 0)
+    vy = j + (dy or 0)
+
+    if self.wrap then
+        while vx > #self.p_.options do
+            vx = vx - #self.options
+        end
+        while vx < 1 do
+            vx = vx + #self.p_.options + 1
+        end
+    end
+
+    local cx = util.clamp(vx, 1, #self.p_.options)
+
+    if self.wrap then
+        while vy > #self.p_.options[cx] do
+            vy = vy - #self.options[cx]
+        end
+        while vy < 1 do
+            vy = vy + #self.p_.options[cx] + 1
+        end
+    end
+
+    local cy = util.clamp(vy, 1, #self.p_.options[cx])
+
+    if i ~= cx or j ~= cy then
+        return self.p_.options[cx][cy]
+    end
+end
+
+_enc.option = _enc.muxaffordance:new {
+    value = "",
+    options = {},
+    wrap = false
+}
+
+_enc.option.new = function(self, o) 
+    o = _enc.muxaffordance.new(self, o)
+
+    if type(o.p_.n) == 'table' then
+        local contains = false
+
+        for x, w in ipairs(self.p_.options) do
+            for y, z in ipairs(w) do
+                if z == o.v then
+                    contains = true
+                end
+            end
+        end
+
+        if not contains then o.v = o.p_.options[1][1] or "" end
+    else
+        if not tab.contains(o.p_.options, o.v) then o.v = o.p_.options[1] or "" end
+    end
+
+    return o
+end
+
+_enc.option.input.muxhandler = _obj_:new {
+    point = function(s, n, d) 
+        return delta_option_point(s, s.v, d), d
+    end,
+    line = function(s, n, d) 
+        local i = tab.key(s.p_.n, n)
+        local dd = { 0, 0 }
+        dd[i] = d
+        local v = delta_option_line(s, s.v, dd[2], dd[1])
+        if v then
+            local del = minit(s.p_.n)
+            del[i] = d
+            return v, del
         end
     end
 }

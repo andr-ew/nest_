@@ -29,7 +29,8 @@ _key.number {
 }
 
 _key.option {
-    options = {}
+    options = {},
+    wrap = false
 }
 
 _enc.number {
@@ -46,7 +47,8 @@ _enc.control {
 }
 
 _enc.option {
-    options = {}
+    options = {},
+    wrap = false
 }
 
 ```
@@ -199,13 +201,9 @@ preset
 
 ```
 
-RENAME
-
-control -> affordance ???
-in this case, fader can become control + get a little closer to the norns standard. we can name certain affordances the same as the params name and make the possible linkages clearer. I'm lichen it !
-
-
 ADD
+
+_obj_:clone(_obj_) - simple solution to multiple inheritance needs - clones the members of an obj to another one but doesn't modify the heiarchy tree allow for easy overrides for creating non-_obj_ members on every clone or new
 
 support nest_.redraw, overrides draw children
 
