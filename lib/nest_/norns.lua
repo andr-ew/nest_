@@ -139,8 +139,8 @@ _enc.muxaffordance.input.filter = function(self, args) -- args = { n, d }
 end
 
 _enc.muxaffordance.input.muxhandler = _obj_:new {
-    point = { function(s, z) end },
-    line = { function(s, v, z) end }
+    point = function(s, z) end,
+    line = function(s, v, z) end
 }
 
 _enc.muxaffordance.input.handler = function(s, k, ...)
@@ -167,10 +167,73 @@ _enc.muxmetaaffordance.input.handler = function(s, k, ...)
     return s.muxhandler[k](s, ...)
 end
 
---> _enc.number (like the param)
+local function minit(n)
+    if type(n) == 'table' then
+        local ret = {}
+        for i = 1, #n do ret[i] = 0 end
+        return ret
+    else return 0 end
+end
 
-_enc.number = _enc.muxaffordance:new { --> affordance? (affordance becomes affordance)
-    affordancespec = nil,
+_enc.number = _enc.muxaffordance:new {
+    range = { 0, 1 },
+    wrap = false
+}
+
+local function delta_number(self, value, d)
+    local v = value + d
+
+    if self.wrap then
+        while v > self.range[2] do
+            v = v - (self.range[2] - self.range[1]) - 1
+        end
+        while v < self.range[1] do
+            v = v + (self.range[2] - self.range[1]) + 1
+        end
+    end
+
+    local c = util.clamp(v,self.range[1],self.range[2])
+    if value ~= c then
+        return c
+    end
+end
+
+_enc.number.input.muxhandler = _obj_:new {
+    point = function(s, n, d) 
+        return delta_number(s, s.v, d), d
+    end,
+    line = function(s, n, d) 
+        local i = tab.key(s.p_.n, n)
+        local v = delta_number(s, s.v[i], d)
+        if v then
+            local del = minit(s.p_.n)
+            del[i] = d
+            s.v[i] = v
+            return s.v, del
+        end
+    end
+}
+
+local function delta_control(self, v, d)
+    local value = self.controlspec:unmap(v) + (d * self.controlspec.quantum)
+
+    if self.controlspec.wrap then
+        while value > 1 do
+            value = value - 1
+        end
+        while value < 0 do
+            value = value + 1
+        end
+    end
+    
+    local c = self.controlspec:map(util.clamp(value, 0, 1))
+    if v ~= c then
+        return c
+    end
+end
+
+_enc.control = _enc.muxaffordance:new {
+    controlspec = nil,
     range = { 0, 1 },
     step = 0.01,
     units = '',
@@ -179,18 +242,36 @@ _enc.number = _enc.muxaffordance:new { --> affordance? (affordance becomes affor
     wrap = false
 }
 
-_enc.number.new = function(self, o)
-    local cs = o.p_.affordancespec
+_enc.control.new = function(self, o)
+    local cs = o.controlspec
 
     o = _enc.muxaffordance.new(self, o)
-    o.affordancespec = cs
 
-    if not o.affordancespec then
-        o.affordancespec = affordancespec:new(o.p_.range[1], o.p_.range[2], o.p_.warp, o.p_.step, o.v, o.p_.units, o.p_.quantum, o.p_.wrap)
-    end
+    o.controlspec = cs or controlspec.new(o.p_.range[1], o.p_.range[2], o.p_.warp, o.p_.step, o.v, o.p_.units, o.p_.quantum, o.p_.wrap)
+
+    local v = minit(o.p_.n)
+    if type(v) == 'table' and (type(o.v) ~= 'table' or (type(o.v) == 'table' and #o.v ~= #v)) then o.v = v end
 
     return o
 end
+
+_enc.control.input.muxhandler = _obj_:new {
+    point = function(s, n, d) 
+        local last = s.v
+        return delta_control(s, s.v, d), s.v - last 
+    end,
+    line = function(s, n, d) 
+        local i = tab.key(s.p_.n, n)
+        local v = delta_control(s, s.v[i], d)
+        if v then
+            local last = s.v[i]
+            local del = minit(s.p_.n)
+            s.v[i] = v
+            del[i] = v - last
+            return s.v, del
+        end
+    end
+}
 
 ----------------------------------------------------------------------------------------------------
 
@@ -238,14 +319,6 @@ _key.muxmetaaffordance.input.handler = _enc.muxmetaaffordance.input.handler
 _key.binary = _key.muxaffordance:new {
     fingers = nil
 }
-
-local function minit(n)
-    if type(n) == 'table' then
-        local ret = {}
-        for i = 1, #n do ret[i] = 0 end
-        return ret
-    else return 0 end
-end
 
 _key.binary.new = function(self, o) 
     o = _key.muxaffordance.new(self, o)
