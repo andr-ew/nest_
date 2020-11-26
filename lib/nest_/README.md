@@ -6,10 +6,12 @@
 ```
 
 redraw = function()
-    self:placer(self:txt())
+    self:txtdraw(self:txt())
 end
 
-_screen.txt.control {
+MAP
+
+_txt.screen.affordance {
     n = 2 or { 2, 3 } or { { 2, 3 }, 3 }
     font = 1
     size = 4

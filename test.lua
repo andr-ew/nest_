@@ -5,20 +5,13 @@ end
 
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
+include 'lib/nest_/txt'
+
 tab = require 'tabutil'
 
 n = nest_ {
-    _key.option {
-        n = { 2, 3 },
-        --n = 2,
-        options = { 'a', 'b', 'c' },
-        --wrap = true,
-        --edge = 0,
-        action = function(s, v, t) 
-            --print('v') 
-            print('v', v)
-            print('t', t)
-            --tab.print(v) 
-        end
+    _txt.label {
+        value = 'test'
     }
-} :connect { key = key, enc = enc }
+} :connect { key = key, enc = enc, screen = screen }
+

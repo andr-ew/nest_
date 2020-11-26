@@ -19,7 +19,7 @@ nest_.connect = function(self, objects, fps)
                 object = vv,
                 redraw = function() 
                     vv:all(0)
-                    self:draw(kk, elapsed) 
+                    self:draw(kk) 
                     vv:refresh()
                 end,
                 handler = function(...)
@@ -52,11 +52,13 @@ nest_.connect = function(self, objects, fps)
 
             _G[kk] = devs[kk].handler
         elseif k == 'screen' then
+            local kk = k
+
             devs[kk] = _dev:new {
                 object = screen,
                 redraw = function()
                     screen.clear()
-                    self:draw('screen', elapsed)
+                    self:draw('screen')
                     screen.update()
                 end
             }
@@ -107,6 +109,7 @@ _screen = _group:new()
 _screen.devk = 'screen'
 
 _screen.affordance = _affordance:new {
+    aa = 0,
     output = _output:new()
 }
 

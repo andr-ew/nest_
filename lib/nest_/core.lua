@@ -52,6 +52,22 @@ _obj_ = {
     print = function(self) print(tostring(self)) end,
     replace = function(self, k, v)
         rawset(self, k, formattype(self, k, v, self._.clone_type))
+    end,
+    copy = function(self, o) 
+        for k,v in pairs(self) do 
+            if not rawget(o, k) then
+                if type(v) == "function" then
+                    -- function pointers are not copied, instead they are referenced using metatables only when the objects are heierchachically related
+                elseif type(v) == "table" and v.is_obj then
+                    local clone = self[k]:new()
+                    o[k] = formattype(o, k, clone, o._.clone_type) ----
+                else rawset(o,k,v) end 
+            end
+        end
+
+        table.sort(o._.zsort, zcomp)
+
+        return o
     end
 }
 
@@ -125,19 +141,8 @@ function _obj_:new(o, clone_type)
         format_nickname(o, k, v)
     end
 
-    for k,v in pairs(self) do 
-        if not rawget(o, k) then
-            if type(v) == "function" then
-                -- function pointers are not copied to child, instead they are referenced using metatables
-            elseif type(v) == "table" and v.is_obj then
-                local clone = self[k]:new()
-                o[k] = formattype(o, k, clone, _.clone_type) ----
-            else rawset(o,k,v) end 
-        end
-    end
+    self:copy(o)
 
-    table.sort(_.zsort, zcomp)
-    
     return o
 end
 
@@ -264,11 +269,11 @@ nest_ = _obj_:new {
             end
         end
     end,
-    draw = function(self, devk, t)
+    draw = function(self, devk)
         for i,v in ipairs(self.zsort) do
             if self.enabled == nil or self.p_.enabled == true then
                 if v.draw then
-                    v:draw(devk, t)
+                    v:draw(devk)
                 end
             end
         end
