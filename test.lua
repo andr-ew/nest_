@@ -11,7 +11,10 @@ tab = require 'tabutil'
 
 n = nest_ {
     _txt.label {
-        value = 'e',
+        x = 64,
+        y = 32,
+        align = { 'center', 'center' },
+        value = 'turtle goes peepee',
         border = 15,
         font = 1,
         --size = 16,
