@@ -114,9 +114,8 @@ _txt.key.toggle {
 
 # etc
 ```
-_etc.et24
-_etc.fselect
-_etc.filebrowser
+_etc.et24_
+_etc.filebrowser_
 
 ```
 
