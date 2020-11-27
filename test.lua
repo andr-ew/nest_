@@ -11,14 +11,16 @@ tab = require 'tabutil'
 
 n = nest_ {
     _txt.label {
+        --x = { 32, 96 },
+        --y = { 16, 48 },
         x = 64,
         y = 32,
         align = { 'center', 'center' },
-        value = 'turtle goes peepee',
-        border = 15,
+        value = 'peepee',
+        border = 7,
         font = 1,
         --size = 16,
-        padding = 2
+        padding = 3
     }
 } :connect { key = key, enc = enc, screen = screen }
 

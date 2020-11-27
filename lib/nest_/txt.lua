@@ -20,37 +20,52 @@ _txt.affordance = _screen.affordance:new {
 
 _txt.affordance.output.txt = function(s) end
 
+--[[
+
+txt0d
+txt1d
+txt2d
+
+]]
+
 local function txtbox(txt, x, y, x2, y2, xalign, yalign, font, size, lvl, border, fill, padding, font_headroom, font_leftroom)
     font_headroom = font_headroom or 3/8 
     font_leftroom = font_leftroom or 1/16
-
-    local width = screen.text_extents(txt)
 
     screen.font_face(font)
     screen.font_size(size)
 
     local fixed = (x2 ~= nil) and (y2 ~= nil)
-    local w, h, bx, by, tx, ty
+    local width = screen.text_extents(txt)
+    local height = size * (1 - font_headroom)
+    local w, h, bx, by, tx, ty, tmode
 
     if fixed then
-        -- fixed width, text centered in box
+        w = x2 - x - 1
+        h = y2 - y - 1
+
+        bx = x
+        by = y
+        tx = bx + w/2 - 1
+        ty = by + (h + height)/2 - 1
+        tmode = 'center'
     else
         local px = (type(padding) == 'table' and padding[1] or padding) * 2
         local py = (type(padding) == 'table' and padding[2] or padding) * 2
-        local height = size * (1 - font_headroom)
 
         w = width + px - 1
         h = height + py - 1
 
         local bxalign = (xalign == 'center') and (((width + px) / 2) + 1) or (xalign == 'right') and (width + px) or 0
+        local byalign = (yalign == 'center') and h/2 - 1 or (yalign == 'bottom') and h or 0
         local txalign = (xalign == 'center') and 0 or (xalign == 'right') and -1 or 1
-        local byalign = (yalign == 'center') and h/2 or (yalign == 'bottom') and h or 0
-        local tyalign = (yalign == 'center') and height/2 - (py/4) or (yalign == 'bottom') and - (py/2) or height + (py/2) - 1
+        local tyalign = (yalign == 'center') and (height/2) or (yalign == 'bottom') and - (py/2) or height + (py/2) - 1
 
         bx = x - bxalign
         by = y - byalign
         tx = x - 1 + ((px / 2) * txalign) - (font == 1 and (size * font_leftroom) or 0)
         ty = y + tyalign
+        tmode = xalign
     end
 
     if fill > 0 then
@@ -68,18 +83,23 @@ local function txtbox(txt, x, y, x2, y2, xalign, yalign, font, size, lvl, border
     screen.level(lvl)
     screen.move(tx, ty)
 
-    if xalign == 'right' then
+    if tmode == 'right' then
         screen.text_right(txt)
-    elseif xalign == 'center' then
+    elseif tmode == 'center' then
         screen.text_center(txt)
     else
         screen.text(txt)
     end
+
+    return w, h
+end
+
+function txtlist(txt, x, y, x2, y2, flow, wrap, margin, cellsize)
 end
 
 _txt.affordance.output.txtdraw = function(s, txt) 
     if type(txt) == 'table' then
-        
+                
     else
         local c = { x = { nil, nil }, y = { nil, nil }, align = { 'left', 'top' } }
         for _,k in ipairs { 'x', 'y', 'align' } do 

@@ -156,7 +156,7 @@ preset
 
 ADD
 
-_obj_:clone(_obj_) - simple solution to multiple inheritance needs - clones the members of an obj to another one but doesn't modify the heiarchy tree allow for easy overrides for creating non-_obj_ members on every clone or new
+_obj_.metatable - allow access to the metatable for e.g. reassigning the __call metamethod, which is both useful when pointed to new and set. ?? what if we defaulted it to set but overrode it for library objects?
 
 support nest_.redraw, overrides draw children
 
