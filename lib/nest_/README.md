@@ -75,6 +75,10 @@ _txt.enc.radio {
     options = {} or { {}, ... }
 }
 
+_txt.enc.scroll {
+    options = {}
+}
+
 _txt.key.option {
     n = 2 or { 2, 3 }
     options = {}
@@ -112,6 +116,7 @@ _txt.key.toggle {
 ```
 _etc.et24
 _etc.fselect
+_etc.filebrowser
 
 ```
 
@@ -159,6 +164,8 @@ ADD
 _obj_.metatable - allow access to the metatable for e.g. reassigning the __call metamethod, which is both useful when pointed to new and set. ?? what if we defaulted it to set but overrode it for library objects?
 
 support nest_.redraw, overrides draw children
+
+nest_.focus - focus on a single nest & children for a device & effectively disable otherelatives. will need it's own variable in the _dev. great for popup interfaces
 
 nest_ get/set: table macros nest = { nest = { control = value } } 
 
