@@ -108,6 +108,8 @@ function txtline(txt, a)
     ]]
 
     local flow = a.flow
+    local noflow
+    local margin = (type(a.margin) == 'table') and { x = a.margin[1], y = a.margin[2] } or { x = a.margin, y = a.margin }
     local start, justify, manual = 1, 2, 3
     local mode = start
     local iax = {}
@@ -134,6 +136,8 @@ function txtline(txt, a)
         end
     end
 
+    for i,k in ipairs(ax) do if k ~= flow then noflow = k end end
+
     local function setetc(pa, i) 
         for j,k in ipairs { 'font', 'size', 'lvl', 'border', 'fill', 'font_headroom', 'font_leftroom' } do 
             local w = a[k]
@@ -156,6 +160,7 @@ function txtline(txt, a)
     end
    
     if mode == start then
+        local j = 1
         for i,v in ipairs(txt) do 
             local pa = {}
             local dim = {} 
@@ -163,7 +168,15 @@ function txtline(txt, a)
             setetc(pa, i)
             dim.x, dim.y = putpoint(v, pa, iax)
 
-            ---------------------------------- scoot !
+            iax[flow] = iax[flow] + dim[flow] + margin[flow]
+            
+            if j >= a.wrap then
+                j = 1
+                iax[flow] = a[flow]
+                iax[noflow] = iax[noflow] + dim[noflow] + margin[noflow]
+            end
+
+            j = j + 1
         end
     end
 
