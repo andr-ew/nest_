@@ -8,6 +8,7 @@ _txt.affordance = _screen.affordance:new {
     border = 0,
     fill = 0,
     padding = 0,
+    margin = 0,
     x = 1,
     y = 1,
     flow = 'x',
@@ -39,7 +40,7 @@ local function txtpoint(txt, a)
 
     local fixed = (d.x[2] ~= nil) and (d.y[2] ~= nil)
     local width = screen.text_extents(txt)
-    local height = a.size * (1 - font_headroom)
+    local height = a.size * (1 - a.font_headroom)
     local w, h, bx, by, tx, ty, tmode
 
     if fixed then
@@ -58,8 +59,8 @@ local function txtpoint(txt, a)
         w = width + px - 1
         h = height + py - 1
 
-        local xalign = a.align[1]
-        local yalign = a.align[2]
+        local xalign = d.align[1]
+        local yalign = d.align[2]
         local bxalign = (xalign == 'center') and (((width + px) / 2) + 1) or (xalign == 'right') and (width + px) or 0
         local byalign = (yalign == 'center') and h/2 - 1 or (yalign == 'bottom') and h or 0
         local txalign = (xalign == 'center') and 0 or (xalign == 'right') and -1 or 1
@@ -67,7 +68,7 @@ local function txtpoint(txt, a)
 
         bx = d.x[1] - bxalign
         by = d.y[1] - byalign
-        tx = d.x[1] - 1 + ((px / 2) * txalign) - (a.font == 1 and (a.size * font_leftroom) or 0)
+        tx = d.x[1] - 1 + ((px / 2) * txalign) - (a.font == 1 and (a.size * a.font_leftroom) or 0)
         ty = d.y[1] + tyalign
         tmode = xalign
     end
@@ -114,6 +115,7 @@ function txtline(txt, a)
     local mode = start
     local iax = {}
     local ax = { 'x', 'y' }
+    local xalign = (type(a.align) == 'table') and a.align[1] or a.align
 
     for i,k in ipairs(ax) do
         if type(a[k]) == 'table' then
@@ -166,18 +168,26 @@ function txtline(txt, a)
             local dim = {} 
 
             setetc(pa, i)
+            pa.align = a.align
+            local dir = (xalign == 'left') and 1 or -1
+
             dim.x, dim.y = putpoint(v, pa, iax)
 
-            iax[flow] = iax[flow] + dim[flow] + margin[flow]
+            iax[flow] = iax[flow] + ((dim[flow] + margin[flow] + 1) * dir)
             
-            if j >= a.wrap then
+            if a.wrap and j >= a.wrap then
                 j = 1
                 iax[flow] = a[flow]
-                iax[noflow] = iax[noflow] + dim[noflow] + margin[noflow]
+                iax[noflow] = iax[noflow] + dim[noflow] + margin[noflow] + 1
             end
 
             j = j + 1
         end
+    elseif mode == justify then
+        --place first
+        --place last
+        --place other
+    elseif mode == manual then
     end
 
     --return w, h

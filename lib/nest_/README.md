@@ -127,6 +127,7 @@ ADD
 _grid.control.wrap
 
 _grid.numtog ?
+_grid.shape (eathsea) named combinations of normalized trigger presses for line & plane. add the naming feature to trigger ? (un-normalized)
 
 _grid.pattern
 _grid.switchpat --switch btw multiple patterns
