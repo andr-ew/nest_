@@ -195,6 +195,8 @@ function txtline(txt, a)
         end
     end
 
+    local dimt = { x = 0, y = 0 }
+    
     if mode == start then
         local j = 1
 
@@ -230,9 +232,13 @@ function txtline(txt, a)
 
             j = j + 1
         end
+
+        for i,k in ipairs(ax) do
+            dimt[k] = (iax[k] + ((dim[k] + 1) * dir)) - a[k]
+        end
     elseif mode == justify then
         local ex = {}
-        local exsum = 0
+        local exsum = { x = 0, y = 0 }
         do
             local pa = {}
             setetc(pa, 1)
@@ -241,7 +247,7 @@ function txtline(txt, a)
 
             ex[1] = {}
             ex[1].x, ex[1].y = txtpoint(txt[1], pa)
-            exsum = exsum + ex[1][flow] + 1
+            exsum[flow] = exsum[flow] + ex[1][flow] + 1
         end
         do
             local pa = {}
@@ -251,7 +257,7 @@ function txtline(txt, a)
 
             ex[#txt] = {}
             ex[#txt].x, ex[#txt].y = txtpoint(txt[#txt], pa)
-            exsum = exsum + ex[#txt][flow] + 1
+            exsum[flow] = exsum[flow] + ex[#txt][flow] + 1
         end
 
         local pa_btw = {}
@@ -262,10 +268,14 @@ function txtline(txt, a)
 
             ex[i] = {}
             ex[i].x, ex[i].y = txtpoint_extents(txt[i], pa_btw[i])
-            exsum = exsum + ex[i][flow] + 1
+            exsum[flow] = exsum[flow] + ex[i][flow] + 1
         end
 
-        local margin = ((lax[flow] - iax[flow]) - exsum) / (#txt - 1)
+        for i,v in ipairs(ex) do 
+            exsum[noflow] = math.max(exsum[noflow], ex[noflow])
+        end
+
+        local margin = ((lax[flow] - iax[flow]) - exsum[flow]) / (#txt - 1)
 
         for i = 2, #txt - 1, 1 do
             iax[flow] = iax[flow] + ex[i - 1][flow] + margin + 1
@@ -274,6 +284,10 @@ function txtline(txt, a)
             pa_btw[i].align = (flow == 'x') and { 'left', yalign } or { xalign, 'top' }
             txtpoint(txt[i], pa_btw[i])
         end
+
+        dimt[flow] = a[2][flow] - a[1][flow]
+        dimt[noflow] = exsum[noflow]
+
     elseif mode == manual then
         for i,v in ipairs(txt) do 
             local pa = {}   
