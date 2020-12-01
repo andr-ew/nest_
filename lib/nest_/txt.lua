@@ -275,6 +275,17 @@ function txtline(txt, a)
             txtpoint(txt[i], pa_btw[i])
         end
     elseif mode == manual then
+        for i,v in ipairs(txt) do 
+            local pa = {}   
+            setetc(pa, i)
+            
+            for j,k in ipairs(ax) do 
+                if flow == nil or flow == k then pa[k] = a[k][i]
+                else pa[k] = a[k] end
+            end
+
+            txtpoint(v, pa)
+        end
     end
 
     --return w, h

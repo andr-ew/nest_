@@ -5,10 +5,6 @@
 # txt
 ```
 
-redraw = function()
-    self:txtdraw(self:txt())
-end
-
 MAP
 
 _txt.screen.affordance {
@@ -38,6 +34,7 @@ _txt.list_ {
     flow = 'x' or 'y'
     items = nest_ {} or { {}, ... }
 }
+numbered children instead of items nest ?
 
 _txt.select_ {
     selector = _affordance
