@@ -13,15 +13,16 @@ n = nest_ {
     _txt.label {
         --x = { 32, 96 },
         --y = { 16, 48 },
-        x = 128 - 4,
+        x = { 2, 128 - 2 },
+        --x = 4,
         y = 32,
         --value = 'one',
-        value = { 'one', 'two', 'three' },
-        align = { 'right', 'bottom' },
+        value = { 'one', 'two', 'three', 'four' },
+        --align = { 'right', 'bottom' },
         border = 15,
         padding = 3,
         margin = 3,
-        wrap = 2,
+        --wrap = 2,
         flow = 'x'
     }
 } :connect { key = key, enc = enc, screen = screen }

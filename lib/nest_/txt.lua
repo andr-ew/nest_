@@ -99,6 +99,37 @@ local function txtpoint(txt, a)
     return w, h
 end
 
+function txtpoint_extents(txt, a) 
+    local d = { 
+        x = { nil, nil }, 
+        y = { nil, nil }
+    }
+    
+    local width = screen.text_extents(txt)
+    local height = a.size * (1 - a.font_headroom)
+    local w, h
+
+    for _,k in ipairs { 'x', 'y' } do 
+        if type(a[k]) == 'table' then d[k] = a[k] 
+        else d[k][1] = a[k] end    
+    end
+    
+    local fixed = (d.x[2] ~= nil) and (d.y[2] ~= nil)
+
+    if fixed then
+        w = d.x[2] - d.x[1] - 1
+        h = d.y[2] - d.y[1] - 1
+    else
+        local px = (type(a.padding) == 'table' and a.padding[1] or a.padding or 0) * 2
+        local py = (type(a.padding) == 'table' and a.padding[2] or a.padding or 0) * 2
+
+        w = width + px - 1
+        h = height + py - 1
+    end
+
+    return w, h
+end
+
 function txtline(txt, a)
     --x, y, align, flow, wrap, margin, cellsize
 
@@ -107,15 +138,18 @@ function txtline(txt, a)
         justify: x = { n, n },
         manual: x = { { n, n }, { n }, ... }
     ]]
-
     local flow = a.flow
     local noflow
+
+    -- support list of margin tables ?
     local margin = (type(a.margin) == 'table') and { x = a.margin[1], y = a.margin[2] } or { x = a.margin, y = a.margin }
     local start, justify, manual = 1, 2, 3
     local mode = start
     local iax = {}
+    local lax = {}  
     local ax = { 'x', 'y' }
     local xalign = (type(a.align) == 'table') and a.align[1] or a.align
+    local yalign = (type(a.align) == 'table') and a.align[2] or 'top'
 
     for i,k in ipairs(ax) do
         if type(a[k]) == 'table' then
@@ -124,6 +158,7 @@ function txtline(txt, a)
                     mode = justify
                     flow = k
                     iax[k] = a[k][1]
+                    lax[k] = a[k][2]
                 end
             else
                 if mode == manual then
@@ -135,6 +170,7 @@ function txtline(txt, a)
             end
         else
             iax[k] = a[k]
+            lax[k] = a[k]
         end
     end
 
@@ -149,7 +185,7 @@ function txtline(txt, a)
         pa.padding = a.padding
     end
 
-    local function putpoint(v, pa, xy)
+    local function setax(pa, xy)
         for j,k in ipairs(ax) do
             if a.cellsize then
                 pa[k] = { xy[k], iax[k] + cellsize[j] }
@@ -157,21 +193,32 @@ function txtline(txt, a)
                 pa[k] = { xy[k] }
             end
         end
-
-        return txtpoint(v, pa)
     end
-   
+
     if mode == start then
         local j = 1
-        for i,v in ipairs(txt) do 
+
+        local dir, st, en
+        if xalign == 'left' then
+            dir = 1
+            st = 1
+            en = #txt
+        else
+            dir = -1
+            st = #txt
+            en = 1
+        end
+        
+        for i = st, en, dir do 
+            local v = txt[i]
             local pa = {}
             local dim = {} 
 
             setetc(pa, i)
+            setax(pa, iax)
             pa.align = a.align
-            local dir = (xalign == 'left') and 1 or -1
 
-            dim.x, dim.y = putpoint(v, pa, iax)
+            dim.x, dim.y = txtpoint(v, pa)
 
             iax[flow] = iax[flow] + ((dim[flow] + margin[flow] + 1) * dir)
             
@@ -184,9 +231,49 @@ function txtline(txt, a)
             j = j + 1
         end
     elseif mode == justify then
-        --place first
-        --place last
-        --place other
+        local ex = {}
+        local exsum = 0
+        do
+            local pa = {}
+            setetc(pa, 1)
+            setax(pa, iax)
+            pa.align = (flow == 'x') and { 'left', yalign } or { xalign, 'top' }
+
+            ex[1] = {}
+            ex[1].x, ex[1].y = txtpoint(txt[1], pa)
+            exsum = exsum + ex[1][flow] + 1
+        end
+        do
+            local pa = {}
+            setetc(pa, #txt)
+            setax(pa, lax)
+            pa.align = (flow == 'x') and { 'right', yalign } or { xalign, 'bottom' }
+
+            ex[#txt] = {}
+            ex[#txt].x, ex[#txt].y = txtpoint(txt[#txt], pa)
+            exsum = exsum + ex[#txt][flow] + 1
+        end
+
+        local pa_btw = {}
+        
+        for i = 2, #txt - 1, 1 do
+            pa_btw[i] = {}
+            setetc(pa_btw[i], i)
+
+            ex[i] = {}
+            ex[i].x, ex[i].y = txtpoint_extents(txt[i], pa_btw[i])
+            exsum = exsum + ex[i][flow] + 1
+        end
+
+        local margin = ((lax[flow] - iax[flow]) - exsum) / (#txt - 1)
+
+        for i = 2, #txt - 1, 1 do
+            iax[flow] = iax[flow] + ex[i - 1][flow] + margin + 1
+            
+            setax(pa_btw[i], iax)
+            pa_btw[i].align = (flow == 'x') and { 'left', yalign } or { xalign, 'top' }
+            txtpoint(txt[i], pa_btw[i])
+        end
     elseif mode == manual then
     end
 
@@ -195,9 +282,9 @@ end
 
 _txt.affordance.output.txtdraw = function(s, txt) 
     if type(txt) == 'table' then
-        txtline(txt, s)                
+        txtline(txt, s.p_)                
     else
-        txtpoint(txt, s)   
+        txtpoint(txt, s.p_)   
     end
 end
 
