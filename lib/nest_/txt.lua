@@ -302,7 +302,7 @@ function txtline(txt, a)
         end
     end
 
-    --return w, h
+    return dimt.x, dimt.y
 end
 
 _txt.affordance.output.txtdraw = function(s, txt) 
