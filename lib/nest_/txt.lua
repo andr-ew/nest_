@@ -334,6 +334,9 @@ local function txtline(txt, a)
     return placeaxis(txt, mode, iax, lax, place, extents, a)
 end
 
+function txtline_extents(txt, a) 
+end
+
 local function txtplane(txt, s)
     --x, y, align, flow, wrap, margin, cellsize
 
@@ -356,6 +359,18 @@ local function txtplane(txt, s)
         end
     end
     
+    local function place(v, a) 
+        return txtline(v, {
+        })
+    end
+    
+    local function extents(v, a) 
+        return txtline_extents(v, {
+        })
+    end
+
+    return placeaxis(txt, mode, iax, lax, place, extents, {
+    })
 end
 
 _txt.affordance.output.txtdraw = function(s, txt) 
