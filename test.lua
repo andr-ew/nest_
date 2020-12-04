@@ -13,7 +13,8 @@ n = nest_ {
     _txt.label {
         --y = { 4, 60 },
         y = 4,
-        x = 6,
+        --x = 6,
+        x = { 4, 124 },
         --value = { 'foo', 'bar', 'ding', 'bat' },
         ---[[
         value = { 

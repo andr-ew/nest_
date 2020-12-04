@@ -222,11 +222,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
             j = j + 1
         end
 
-        -----------------?
-        tab.print(txt)
         for i,k in ipairs(ax) do
-            print(k)
-            print(dimt[k], iax[k], dim[k], dir, initax[k])
             dimt[k] = (iax[k] + ((dim[k] + 1) * dir)) - initax[k]
         end
     elseif mode == justify then
@@ -258,6 +254,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
         for i = 2, #txt - 1, 1 do
             pa_btw[i] = {}
             setetc(pa_btw[i], i)
+            setax(pa_btw[i], iax)
 
             ex[i] = {}
             ex[i].x, ex[i].y = extents(txt[i], pa_btw[i])
