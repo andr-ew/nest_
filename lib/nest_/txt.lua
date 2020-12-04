@@ -335,6 +335,42 @@ local function txtline(txt, a)
 end
 
 function txtline_extents(txt, a) 
+    local ax = { 'x', 'y' }
+    local start, justify, manual = 1, 2, 3
+    local mode = start
+    local iax = {}
+    local lax = {}  
+
+    for i,k in ipairs(ax) do
+        if type(a[k]) == 'table' then
+            if type(a[k][1]) ~= 'table' then
+                if mode == start then
+                    mode = justify
+                    flow = k
+                    iax[k] = a[k][1]
+                    lax[k] = a[k][2]
+                end
+            else
+                if mode == manual then
+                    flow = nil
+                else
+                    mode = manual
+                    flow = k
+                end
+            end
+        else
+            iax[k] = a[k]
+            lax[k] = a[k]
+        end
+    end
+
+    local function extents(v, a) 
+        return txtpoint_extents(v, a)
+    end
+    
+    local place = extents
+
+    return placeaxis(txt, mode, iax, lax, place, extents, a)
 end
 
 local function txtplane(txt, s)
@@ -360,22 +396,44 @@ local function txtplane(txt, s)
     end
     
     local function place(v, a) 
-        return txtline(v, {
-        })
+        local b = {}
+        for k,v in pairs(a) do
+            b[k] = a[k]
+        end
+
+        b.flow = noflow
+
+        return txtline(v, b)
     end
     
     local function extents(v, a) 
-        return txtline_extents(v, {
-        })
+        local b = {}
+        for k,v in pairs(a) do
+            b[k] = a[k]
+        end
+
+        b.flow = noflow
+
+        return txtline_extents(v, b)
     end
 
-    return placeaxis(txt, mode, iax, lax, place, extents, {
-    })
+    local b = {}
+    for k,v in pairs(a) do
+        b[k] = a[k]
+    end
+
+    b.cellsize = nil
+
+    return placeaxis(txt, mode, iax, lax, place, extents, b)
 end
 
 _txt.affordance.output.txtdraw = function(s, txt) 
     if type(txt) == 'table' then
-        txtline(txt, s.p_)                
+        if type(a[k][1]) ~= 'table' then
+            txtline(txt, s.p_)                
+        else
+            txtplane(txt, s.p_)                
+        end
     else
         txtpoint(txt, s.p_)   
     end
