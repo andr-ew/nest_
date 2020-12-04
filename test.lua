@@ -9,6 +9,9 @@ include 'lib/nest_/txt'
 
 tab = require 'tabutil'
 
+--test manual & cellsize
+--maybe refactor cellsize into txtpoint instead of txtline, it probably bugs out rn
+
 n = nest_ {
     _txt.label {
         y = { 4, 60 },
