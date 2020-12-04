@@ -11,16 +11,21 @@ tab = require 'tabutil'
 
 n = nest_ {
     _txt.label {
+        --y = { 4, 60 },
         y = 4,
-        x = 4,
+        x = 6,
+        --value = { 'foo', 'bar', 'ding', 'bat' },
+        ---[[
         value = { 
             { 'foo', 'bar', 'ding', 'bat' },
             { 'bar', 'foo', 'bat', 'ding' },
             { 'bat', 'ding', 'bar', 'foo' }
         },
+        --]]
         border = 15,
         padding = 3,
         margin = 3,
         flow = 'y'
+        --cellsize = { 10, 10 }
     }
 } :connect { key = key, enc = enc, screen = screen }

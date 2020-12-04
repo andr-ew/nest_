@@ -151,6 +151,7 @@ end
 local function placeaxis(txt, mode, iax, lax, place, extents, a)
     --align, margin, flow, cellsize
 
+
     local flow = a.flow
     local noflow
     local margin = (type(a.margin) == 'table') and { x = a.margin[1], y = a.margin[2] } or { x = a.margin, y = a.margin }
@@ -160,8 +161,10 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
     local yalign = (type(a.align) == 'table') and a.align[2] or 'top'
     local align = { x = xalign, y = yalign }
     local dimt = { x = 0, y = 0 }
+    local initax = {}
 
     for i,k in ipairs(ax) do if k ~= flow then noflow = k end end
+    for i,k in ipairs(ax) do initax[k] = iax[k] end
 
     local function setetc(pa, i) 
         for j,k in ipairs { 'font', 'size', 'lvl', 'border', 'fill', 'font_headroom', 'font_leftroom' } do 
@@ -174,7 +177,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
 
     local function setax(pa, xy)
         for j,k in ipairs(ax) do
-            if a.cellsize then
+            if a.cellsize and type(a.cellsize) == 'table' then
                 pa[k] = { xy[k], iax[k] + cellsize[j] }
             else 
                 pa[k] = xy[k]
@@ -219,8 +222,12 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
             j = j + 1
         end
 
+        -----------------?
+        tab.print(txt)
         for i,k in ipairs(ax) do
-            dimt[k] = (iax[k] + ((dim[k] + 1) * dir)) - a[k]
+            print(k)
+            print(dimt[k], iax[k], dim[k], dir, initax[k])
+            dimt[k] = (iax[k] + ((dim[k] + 1) * dir)) - initax[k]
         end
     elseif mode == justify then
         local ex = {}
@@ -323,62 +330,29 @@ local function txtline(txt, a)
         end
     end
 
-    local function place(v, a) 
-        return txtpoint(v, a)
-    end
-    
-    local function extents(v, a) 
-        return txtpoint_extents(v, a)
-    end
-
-    return placeaxis(txt, mode, iax, lax, place, extents, a)
+    return placeaxis(txt, mode, iax, lax, 
+        function(v, a) 
+            return txtpoint(v, a)
+        end, 
+        function(v, a) 
+            return txtpoint_extents(v, a)
+        end, 
+        a
+    )
 end
 
-function txtline_extents(txt, a) 
-    local ax = { 'x', 'y' }
-    local start, justify, manual = 1, 2, 3
-    local mode = start
-    local iax = {}
-    local lax = {}  
-
-    for i,k in ipairs(ax) do
-        if type(a[k]) == 'table' then
-            if type(a[k][1]) ~= 'table' then
-                if mode == start then
-                    mode = justify
-                    flow = k
-                    iax[k] = a[k][1]
-                    lax[k] = a[k][2]
-                end
-            else
-                if mode == manual then
-                    flow = nil
-                else
-                    mode = manual
-                    flow = k
-                end
-            end
-        else
-            iax[k] = a[k]
-            lax[k] = a[k]
-        end
-    end
-
-    local function extents(v, a) 
-        return txtpoint_extents(v, a)
-    end
-    
-    local place = extents
-
-    return placeaxis(txt, mode, iax, lax, place, extents, a)
-end
-
-local function txtplane(txt, s)
+local function txtplane(txt, a)
     --x, y, align, flow, wrap, margin, cellsize
 
     local start, justify, manual = 1, 2, 3
     local mode = { x = start, y = start }
+    local iax = {}
+    local lax = {}  
     local ax = { 'x', 'y' }
+    
+    local flow = a.flow
+    local noflow
+    for i,k in ipairs(ax) do if k ~= a.flow then noflow = k end end
     
     for i,k in ipairs(ax) do
         if type(a[k]) == 'table' then
@@ -395,44 +369,57 @@ local function txtplane(txt, s)
         end
     end
     
-    local function place(v, a) 
-        local b = {}
-        for k,v in pairs(a) do
-            b[k] = a[k]
+    local function cb(extents) 
+        return function(v, b) 
+            setmetatable(b, { __index = a })
+            
+            liax = {}
+            llax = {}
+            b.flow = noflow
+
+            liax[flow] = b[flow]
+            liax[noflow] = iax[noflow]
+            llax[flow] = b[flow]
+            llax[noflow] = lax[noflow]
+
+            return placeaxis(v, mode[noflow], liax, llax, 
+                function(w, a) 
+                    if extents then
+                        return txtpoint_extents(w, a)
+                    else
+                        return txtpoint(w, a)
+                    end
+                end, 
+                function(w, a) 
+                    return txtpoint_extents(w, a)
+                end, 
+                b
+            )
         end
-
-        b.flow = noflow
-
-        return txtline(v, b)
-    end
-    
-    local function extents(v, a) 
-        local b = {}
-        for k,v in pairs(a) do
-            b[k] = a[k]
-        end
-
-        b.flow = noflow
-
-        return txtline_extents(v, b)
     end
 
     local b = {}
-    for k,v in pairs(a) do
-        b[k] = a[k]
-    end
+    setmetatable(b, { __index = a })
+    
+    --b.cellsize = ""
 
-    b.cellsize = nil
-
-    return placeaxis(txt, mode, iax, lax, place, extents, b)
+    return placeaxis(txt, mode[a.flow], iax, lax, cb(false), cb(true), b)
 end
 
 _txt.affordance.output.txtdraw = function(s, txt) 
     if type(txt) == 'table' then
-        if type(a[k][1]) ~= 'table' then
-            txtline(txt, s.p_)                
-        else
+
+        local plane = false
+        for i,v in ipairs(txt) do
+            if type(v) == 'table' then
+                plane = true
+            end 
+        end
+
+        if plane then
             txtplane(txt, s.p_)                
+        else
+            txtline(txt, s.p_)                
         end
     else
         txtpoint(txt, s.p_)   
