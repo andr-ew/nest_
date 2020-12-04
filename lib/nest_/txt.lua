@@ -373,6 +373,7 @@ local function txtplane(txt, a)
             liax = {}
             llax = {}
             b.flow = noflow
+            b[noflow] = a[noflow]
 
             liax[flow] = b[flow]
             liax[noflow] = iax[noflow]
