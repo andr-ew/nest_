@@ -9,21 +9,17 @@ include 'lib/nest_/txt'
 
 tab = require 'tabutil'
 
---test cellsize
---maybe refactor cellsize into txtpoint instead of txtline, it probably bugs out rn
---also maybe add cellsize 'auto', because I'm crazy & we've gone this deep already
-
 n = nest_ {
     _txt.label {
-        --y = 4,
-        y = { 2, 62 },
-        --[[
+        y = 4,
+        --y = { 2, 62 },
+        ---[[
         x = {
-            { { 4, 24 }, { 28, 48 }, { 52, 72 }, { 90, 126 } },
-            { { 4, 24 }, { 28, 48 }, { 52, 72 }, { 80, 126 } },
-            { { 4, 24 }, { 28, 48 }, { 52, 72 }, { 80, 126 } }
+            { { 4 }, { 28 }, { 52 }, { 90 } },
+            { { 4 }, { 28 }, { 52 }, { 80 } },
+            { { 4 }, { 28 }, { 52 }, { 80 } }
         },
-        ]]
+        --]]
         ---[[
         value = { 
             { 'f', 'b', 'd', 'b' },
@@ -31,8 +27,7 @@ n = nest_ {
             { 'b', 'd', 'b', 'f' }
         },
         --]]
-        --x = { 32, 76 },
-        x = { 2, 126 },
+        --x = { 2, 126 },
         --x = 126,
         --align = { 'right', 'top' },
         --value = { 'a', 'b', 'c', 'd' },
@@ -40,7 +35,7 @@ n = nest_ {
         padding = 3,
         margin = 3,
         flow = 'y',
-        --size = 20,
-        size = { 20, 'auto' }
+        size = 10,
+        --size = { 20, 'auto' }
     }
 } :connect { key = key, enc = enc, screen = screen }

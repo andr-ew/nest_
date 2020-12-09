@@ -269,10 +269,22 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
             setetc(pa, i)
              
             for j,k in ipairs(ax) do 
-                if not flow or flow == k then pa[k] = a[k][i]
-                else pa[k] = a[k] end
-                print(k)
-                if type(pa[k]) == 'table' then tab.print(pa[k]) else print(pa[k]) end
+                local size = a.size and ((type(a.size) == 'table') and a.size[j] or a.size) or nil
+
+                if not flow or flow == k then 
+                    pa[k] = a[k][i]
+
+                    if size and size ~= 'auto' then
+                        pa[k][2] = pa[k][1] + size
+                    end
+                else 
+                    pa[k] = a[k] 
+
+                    if size and size ~= 'auto' then
+                        local one = ((type(pa[k]) == 'table') and pa[k][1] or pa[k])
+                        pa[k] = { one, one + size }
+                    end
+                end
             end
 
             ex[i] = {}
@@ -283,8 +295,6 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
             for i,v in ipairs(ex) do 
                 dimt[noflow] = math.max(dimt[noflow], v[noflow])
             end
-            
-            print(dimt.x, dimt.y)
         end
     end
     
@@ -444,3 +454,6 @@ _txt.label = _txt.affordance:new {
 } 
 
 _txt.label.output.txt = function(s) return s.v end
+
+
+--next up: enc.number !
