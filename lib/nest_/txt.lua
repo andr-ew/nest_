@@ -164,10 +164,10 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
             if a.size then
                 local size = ((type(a.size) == 'table') and a.size[j] or a.size)
 
-                if align[k] == 'left' or align[k] == 'top' then
-                    pa[k] = { xy[k], iax[k] + size }
+                if pa.align[j] == 'left' or pa.align[j] == 'top' then
+                    pa[k] = { xy[k], xy[k] + size }
                 else
-                    pa[k] = { xy[k] - size, iax[k] }
+                    pa[k] = { xy[k] - size, xy[k] }
                 end
             else 
                 pa[k] = xy[k] or a[k][i]
@@ -178,7 +178,6 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
     if mode == start then
         local j = 1
 
-        print(align[flow])
         local dir, st, en
         if align[flow] == 'left' or align[flow] == 'top' then
             dir = 1
@@ -231,7 +230,8 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
             ex[1].x, ex[1].y = place(txt[1], pa)
             exsum[flow] = exsum[flow] + ex[1][flow] + 1
         end
-        do
+
+        if #txt > 1 then
             local pa = {}
             setetc(pa, #txt)
             pa.align = (flow == 'x') and { 'right', yalign } or { xalign, 'bottom' }
@@ -242,30 +242,36 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
             exsum[flow] = exsum[flow] + ex[#txt][flow] + 1
         end
 
-        local pa_btw = {}
-        
-        for i = 2, #txt - 1, 1 do
-            pa_btw[i] = {}
-            setetc(pa_btw[i], i)
-            pa_btw[i].align = (flow == 'x') and { 'left', yalign } or { xalign, 'top' }
-            setax(pa_btw[i], i, iax)
-
-            ex[i] = {}
-            ex[i].x, ex[i].y = extents(txt[i], pa_btw[i])
-            exsum[flow] = exsum[flow] + ex[i][flow] + 1
-        end
-
-        for i,v in ipairs(ex) do 
-            exsum[noflow] = math.max(exsum[noflow], v[noflow])
-        end
-
-        local margin = ((lax[flow] - iax[flow]) - exsum[flow]) / (#txt - 1)
-
-        for i = 2, #txt - 1, 1 do
-            iax[flow] = iax[flow] + ex[i - 1][flow] + margin + 1
+        if #txt > 2 then
+            local pa_btw = {}
             
-            setax(pa_btw[i], i, iax)
-            place(txt[i], pa_btw[i])
+            for i = 2, #txt - 1, 1 do
+                pa_btw[i] = {}
+                setetc(pa_btw[i], i)
+                pa_btw[i].align = (flow == 'x') and { 'left', yalign } or { xalign, 'top' }
+                setax(pa_btw[i], i, iax)
+
+                ex[i] = {}
+                ex[i].x, ex[i].y = extents(txt[i], pa_btw[i])
+                exsum[flow] = exsum[flow] + ex[i][flow] + 1
+            end
+
+            for i,v in ipairs(ex) do 
+                exsum[noflow] = math.max(exsum[noflow], v[noflow])
+            end
+
+            local margin = ((lax[flow] - iax[flow]) - exsum[flow]) / (#txt - 1)
+
+            for i = 2, #txt - 1, 1 do
+                iax[flow] = iax[flow] + ex[i - 1][flow] + margin + 1
+                
+                setax(pa_btw[i], i, iax)
+                place(txt[i], pa_btw[i])
+            end
+        else
+            for i,v in ipairs(ex) do 
+                exsum[noflow] = math.max(exsum[noflow], v[noflow])
+            end
         end
 
         dimt[flow] = a[flow][2] - a[flow][1]
