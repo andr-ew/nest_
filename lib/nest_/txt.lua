@@ -161,8 +161,14 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
 
     local function setax(pa, i, xy)
         for j,k in ipairs(ax) do
-            if a.size and type(a.size) == 'table' then
-                pa[k] = { xy[k], iax[k] + a.size[j] }
+            if a.size then
+                local size = ((type(a.size) == 'table') and a.size[j] or a.size)
+
+                if align[k] == 'left' or align[k] == 'top' then
+                    pa[k] = { xy[k], iax[k] + size }
+                else
+                    pa[k] = { xy[k] - size, iax[k] }
+                end
             else 
                 pa[k] = xy[k] or a[k][i]
             end
@@ -172,8 +178,9 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
     if mode == start then
         local j = 1
 
+        print(align[flow])
         local dir, st, en
-        if align[flow] == 'left' or 'top' then
+        if align[flow] == 'left' or align[flow] == 'top' then
             dir = 1
             st = 1
             en = #txt
@@ -190,8 +197,8 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
             dim = {} 
 
             setetc(pa, i)
-            setax(pa, i, iax)
             pa.align = a.align
+            setax(pa, i, iax)
 
             dim.x, dim.y = place(v, pa)
 
@@ -208,7 +215,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
 
         for i,k in ipairs(ax) do
             if iax[k] and initax[k] then
-                dimt[k] = (iax[k] + ((dim[k] + 1) * dir)) - initax[k]
+                dimt[k] = (iax[k] + ((dim[k] + 1) * 1)) - initax[k]
             end
         end
     elseif mode == justify then
@@ -217,8 +224,8 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
         do
             local pa = {}
             setetc(pa, 1)
-            setax(pa, 1, iax)
             pa.align = (flow == 'x') and { 'left', yalign } or { xalign, 'top' }
+            setax(pa, 1, iax)
 
             ex[1] = {}
             ex[1].x, ex[1].y = place(txt[1], pa)
@@ -227,8 +234,8 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
         do
             local pa = {}
             setetc(pa, #txt)
-            setax(pa, #txt, lax)
             pa.align = (flow == 'x') and { 'right', yalign } or { xalign, 'bottom' }
+            setax(pa, #txt, lax)
 
             ex[#txt] = {}
             ex[#txt].x, ex[#txt].y = place(txt[#txt], pa)
@@ -240,6 +247,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
         for i = 2, #txt - 1, 1 do
             pa_btw[i] = {}
             setetc(pa_btw[i], i)
+            pa_btw[i].align = (flow == 'x') and { 'left', yalign } or { xalign, 'top' }
             setax(pa_btw[i], i, iax)
 
             ex[i] = {}
@@ -257,7 +265,6 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
             iax[flow] = iax[flow] + ex[i - 1][flow] + margin + 1
             
             setax(pa_btw[i], i, iax)
-            pa_btw[i].align = (flow == 'x') and { 'left', yalign } or { xalign, 'top' }
             place(txt[i], pa_btw[i])
         end
 

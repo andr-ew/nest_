@@ -23,17 +23,21 @@ n = nest_ {
             { { 4, 24 }, { 28, 48 }, { 52, 72 }, { 80, 126 } }
         },
         ]]
+        ---[[
         value = { 
             { 'f', 'b', 'd', 'b' },
             { 'b', 'f', 'b', 'd' },
             { 'b', 'd', 'b', 'f' }
         },
-        x = 4,
+        --]]
+        --x = { 2, 126 },
+        x = 126,
+        align = { 'right', 'top' },
         --value = { 'a', 'b', 'c', 'd' },
-        border = 15,
+        --border = 15,
         padding = 3,
-        margin = 3,
+        margin = 0,
         flow = 'y',
-        size = { 20, 20 }
+        size = 10
     }
 } :connect { key = key, enc = enc, screen = screen }
