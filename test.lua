@@ -22,18 +22,18 @@ n = nest_ {
             { { 4, 24 }, { 28, 48 }, { 52, 72 }, { 80, 126 } },
             { { 4, 24 }, { 28, 48 }, { 52, 72 }, { 80, 126 } }
         },
-        value = { 
-            { 'foo', 'bar', 'ding', 'bat' },
-            { 'bar', 'foo', 'bat', 'ding' },
-            { 'bat', 'ding', 'bar', 'foo' }
-        },
         ]]
+        value = { 
+            { 'f', 'b', 'd', 'b' },
+            { 'b', 'f', 'b', 'd' },
+            { 'b', 'd', 'b', 'f' }
+        },
         x = 4,
-        value = { 'a', 'b', 'c', 'd' },
+        --value = { 'a', 'b', 'c', 'd' },
         border = 15,
         padding = 3,
         margin = 3,
-        --flow = 'y',
+        flow = 'y',
         size = { 20, 20 }
     }
 } :connect { key = key, enc = enc, screen = screen }

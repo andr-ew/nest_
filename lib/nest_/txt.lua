@@ -411,7 +411,7 @@ local function txtplane(txt, a)
     local b = {}
     setmetatable(b, { __index = a })
     b.flow = rflow 
-    --b.size = ""
+    b.size = false
 
     return placeaxis(txt, mode[a.flow], iax, lax, cb(false), cb(true), b)
 end
