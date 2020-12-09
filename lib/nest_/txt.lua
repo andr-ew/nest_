@@ -39,66 +39,84 @@ local function txtpoint(txt, a)
     screen.font_face(a.font_face)
     screen.font_size(a.font_size)
 
-    local fixed = (d.x[2] ~= nil) and (d.y[2] ~= nil)
+    --[[
     local width = screen.text_extents(txt)
     local height = a.font_size * (1 - a.font_headroom)
     local w, h, bx, by, tx, ty, tmode
+    --]]
 
-    -- rewrite this !! independent mode per axis
-    if fixed then
-        w = d.x[2] - d.x[1] - 1
-        h = d.y[2] - d.y[1] - 1
+    local ax = { 'x', 'y' }
+    local tsize = { x = screen.text_extents(txt), y = a.font_size * (1 - a.font_headroom) }
+    local size = {}
+    local b = {}
+    local t = {}
+    local tmode = {}
+    local p = {}
+    local align = { x = d.align[1], y = d.align[2] }
+    local balign = {}
+    local talign = {}
 
-        bx = d.x[1]
-        by = d.y[1]
-        tx = bx + w/2 - 1
-        ty = by + (h + height)/2 - 1
-        tmode = 'center'
-    else
-        local px = (type(a.padding) == 'table' and a.padding[1] or a.padding or 0) * 2
-        local py = (type(a.padding) == 'table' and a.padding[2] or a.padding or 0) * 2
+    for i,k in ipairs(ax) do
+        if d[k][2] ~= nil then
+            size[k] = d[k][2] - d[k][1] - 1
 
-        w = width + px - 1
-        h = height + py - 1
+            b[k] = d[k][1]
+            t[k] = b[k] + ((k == 'y') and size[k] + tsize[k] or size[k])/2 - 1
 
-        local xalign = d.align[1]
-        local yalign = d.align[2]
-        local bxalign = (xalign == 'center') and (((width + px) / 2) + 1) or (xalign == 'right') and (width + px) or 0
-        local byalign = (yalign == 'center') and h/2 - 1 or (yalign == 'bottom') and h or 0
-        local txalign = (xalign == 'center') and 0 or (xalign == 'right') and -1 or 1
-        local tyalign = (yalign == 'center') and (height/2) or (yalign == 'bottom') and - (py/2) or height + (py/2) - 1
+            tmode[k] = 'center'
+        else
+            p[k] = (type(a.padding) == 'table' and a.padding[i] or a.padding or 0) * 2
+            size[k] = tsize[k] + p[k] - 1
 
-        bx = d.x[1] - bxalign
-        by = d.y[1] - byalign
-        tx = d.x[1] - 1 + ((px / 2) * txalign) - (a.font_face == 1 and (a.font_size * a.font_leftroom) or 0)
-        ty = d.y[1] + tyalign
-        tmode = xalign
+            if align[k] == 'center' then
+                balign[k] = (k == 'x') and (((tsize[k] + p[k]) / 2) + 1) or size[k]/2 - 1
+                talign[k] = (k == 'x') and 0 or (tsize[k]/2)
+            elseif align[k] == 'bottom' or align[k] == 'right' then
+                balign[k] = (k == 'x') and (tsize[k] + p[k]) or size[k]
+                talign[k] = (k == 'x') and -1 or -(p[k]/2)
+            else
+                balign[k] = 0
+                talign[k] = (k == 'x') and 1 or tsize[k] + (p[k]/2) - 1
+            end
+            
+            b[k] = d[k][1] - balign[k]
+            
+            --t[k] = (k == 'x') and  or 
+
+            if k == 'x' then
+                t[k] = (d[k][1] - 1 + ((p[k] / 2) * talign[k]) - (a.font_face == 1 and (a.font_size * a.font_leftroom) or 0))
+            else
+                t[k] = d[k][1] + talign[k]
+            end
+
+            tmode[k] = align[k]
+        end
     end
 
     if a.fill > 0 then
         screen.level(a.fill)
-        screen.rect(bx - 1, by - 1, w + 1, h + 1)
+        screen.rect(b.x - 1, b.y - 1, size.x + 1, size.y + 1)
         screen.fill()
     end
 
     if a.border > 0 then
         screen.level(a.border)
-        screen.rect(bx, by, w, h)
+        screen.rect(b.x, b.y, size.x, size.y)
         screen.stroke()
     end
 
     screen.level(a.lvl)
-    screen.move(tx, ty)
+    screen.move(t.x, t.y)
 
-    if tmode == 'right' then
+    if tmode.x == 'right' then
         screen.text_right(txt)
-    elseif tmode == 'center' then
+    elseif tmode.x == 'center' then
         screen.text_center(txt)
     else
         screen.text(txt)
     end
 
-    return w, h
+    return size.x, size.y
 end
 
 function txtpoint_extents(txt, a) 

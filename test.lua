@@ -31,15 +31,16 @@ n = nest_ {
         },
         --]]
         --x = { 32, 76 },
-        x = { 2, 126 },
-        --x = 126,
+        --x = { 2, 126 },
+        x = 126,
         align = { 'right', 'top' },
         --value = { 'a', 'b', 'c', 'd' },
         value = { 'a', 'b', 'c', 'd' },
         border = 15,
         padding = 3,
-        margin = 0,
+        margin = 3,
         --flow = 'y',
-        size = { 'auto', 20 }
+        --size = 20,
+        size = { 20, 'auto' }
     }
 } :connect { key = key, enc = enc, screen = screen }
