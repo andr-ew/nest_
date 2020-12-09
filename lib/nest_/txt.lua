@@ -161,9 +161,9 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
 
     local function setax(pa, i, xy)
         for j,k in ipairs(ax) do
-            if a.size then
-                local size = ((type(a.size) == 'table') and a.size[j] or a.size)
+            local size = a.size and ((type(a.size) == 'table') and a.size[j] or a.size) or nil
 
+            if size and size ~= 'auto' then
                 if pa.align[j] == 'left' or pa.align[j] == 'top' then
                     pa[k] = { xy[k], xy[k] + size }
                 else

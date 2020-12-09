@@ -40,6 +40,6 @@ n = nest_ {
         padding = 3,
         margin = 0,
         --flow = 'y',
-        size = 20
+        size = { 'auto', 20 }
     }
 } :connect { key = key, enc = enc, screen = screen }
