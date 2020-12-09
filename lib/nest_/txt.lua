@@ -2,8 +2,8 @@ _txt = _group:new()
 _txt.devk = 'screen'
 
 _txt.affordance = _screen.affordance:new {
-    font = 1,
-    size = 8,
+    font_face = 1,
+    font_size = 8,
     lvl = 15,
     border = 0,
     fill = 0,
@@ -11,6 +11,7 @@ _txt.affordance = _screen.affordance:new {
     margin = 0,
     x = 1,
     y = 1,
+    size = nil,
     flow = 'x',
     align = 'left',
     wrap = nil,
@@ -22,7 +23,7 @@ _txt.affordance = _screen.affordance:new {
 _txt.affordance.output.txt = function(s) end
 
 local function txtpoint(txt, a)
-    -- x, y, align font, size, lvl, border, fill, padding, font_headroom, font_leftroom
+    -- x, y, size, align, font_face, font_size, lvl, border, fill, padding, font_headroom, font_leftroom
 
     local d = { 
         x = { nil, nil }, 
@@ -35,12 +36,12 @@ local function txtpoint(txt, a)
         else d[k][1] = a[k] end    
     end
 
-    screen.font_face(a.font)
-    screen.font_size(a.size)
+    screen.font_face(a.font_face)
+    screen.font_size(a.font_size)
 
     local fixed = (d.x[2] ~= nil) and (d.y[2] ~= nil)
     local width = screen.text_extents(txt)
-    local height = a.size * (1 - a.font_headroom)
+    local height = a.font_size * (1 - a.font_headroom)
     local w, h, bx, by, tx, ty, tmode
 
     -- rewrite this !! independent mode per axis
@@ -69,7 +70,7 @@ local function txtpoint(txt, a)
 
         bx = d.x[1] - bxalign
         by = d.y[1] - byalign
-        tx = d.x[1] - 1 + ((px / 2) * txalign) - (a.font == 1 and (a.size * a.font_leftroom) or 0)
+        tx = d.x[1] - 1 + ((px / 2) * txalign) - (a.font_face == 1 and (a.font_size * a.font_leftroom) or 0)
         ty = d.y[1] + tyalign
         tmode = xalign
     end
@@ -107,7 +108,7 @@ function txtpoint_extents(txt, a)
     }
     
     local width = screen.text_extents(txt)
-    local height = a.size * (1 - a.font_headroom)
+    local height = a.font_size * (1 - a.font_headroom)
     local w, h
 
     for _,k in ipairs { 'x', 'y' } do 
@@ -150,7 +151,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
     if not flow then noflow = false end
 
     local function setetc(pa, i) 
-        for j,k in ipairs { 'font', 'size', 'lvl', 'border', 'fill', 'font_headroom', 'font_leftroom' } do 
+        for j,k in ipairs { 'font_face', 'font_size', 'lvl', 'border', 'fill', 'font_headroom', 'font_leftroom' } do 
             local w = a[k]
             pa[k] = (type(w) == 'table') and w[i] or w
         end
@@ -160,8 +161,8 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
 
     local function setax(pa, i, xy)
         for j,k in ipairs(ax) do
-            if a.cellsize and type(a.cellsize) == 'table' then
-                pa[k] = { xy[k], iax[k] + cellsize[j] }
+            if a.size and type(a.size) == 'table' then
+                pa[k] = { xy[k], iax[k] + a.size[j] }
             else 
                 pa[k] = xy[k] or a[k][i]
             end
@@ -293,7 +294,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
 end
 
 local function txtline(txt, a)
-    --x, y, align, flow, wrap, margin, cellsize
+    --x, y, align, flow, wrap, margin, size
 
     local ax = { 'x', 'y' }
     local start, justify, manual = 1, 2, 3
@@ -336,7 +337,7 @@ local function txtline(txt, a)
 end
 
 local function txtplane(txt, a)
-    --x, y, align, flow, wrap, margin, cellsize
+    --x, y, align, flow, wrap, margin, size
 
     local start, justify, manual = 1, 2, 3
     local mode = { x = start, y = start }
@@ -410,7 +411,7 @@ local function txtplane(txt, a)
     local b = {}
     setmetatable(b, { __index = a })
     b.flow = rflow 
-    --b.cellsize = ""
+    --b.size = ""
 
     return placeaxis(txt, mode[a.flow], iax, lax, cb(false), cb(true), b)
 end

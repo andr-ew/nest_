@@ -156,9 +156,15 @@ preset
 
 ```
 
+RENAME
+
+lvl -> level. add a lvl as a nickname
+add en as a nickname for enabled
+
 ADD
 
-_obj_.metatable - allow access to the metatable for e.g. reassigning the __call metamethod, which is both useful when pointed to new and set. ?? what if we defaulted it to set but overrode it for library objects?
+_obj_.metatable - allow access to the metatable for e.g. reassigning the __call metamethod, which is both useful when pointed to new and set. ?? what if we defaulted it to set but overrode it for library objects? 
+simpler solution would just be adding a member called __call which the metatable points to. the other things we probs don't want to expose
 
 support nest_.redraw, overrides draw children
 
