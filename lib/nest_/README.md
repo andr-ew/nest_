@@ -52,6 +52,7 @@ _txt.scroll_ {
     selector = _affordance
     items = nest_ {} or { {}, ... }
 }
+scrolling as a config for list, select, radio, etc ?
 
 _txt.enc.control {
     n = 2 or { 2, 3 }

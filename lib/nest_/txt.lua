@@ -455,5 +455,4 @@ _txt.label = _txt.affordance:new {
 
 _txt.label.output.txt = function(s) return s.v end
 
-
 --next up: enc.number !
