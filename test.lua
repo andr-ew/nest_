@@ -15,7 +15,8 @@ tab = require 'tabutil'
 
 n = nest_ {
     _txt.label {
-        y = 4,
+        --y = 4,
+        y = { 2, 62 },
         --[[
         x = {
             { { 4, 24 }, { 28, 48 }, { 52, 72 }, { 90, 126 } },
@@ -23,7 +24,7 @@ n = nest_ {
             { { 4, 24 }, { 28, 48 }, { 52, 72 }, { 80, 126 } }
         },
         ]]
-        --[[
+        ---[[
         value = { 
             { 'f', 'b', 'd', 'b' },
             { 'b', 'f', 'b', 'd' },
@@ -31,15 +32,14 @@ n = nest_ {
         },
         --]]
         --x = { 32, 76 },
-        --x = { 2, 126 },
-        x = 126,
-        align = { 'right', 'top' },
+        x = { 2, 126 },
+        --x = 126,
+        --align = { 'right', 'top' },
         --value = { 'a', 'b', 'c', 'd' },
-        value = { 'a', 'b', 'c', 'd' },
         border = 15,
         padding = 3,
         margin = 3,
-        --flow = 'y',
+        flow = 'y',
         --size = 20,
         size = { 20, 'auto' }
     }

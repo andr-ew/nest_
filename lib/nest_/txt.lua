@@ -22,7 +22,7 @@ _txt.affordance = _screen.affordance:new {
 
 _txt.affordance.output.txt = function(s) end
 
-local function txtpoint(txt, a)
+local function txtpoint(txt, a, extents)
     -- x, y, size, align, font_face, font_size, lvl, border, fill, padding, font_headroom, font_leftroom
 
     local d = { 
@@ -54,94 +54,67 @@ local function txtpoint(txt, a)
         if d[k][2] ~= nil then
             size[k] = d[k][2] - d[k][1] - 1
 
-            b[k] = d[k][1]
-            t[k] = b[k] + ((k == 'y') and size[k] + tsize[k] or size[k])/2 - 1
+            if not extents then
+                b[k] = d[k][1]
+                t[k] = b[k] + ((k == 'y') and size[k] + tsize[k] or size[k])/2 - 1
 
-            tmode[k] = 'center'
+                tmode[k] = 'center'
+            end
         else
             p[k] = (type(a.padding) == 'table' and a.padding[i] or a.padding or 0) * 2
             size[k] = tsize[k] + p[k] - 1
 
-            if align[k] == 'center' then
-                balign[k] = (k == 'x') and (((tsize[k] + p[k]) / 2) + 1) or size[k]/2 - 1
-                talign[k] = (k == 'x') and 0 or (tsize[k]/2)
-            elseif align[k] == 'bottom' or align[k] == 'right' then
-                balign[k] = (k == 'x') and (tsize[k] + p[k]) or size[k]
-                talign[k] = (k == 'x') and -1 or -(p[k]/2)
-            else
-                balign[k] = 0
-                talign[k] = (k == 'x') and 1 or tsize[k] + (p[k]/2) - 1
-            end
-            
-            b[k] = d[k][1] - balign[k]
-            
-            if k == 'x' then
-                t[k] = (d[k][1] - 1 + ((p[k] / 2) * talign[k]) - (a.font_face == 1 and (a.font_size * a.font_leftroom) or 0))
-            else
-                t[k] = d[k][1] + talign[k]
-            end
+            if not extents then
+                if align[k] == 'center' then
+                    balign[k] = (k == 'x') and (((tsize[k] + p[k]) / 2) + 1) or size[k]/2 - 1
+                    talign[k] = (k == 'x') and 0 or (tsize[k]/2)
+                elseif align[k] == 'bottom' or align[k] == 'right' then
+                    balign[k] = (k == 'x') and (tsize[k] + p[k]) or size[k]
+                    talign[k] = (k == 'x') and -1 or -(p[k]/2)
+                else
+                    balign[k] = 0
+                    talign[k] = (k == 'x') and 1 or tsize[k] + (p[k]/2) - 1
+                end
+                
+                b[k] = d[k][1] - balign[k]
+                
+                if k == 'x' then
+                    t[k] = (d[k][1] - 1 + ((p[k] / 2) * talign[k]) - (a.font_face == 1 and (a.font_size * a.font_leftroom) or 0))
+                else
+                    t[k] = d[k][1] + talign[k]
+                end
 
-            tmode[k] = align[k]
+                tmode[k] = align[k]
+            end
         end
     end
 
-    if a.fill > 0 then
-        screen.level(a.fill)
-        screen.rect(b.x - 1, b.y - 1, size.x + 1, size.y + 1)
-        screen.fill()
+    if not extents then
+        if a.fill > 0 then
+            screen.level(a.fill)
+            screen.rect(b.x - 1, b.y - 1, size.x + 1, size.y + 1)
+            screen.fill()
+        end
+
+        if a.border > 0 then
+            screen.level(a.border)
+            screen.rect(b.x, b.y, size.x, size.y)
+            screen.stroke()
+        end
+
+        screen.level(a.lvl)
+        screen.move(t.x, t.y)
+
+        if tmode.x == 'right' then
+            screen.text_right(txt)
+        elseif tmode.x == 'center' then
+            screen.text_center(txt)
+        else
+            screen.text(txt)
+        end
     end
-
-    if a.border > 0 then
-        screen.level(a.border)
-        screen.rect(b.x, b.y, size.x, size.y)
-        screen.stroke()
-    end
-
-    screen.level(a.lvl)
-    screen.move(t.x, t.y)
-
-    if tmode.x == 'right' then
-        screen.text_right(txt)
-    elseif tmode.x == 'center' then
-        screen.text_center(txt)
-    else
-        screen.text(txt)
-    end
-
+    
     return size.x, size.y
-end
-
-function txtpoint_extents(txt, a) 
-    --update this ! combining functions actually would be much less dumb
-
-    local d = { 
-        x = { nil, nil }, 
-        y = { nil, nil }
-    }
-    
-    local width = screen.text_extents(txt)
-    local height = a.font_size * (1 - a.font_headroom)
-    local w, h
-
-    for _,k in ipairs { 'x', 'y' } do 
-        if type(a[k]) == 'table' then d[k] = a[k] 
-        else d[k][1] = a[k] end    
-    end
-    
-    local fixed = (d.x[2] ~= nil) and (d.y[2] ~= nil)
-
-    if fixed then
-        w = d.x[2] - d.x[1] - 1
-        h = d.y[2] - d.y[1] - 1
-    else
-        local px = (type(a.padding) == 'table' and a.padding[1] or a.padding or 0) * 2
-        local py = (type(a.padding) == 'table' and a.padding[2] or a.padding or 0) * 2
-
-        w = width + px - 1
-        h = height + py - 1
-    end
-
-    return w, h
 end
 
 local function placeaxis(txt, mode, iax, lax, place, extents, a)
@@ -355,7 +328,7 @@ local function txtline(txt, a)
             return txtpoint(v, a)
         end, 
         function(v, a) 
-            return txtpoint_extents(v, a)
+            return txtpoint(v, a, true)
         end, 
         a
     )
@@ -420,13 +393,13 @@ local function txtplane(txt, a)
             return placeaxis(v, mode[noflow], liax, llax, 
                 function(w, a) 
                     if extents then
-                        return txtpoint_extents(w, a)
+                        return txtpoint(w, a, true)
                     else
                         return txtpoint(w, a)
                     end
                 end, 
                 function(w, a) 
-                    return txtpoint_extents(w, a)
+                    return txtpoint(w, a, true)
                 end, 
                 b
             )
