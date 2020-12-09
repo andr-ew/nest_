@@ -39,12 +39,6 @@ local function txtpoint(txt, a)
     screen.font_face(a.font_face)
     screen.font_size(a.font_size)
 
-    --[[
-    local width = screen.text_extents(txt)
-    local height = a.font_size * (1 - a.font_headroom)
-    local w, h, bx, by, tx, ty, tmode
-    --]]
-
     local ax = { 'x', 'y' }
     local tsize = { x = screen.text_extents(txt), y = a.font_size * (1 - a.font_headroom) }
     local size = {}
@@ -81,8 +75,6 @@ local function txtpoint(txt, a)
             
             b[k] = d[k][1] - balign[k]
             
-            --t[k] = (k == 'x') and  or 
-
             if k == 'x' then
                 t[k] = (d[k][1] - 1 + ((p[k] / 2) * talign[k]) - (a.font_face == 1 and (a.font_size * a.font_leftroom) or 0))
             else
@@ -120,6 +112,8 @@ local function txtpoint(txt, a)
 end
 
 function txtpoint_extents(txt, a) 
+    --update this ! combining functions actually would be much less dumb
+
     local d = { 
         x = { nil, nil }, 
         y = { nil, nil }
