@@ -461,7 +461,7 @@ _txt.label = _txt.affordance:new {
 
 _txt.label.output.txt = function(s) return s.v end
 
---input is functional but output does not update the screen dirty state. check core.lua
+
 _txt.enc.number = _enc.number:new()
 _txt.affordance:copy(_txt.enc.number)
 
