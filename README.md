@@ -1,6 +1,6 @@
 `{.:}`
 
-# nest_
+# nest_ (beta)
 
 `nest_` is an object language and library for constructing user interface structures in lua for monome devices. 
 
