@@ -114,7 +114,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
     local function setetc(pa, i) 
         for j,k in ipairs { 'font_face', 'font_size', 'lvl', 'border', 'fill', 'font_headroom', 'font_leftroom' } do 
             local w = a[k]
-            pa[k] = (type(w) == 'table') and w[i] or w
+            pa[k] = (type(w) == 'table') and (w[i] and w[i] or w[#w]) or w
         end
 
         pa.padding = a.padding
@@ -424,8 +424,7 @@ _txt.affordance = _screen.affordance:new {
     align = 'left',
     wrap = nil,
     font_headroom = 3/8,
-    font_leftroom = 1/16,
-    label = function(s) return s.k end
+    font_leftroom = 1/16
 }
 
 _txt.affordance.output.txt = function(s) return 'wrong' end
@@ -461,8 +460,19 @@ _txt.label = _txt.affordance:new {
 
 _txt.label.output.txt = function(s) return s.v end
 
+_txt.enc.affordance = _txt.affordance:new {
+    label = function(s) return s.affordance.k end,
+    lvl = { 4, 15 },
+    margin = 5
+}
+
+_txt.enc.affordance.output.txt = function(s)
+    if s.p_.label then 
+    --if false then
+        return { s.p_.label, type(s.v) == 'table' and table.unpack(s.v) or s.v }
+    else 
+        return s.v end
+end
 
 _txt.enc.number = _enc.number:new()
-_txt.affordance:copy(_txt.enc.number)
-
-_txt.enc.number.output.txt = function(s) return s.v end
+_txt.enc.affordance:copy(_txt.enc.number)

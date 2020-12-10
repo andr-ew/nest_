@@ -10,7 +10,7 @@ include 'lib/nest_/txt'
 tab = require 'tabutil'
 
 n = nest_ {
-    _txt.enc.number {
+    num = _txt.enc.number {
         n = 2,
         range = { 0, 10 },
         action = function(s, v) print(v) end
