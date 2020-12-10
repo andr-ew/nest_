@@ -1,27 +1,3 @@
-_txt = _group:new()
-_txt.devk = 'screen'
-
-_txt.affordance = _screen.affordance:new {
-    font_face = 1,
-    font_size = 8,
-    lvl = 15,
-    border = 0,
-    fill = 0,
-    padding = 0,
-    margin = 0,
-    x = 1,
-    y = 1,
-    size = nil,
-    flow = 'x',
-    align = 'left',
-    wrap = nil,
-    font_headroom = 3/8,
-    font_leftroom = 1/16,
-    label = function(s) return s.k end
-}
-
-_txt.affordance.output.txt = function(s) end
-
 local function txtpoint(txt, a, extents)
     -- x, y, size, align, font_face, font_size, lvl, border, fill, padding, font_headroom, font_leftroom
 
@@ -424,6 +400,33 @@ local function txtplane(txt, a)
     return placeaxis(txt, mode[a.flow], iax, lax, cb(false), cb(true), b)
 end
 
+_txt = _group:new()
+_txt.devk = 'screen'
+
+_txt.enc = _group:new()
+_txt.key = _group:new()
+
+_txt.affordance = _screen.affordance:new {
+    font_face = 1,
+    font_size = 8,
+    lvl = 15,
+    border = 0,
+    fill = 0,
+    padding = 0,
+    margin = 0,
+    x = 1,
+    y = 1,
+    size = nil,
+    flow = 'x',
+    align = 'left',
+    wrap = nil,
+    font_headroom = 3/8,
+    font_leftroom = 1/16,
+    label = function(s) return s.k end
+}
+
+_txt.affordance.output.txt = function(s) return 'wrong' end
+
 _txt.affordance.output.txtdraw = function(s, txt) 
     if type(txt) == 'table' then
 
@@ -446,6 +449,8 @@ end
 
 _txt.affordance.output.redraw = function(s, ...) 
     screen.aa(s.aa)
+    print('txt()', s.txt)
+    print(s:txt())
     s:txtdraw(s:txt())
 end
 
@@ -456,3 +461,16 @@ _txt.label = _txt.affordance:new {
 _txt.label.output.txt = function(s) return s.v end
 
 --next up: enc.number !
+
+_txt.enc.number = _txt.affordance:new()
+
+_txt.enc.number.new = function(self, o)
+    o = _txt.affordance:new(o)
+    o = _enc.number:new(o)
+
+    return o
+end
+
+_txt.enc.number.output.txt = function(s) return s.v end
+    
+print('txt()',_txt.enc.number.output.txt)

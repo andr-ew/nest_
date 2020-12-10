@@ -111,7 +111,7 @@ function _obj_:new(o, clone_type)
         __call = function(idk, ...) -- dunno what's going on w/ the first arg to this metatmethod
             return o:new(...)
         end,
-        __tostring = function(t) return tostring(t.k) end
+        --__tostring = function(t) return tostring(t.k) end
     })
 
     --[[
