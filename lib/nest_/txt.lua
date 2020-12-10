@@ -461,7 +461,6 @@ _txt.label = _txt.affordance:new {
 
 _txt.label.output.txt = function(s) return s.v end
 
---next up: enc.number !
 
 _txt.enc.number = _enc.number:new()
 _txt.affordance:copy(_txt.enc.number)

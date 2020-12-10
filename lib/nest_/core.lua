@@ -157,7 +157,9 @@ _input = _obj_:new {
             local hargs = self:filter(args)
             
             if hargs ~= nil and self.affordance then
-                if self.devs[self.devk] then self.devs[self.devk].dirty = true end
+                for i,v in ipairs(self.affordance.zsort) do
+                    if v.devk and self.devs[v.devk] then self.devs[v.devk].dirty = true end
+                end
  
                 if self.handler then 
                     local aargs = table.pack(self:handler(table.unpack(hargs)))
