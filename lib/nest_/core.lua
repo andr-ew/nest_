@@ -56,9 +56,10 @@ _obj_ = {
     copy = function(self, o) 
         for k,v in pairs(self) do 
             if not rawget(o, k) then
-                if type(v) == "function" then
+                --if type(v) == "function" then
                     -- function pointers are not copied, instead they are referenced using metatables only when the objects are heierchachically related
-                elseif type(v) == "table" and v.is_obj then
+                --else
+                if type(v) == "table" and v.is_obj then
                     local clone = self[k]:new()
                     o[k] = formattype(o, k, clone, o._.clone_type) ----
                 else rawset(o,k,v) end 
@@ -78,7 +79,7 @@ function _obj_:new(o, clone_type)
         k = nil,
         z = 0,
         zsort = {}, -- list of obj children sorted by descending z value
-        clone_type = clone_type
+        clone_type = clone_type,
     }
 
     o = o or {}
@@ -89,7 +90,7 @@ function _obj_:new(o, clone_type)
             if k == "_" then return _
             elseif index_nickname(t,k) then return index_nickname(t,k)
             elseif _[k] ~= nil then return _[k]
-            elseif self[k] ~= nil then return self[k]
+            --elseif self[k] ~= nil then return self[k]
             else return nil end
         end,
         __newindex = function(t, k, v)
@@ -196,19 +197,21 @@ function _input:new(o)
     mt.__index = function(t, k) 
         if k == "_" then return _
         elseif _[k] ~= nil then return _[k]
-        else
+        else return _.affordance and _.affordance[k]
+            --[[
             local c = _.affordance and _.affordance[k]
             
             -- catch shared keys, otherwise privilege affordance keys
             if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' then return self[k]
             else return c or self[k] end
+            ]]--
         end
     end
 
     mt.__newindex = function(t, k, v)
         local c = _.affordance and _.affordance[k]
     
-        if c and type(c) ~= 'function' then _.affordance[k] = v
+        if c then _.affordance[k] = v
         else mtn(t, k, v) end
     end
 
