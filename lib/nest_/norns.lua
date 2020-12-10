@@ -201,8 +201,8 @@ _enc.number = _enc.muxaffordance:new {
     wrap = false
 }
 
-_enc.number.new = function(self, o)
-    o = _enc.muxaffordance.new(self, o)
+_enc.number.copy = function(self, o)
+    o = _enc.muxaffordance.copy(self, o)
 
     local v = minit(o.p_.n)
     if type(v) == 'table' and (type(o.v) ~= 'table' or (type(o.v) == 'table' and #o.v ~= #v)) then o.v = v end
@@ -254,10 +254,10 @@ _enc.control = _enc.muxaffordance:new {
     wrap = false
 }
 
-_enc.control.new = function(self, o)
+_enc.control.copy = function(self, o)
     local cs = o.controlspec
 
-    o = _enc.muxaffordance.new(self, o)
+    o = _enc.muxaffordance.copy(self, o)
 
     o.controlspec = cs or controlspec.new(o.p_.range[1], o.p_.range[2], o.p_.warp, o.p_.step, o.v, o.p_.units, o.p_.quantum, o.p_.wrap)
 
@@ -355,8 +355,8 @@ _enc.option = _enc.muxaffordance:new {
     wrap = false
 }
 
-_enc.option.new = function(self, o) 
-    o = _enc.muxaffordance.new(self, o)
+_enc.option.copy = function(self, o) 
+    o = _enc.muxaffordance.copy(self, o)
 
     if type(o.p_.n) == 'table' then
         local contains = false
@@ -472,8 +472,8 @@ _key.option = _enc.muxaffordance:new {
     tdown = 0
 }
 
-_key.option.new = function(self, o) 
-    o = _enc.muxaffordance.new(self, o)
+_key.option.copy = function(self, o) 
+    o = _enc.muxaffordance.copy(self, o)
 
     if not tab.contains(o.p_.options, o.v) then o.v = o.p_.options[1] or "" end
 
@@ -502,8 +502,8 @@ _key.binary = _key.muxaffordance:new {
     fingers = nil
 }
 
-_key.binary.new = function(self, o) 
-    o = _key.muxaffordance.new(self, o)
+_key.binary.copy = function(self, o) 
+    o = _key.muxaffordance.copy(self, o)
 
     rawset(o, 'list', {})
 
@@ -611,8 +611,8 @@ _key.momentary.input.muxhandler = _obj_:new {
 
 _key.toggle = _key.binary:new { edge = 1, lvl = { 0, 15 } } -- it is wierd that lvl is being used w/o an output :/
 
-_key.toggle.new = function(self, o) 
-    o = _key.binary.new(self, o)
+_key.toggle.copy = function(self, o) 
+    o = _key.binary.copy(self, o)
 
     rawset(o, 'toglist', {})
 
@@ -694,8 +694,8 @@ _key.toggle.input.muxhandler = _obj_:new {
 
 _key.trigger = _key.binary:new { edge = 1, blinktime = 0.1 }
 
-_key.trigger.new = function(self, o) 
-    o = _key.binary.new(self, o)
+_key.trigger.copy = function(self, o) 
+    o = _key.binary.copy(self, o)
 
     rawset(o, 'triglist', {})
 
