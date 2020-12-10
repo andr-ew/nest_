@@ -9,6 +9,7 @@ include 'lib/nest_/txt'
 
 tab = require 'tabutil'
 
+--test n = { 2, 3 }
 n = nest_ {
     num = _txt.enc.number {
         n = 2,
