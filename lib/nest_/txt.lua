@@ -404,7 +404,10 @@ _txt = _group:new()
 _txt.devk = 'screen'
 
 _txt.enc = _group:new()
+_txt.enc.devk = 'enc'
+
 _txt.key = _group:new()
+_txt.key.devk = 'key'
 
 _txt.affordance = _screen.affordance:new {
     font_face = 1,
@@ -449,8 +452,6 @@ end
 
 _txt.affordance.output.redraw = function(s, ...) 
     screen.aa(s.aa)
-    print('txt()', s.txt)
-    print(s:txt())
     s:txtdraw(s:txt())
 end
 
@@ -460,17 +461,8 @@ _txt.label = _txt.affordance:new {
 
 _txt.label.output.txt = function(s) return s.v end
 
---next up: enc.number !
-
-_txt.enc.number = _txt.affordance:new()
-
-_txt.enc.number.new = function(self, o)
-    o = _txt.affordance:new(o)
-    o = _enc.number:new(o)
-
-    return o
-end
+--input is functional but output does not update the screen dirty state. check core.lua
+_txt.enc.number = _enc.number:new()
+_txt.affordance:copy(_txt.enc.number)
 
 _txt.enc.number.output.txt = function(s) return s.v end
-    
-print('txt()',_txt.enc.number.output.txt)
