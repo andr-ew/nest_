@@ -142,7 +142,7 @@ function _obj_:new(o, clone_type)
         format_nickname(o, k, v)
     end
 
-    self:copy(o)
+    o = self:copy(o)
 
     return o
 end
@@ -363,13 +363,11 @@ function _affordance:new(o)
 
     --mt.__tostring = function(t) return '_affordance' end
 
-    mt.__newindex = function(t, k, v) 
-        mtn(t, k, v)
-        if type(v) == 'table' then if v.is_input or v.is_output then
-            rawset(v._, 'affordance', o)
-            v.devk = v.devk or o.devk
-        end end
-    end
+    return o
+end
+
+function _affordance:copy(o)
+    o = nest_.copy(self, o)
 
     for k,v in pairs(o) do
         if type(v) == 'table' then if v.is_input or v.is_output then
@@ -377,7 +375,7 @@ function _affordance:new(o)
             v.devk = v.devk or o.devk
         end end
     end
- 
+
     return o
 end
 
