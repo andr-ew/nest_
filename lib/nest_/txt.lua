@@ -93,7 +93,7 @@ local function txtpoint(txt, a, extents)
     return size.x, size.y
 end
 
-local function placeaxis(txt, mode, iax, lax, place, extents, a)
+local function placeaxis(txt, mode, iax, lax, place, extents, a) --selection (optional)
     --align, margin, flow, cellsize
 
     local flow = a.flow
@@ -111,6 +111,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
     for i,k in ipairs(ax) do initax[k] = iax[k] end
     if not flow then noflow = false end
 
+    -- add selection mode: selected items are second in table, unselected are first
     local function setetc(pa, i) 
         for j,k in ipairs { 'font_face', 'font_size', 'lvl', 'border', 'fill', 'font_headroom', 'font_leftroom' } do 
             local w = a[k]
@@ -430,6 +431,8 @@ _txt.affordance = _screen.affordance:new {
 _txt.affordance.output.txt = function(s) return 'wrong' end
 
 _txt.affordance.output.txtdraw = function(s, txt) 
+    --add scroll modality (based on properties). dump txt into a sublist buffer and scoot members
+
     if type(txt) == 'table' then
 
         local plane = false
