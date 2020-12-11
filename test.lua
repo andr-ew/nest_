@@ -11,9 +11,9 @@ tab = require 'tabutil'
 
 --test n = { 2, 3 }
 n = nest_ {
-    num = _txt.enc.number {
-        n = 2,
-        range = { 0, 10 },
-        action = function(s, v) print(v) end
+    num = _txt.enc.option {
+        options = { 'a', 'b', 'c' },
+        action = function(s, v) --tab.print(v) 
+        end
     }
 } :connect { key = key, enc = enc, screen = screen }  

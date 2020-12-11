@@ -468,11 +468,17 @@ _txt.enc.affordance = _txt.affordance:new {
 
 _txt.enc.affordance.output.txt = function(s)
     if s.p_.label then 
-    --if false then
-        return { s.p_.label, type(s.v) == 'table' and table.unpack(s.v) or s.v }
-    else 
-        return s.v end
+        if type(s.v) == 'table' then
+            return { s.p_.label, table.unpack(s.v) }
+        else return { s.p_.label, s.v } end
+    else return s.v end
 end
 
 _txt.enc.number = _enc.number:new()
 _txt.enc.affordance:copy(_txt.enc.number)
+
+_txt.enc.control = _enc.control:new()
+_txt.enc.affordance:copy(_txt.enc.control)
+
+_txt.enc.option = _enc.option:new()
+_txt.enc.affordance:copy(_txt.enc.option)
