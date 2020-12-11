@@ -93,7 +93,7 @@ local function txtpoint(txt, a, extents)
     return size.x, size.y
 end
 
-local function placeaxis(txt, mode, iax, lax, place, extents, a) --selection (optional)
+local function placeaxis(txt, mode, iax, lax, place, extents, a)
     --align, margin, flow, cellsize
 
     local flow = a.flow
@@ -111,11 +111,51 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a) --selection (op
     for i,k in ipairs(ax) do initax[k] = iax[k] end
     if not flow then noflow = false end
 
-    -- add selection mode: selected items are second in table, unselected are first
-    local function setetc(pa, i) 
+    local function setetc(pa, i)
         for j,k in ipairs { 'font_face', 'font_size', 'lvl', 'border', 'fill', 'font_headroom', 'font_leftroom' } do 
             local w = a[k]
-            pa[k] = (type(w) == 'table') and (w[i] and w[i] or w[#w]) or w
+            if (type(w) == 'table') then
+                if a.selected then
+                    if type(a.selected) == 'table' then
+                        if type(a.selected[1]) == 'table' and type(txt[i] == 'table') then
+                            pa[k] = {}
+                            for l = 1, #txt[i] do
+                                pa[k][l] = w[1]
+                            end
+
+                            for l,v in ipairs(a.selected) do  
+                                if v[flow] == i then
+                                    pa[k][v[noflow]] = w[2]
+                                end
+                            end
+                        else
+                            pa[k] = w[1]
+
+                            if a.selected[flow] then
+                                if a.selected[flow] == i then
+                                    pa[k] = {}
+                                    for l = 1, #txt[i] do
+                                        pa[k][l] = w[1]
+                                    end
+
+                                    pa[k][a.selected[noflow]] = w[2]
+                                end
+                            else
+                                for l,v in ipairs(a.selected) do  
+                                    if i == v then 
+                                        pa[k] = w[2]
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        pa[k] = w[(a.selected == i) and 2 or 1]
+                    end
+                else
+                    pa[k] = w[i] or w[#w]
+                end
+            else pa[k] = w end
         end
 
         pa.padding = a.padding
@@ -367,6 +407,7 @@ local function txtplane(txt, a)
             llax = {}
             
             b.flow = rnoflow
+            b.selected = false
 
             if mode[noflow] ~= manual then
                 b[noflow] = a[noflow]
@@ -417,7 +458,7 @@ _txt.affordance = _screen.affordance:new {
     border = 0,
     fill = 0,
     padding = 0,
-    margin = 0,
+    margin = 5,
     x = 1,
     y = 1,
     size = nil,
@@ -425,7 +466,10 @@ _txt.affordance = _screen.affordance:new {
     align = 'left',
     wrap = nil,
     font_headroom = 3/8,
-    font_leftroom = 1/16
+    font_leftroom = 1/16,
+    scroll_window = nil, -- 6
+    scroll_focus = nil, -- 3 or { 1, 6 }
+    selection = nil -- 1 or { 1, 2 } or { x = 1, y = 2 }, or { { x = 1, y = 2 }, x = 3, y = 4 } }
 }
 
 _txt.affordance.output.txt = function(s) return 'wrong' end

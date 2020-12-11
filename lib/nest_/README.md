@@ -161,11 +161,14 @@ RENAME
 
 lvl -> level. add a lvl as a nickname
 add en as a nickname for enabled
+zsort -> children. require children to be nest_'s
 
 ADD
 
 _obj_.metatable - allow access to the metatable for e.g. reassigning the __call metamethod, which is both useful when pointed to new and set. ?? what if we defaulted it to set but overrode it for library objects? 
-simpler solution would just be adding a member called __call which the metatable points to. the other things we probs don't want to expose
+simpler solution would just be adding a property called __call which the metatable references. the other things we probs don't want to expose
+
+support _affordance { input = false } properly when input already exists. use booleans in the constructor to essentially nullify default values, even when they are _obj_ (i.e., members of zsort)
 
 support nest_.redraw, overrides draw children
 
