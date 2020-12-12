@@ -5,6 +5,12 @@
 # txt
 ```
 
+REFACTOR
+
+option fails if any value in options{} is repeated. I'm planning to do this in a script, so....
+
+maybe we should switch value to just be an index. I like the string mode, but, it's really easy to turn the index back into a string.
+
 MAP
 
 _txt.screen.affordance {
