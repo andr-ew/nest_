@@ -93,7 +93,7 @@ local function txtpoint(txt, a, extents)
     return size.x, size.y
 end
 
-local function placeaxis(txt, mode, iax, lax, place, extents, a)
+local function placeaxis(txt, mode, iax, lax, selected, place, extents, a)
     --align, margin, flow, cellsize
 
     local flow = a.flow
@@ -115,15 +115,15 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
         for j,k in ipairs { 'font_face', 'font_size', 'lvl', 'border', 'fill', 'font_headroom', 'font_leftroom' } do 
             local w = a[k]
             if (type(w) == 'table') then
-                if a.selected then
-                    if type(a.selected) == 'table' then
-                        if type(a.selected[1]) == 'table' and type(txt[i] == 'table') then
+                if selected then
+                    if type(selected) == 'table' then
+                        if type(selected[1]) == 'table' and type(txt[i] == 'table') then
                             pa[k] = {}
                             for l = 1, #txt[i] do
                                 pa[k][l] = w[1]
                             end
 
-                            for l,v in ipairs(a.selected) do  
+                            for l,v in ipairs(selected) do  
                                 if v[flow] == i then
                                     pa[k][v[noflow]] = w[2]
                                 end
@@ -131,17 +131,17 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
                         else
                             pa[k] = w[1]
 
-                            if a.selected[flow] then
-                                if a.selected[flow] == i then
+                            if selected[flow] then
+                                if selected[flow] == i then
                                     pa[k] = {}
                                     for l = 1, #txt[i] do
                                         pa[k][l] = w[1]
                                     end
 
-                                    pa[k][a.selected[noflow]] = w[2]
+                                    pa[k][selected[noflow]] = w[2]
                                 end
                             else
-                                for l,v in ipairs(a.selected) do  
+                                for l,v in ipairs(selected) do  
                                     if i == v then 
                                         pa[k] = w[2]
                                         break
@@ -150,7 +150,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
                             end
                         end
                     else
-                        pa[k] = w[(a.selected == i) and 2 or 1]
+                        pa[k] = w[(selected == i) and 2 or 1]
                     end
                 else
                     pa[k] = w[i] or w[#w]
@@ -318,7 +318,7 @@ local function placeaxis(txt, mode, iax, lax, place, extents, a)
     return dimt.x, dimt.y
 end
 
-local function txtline(txt, a)
+local function txtline(txt, selected, a)
     --x, y, align, flow, wrap, margin, size
 
     local ax = { 'x', 'y' }
@@ -351,6 +351,7 @@ local function txtline(txt, a)
     end
 
     return placeaxis(txt, mode, iax, lax, 
+        selected,
         function(v, a) 
             return txtpoint(v, a)
         end, 
@@ -361,7 +362,7 @@ local function txtline(txt, a)
     )
 end
 
-local function txtplane(txt, a)
+local function txtplane(txt, selected, a)
     --x, y, align, flow, wrap, margin, size
 
     local start, justify, manual = 1, 2, 3
@@ -407,7 +408,6 @@ local function txtplane(txt, a)
             llax = {}
             
             b.flow = rnoflow
-            b.selected = false
 
             if mode[noflow] ~= manual then
                 b[noflow] = a[noflow]
@@ -419,6 +419,7 @@ local function txtplane(txt, a)
             end
 
             return placeaxis(v, mode[noflow], liax, llax, 
+                false,
                 function(w, a) 
                     if extents then
                         return txtpoint(w, a, true)
@@ -439,7 +440,7 @@ local function txtplane(txt, a)
     b.flow = rflow 
     b.size = false
 
-    return placeaxis(txt, mode[a.flow], iax, lax, cb(false), cb(true), b)
+    return placeaxis(txt, mode[a.flow], iax, lax, selected, cb(false), cb(true), b)
 end
 
 _txt = _group:new()
@@ -472,24 +473,61 @@ _txt.affordance = _screen.affordance:new {
     selection = nil -- 1 or { 1, 2 } or { x = 1, y = 2 }, or { { x = 1, y = 2 }, x = 3, y = 4 } }
 }
 
+_txt.affordance.copy = function(self, o) 
+    o = _screen.affordance.copy(self, o)
+
+    print('copyyyyyyyyy', o.k)
+    print(o.test)
+
+    if type(o.p_.scroll_window) == 'number' then o.scroll_window = { 1, o.scroll_window } end
+    if type(o.p_.scroll_focus) == 'number' then o.scroll_focus = { 1, o.scroll_focus } end
+
+    return o
+end
+
 _txt.affordance.output.txt = function(s) return 'wrong' end
 
 _txt.affordance.output.txtdraw = function(s, txt) 
     --add scroll modality (based on properties). dump txt into a sublist buffer and scoot members
 
     if type(txt) == 'table' then
+        local t = txt
+
+        local w = s.p_.scroll_window 
+        local f = s.p_.scroll_focus or w
+        local sel = s.p_.selected
+        local ssel = sel
+        if w and type(sel) ~= 'table' then
+            while sel > f[2] do
+                w[1] = w[1] + 1
+                w[2] = w[2] + 1
+            end
+            while sel < f[1] do
+                w[1] = w[1] - 1
+                w[2] = w[2] - 1
+            end
+
+            t = {}
+            local j = 0
+            for i = w[1], w[2] do
+                j = j + 1
+                t[j] = txt[i]
+                if i == sel then ssel = j end
+            end
+            --]]
+        end
 
         local plane = false
-        for i,v in ipairs(txt) do
+        for i,v in ipairs(t) do
             if type(v) == 'table' then
                 plane = true
             end 
         end
 
         if plane then
-            txtplane(txt, s.p_)                
+            txtplane(t, ssel, s.p_)                
         else
-            txtline(txt, s.p_)                
+            txtline(t, ssel, s.p_)                
         end
     else
         txtpoint(txt, s.p_)   
@@ -528,6 +566,7 @@ _txt.enc.control = _enc.control:new()
 _txt.labelaffordance:copy(_txt.enc.control)
 
 _txt.enc.option = _enc.option:new()
+print("one")
 _txt.affordance:copy(_txt.enc.option)
 
 _txt.enc.option.lvl = { 4, 15 }
@@ -537,3 +576,5 @@ _txt.enc.option.selected = function(s)
 end
 
 _txt.enc.option.output.txt = function(s) return s.options end
+
+print('two')

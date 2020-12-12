@@ -15,7 +15,9 @@ n = nest_ {
         ---[[    
         options = { 'foo', 'bar', 'ding', 'bat', 'foo', 'bar', 'ding', 'bat' },
         flow = 'y',
-        action = function(s, v, option) print(v, option) end
+        scroll_window = 1,
+        test = "foobar",
+        --action = function(s, v, option) print(v, option) end
         --]]
         --[[
         x = 12,
