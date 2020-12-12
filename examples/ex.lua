@@ -1,3 +1,26 @@
+n = nest_ {
+    o = _txt.enc.radio {
+        --options = { 'a', 'b', 'c', 'd' },
+        ---[[
+        x = 12,
+        y = 12,
+        n = { 1, 2 },
+        flow = 'y',
+        size = 10,
+        margin = 0, 
+        padding = 3,
+        lvl = 15,
+        border = { 0, 15 },
+        options = { 
+            { 'a', 'b', 'c' },
+            { 'd', 'e', 'f' },
+            { 'h', 'i', 'j' }
+        },
+        --]]
+        action = function(s, v) print(v) end
+    }
+} :connect { key = key, enc = enc, screen = screen }  
+
 -- 16 pages of grid toggles and faders using library controls, fader values drawn on screen
 
 n = nest_:new {

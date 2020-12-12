@@ -11,9 +11,10 @@ tab = require 'tabutil'
 
 --test n = { 2, 3 }
 n = nest_ {
-    o = _txt.enc.radio {
-        --options = { 'a', 'b', 'c', 'd' },
-        ---[[
+    o = _txt.enc.option {
+        options = { 'foo', 'bar', 'ding', 'bat' },
+        flow = 'y',
+        --[[
         x = 12,
         y = 12,
         n = { 1, 2 },

@@ -527,16 +527,17 @@ _txt.labelaffordance:copy(_txt.enc.number)
 _txt.enc.control = _enc.control:new()
 _txt.labelaffordance:copy(_txt.enc.control)
 
+--[[
 _txt.enc.option = _enc.option:new()
 _txt.labelaffordance:copy(_txt.enc.option)
+--]]
 
-_txt.enc.radio = _enc.option:new()
-_txt.affordance:copy(_txt.enc.radio)
+_txt.enc.option = _enc.option:new()
+_txt.affordance:copy(_txt.enc.option)
 
-_txt.enc.radio.lvl = { 4, 15 }
+_txt.enc.option.lvl = { 4, 15 }
 
----[[
-_txt.enc.radio.selected = function(s)
+_txt.enc.option.selected = function(s)
     if type(s.options[1]) == 'table' then
         for y,v in ipairs(s.options) do
             for x,w in ipairs(v) do
@@ -549,6 +550,5 @@ _txt.enc.radio.selected = function(s)
         return tab.key(s.options, s.v)
     end
 end
---]]
 
-_txt.enc.radio.output.txt = function(s) return s.options end
+_txt.enc.option.output.txt = function(s) return s.options end
