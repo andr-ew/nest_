@@ -362,7 +362,8 @@ end
 
 _enc.option.input.muxhandler = _obj_:new {
     point = function(s, n, d) 
-        return delta_option_point(s, s.v, d), d
+        local v = delta_option_point(s, s.v, d)
+        return v, s.options[v], d
     end,
     line = function(s, n, d) 
         local i = tab.key(s.p_.n, n)
@@ -372,7 +373,7 @@ _enc.option.input.muxhandler = _obj_:new {
         if v then
             local del = minit(s.p_.n)
             del[i] = d
-            return v, del
+            return v, s.options[v.y][v.x], del
         end
     end
 }
@@ -465,7 +466,8 @@ _key.option.input.muxhandler = _obj_:new {
     point = function(s, n, z) 
         if z == s.edge then 
             s.wrap = true
-            return delta_option_point(s, s.v, s.inc), util.time() - s.tdown, s.inc
+            local v = delta_option_point(s, s.v, s.inc)
+            return v, s.options[v], util.time() - s.tdown, s.inc
         else s.tdown = util.time()
         end
     end,
@@ -473,7 +475,8 @@ _key.option.input.muxhandler = _obj_:new {
         if z == s.edge then 
             local i = tab.key(s.p_.n, n)
             local d = i == 2 and s.inc or -s.inc
-            return delta_option_point(s, s.v, d), util.time() - s.tdown, d
+            local v = delta_option_point(s, s.v, d)
+            return v, s.options[v], util.time() - s.tdown, d
         else s.tdown = util.time()
         end
     end
