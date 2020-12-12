@@ -527,28 +527,13 @@ _txt.labelaffordance:copy(_txt.enc.number)
 _txt.enc.control = _enc.control:new()
 _txt.labelaffordance:copy(_txt.enc.control)
 
----[[
-_txt.enc.option1 = _enc.option:new()
-_txt.labelaffordance:copy(_txt.enc.option1)
---]]
-
 _txt.enc.option = _enc.option:new()
 _txt.affordance:copy(_txt.enc.option)
 
 _txt.enc.option.lvl = { 4, 15 }
 
 _txt.enc.option.selected = function(s)
-    if type(s.options[1]) == 'table' then
-        for y,v in ipairs(s.options) do
-            for x,w in ipairs(v) do
-                if w == s.v then
-                    return { x = x, y = y }
-                end
-            end
-        end
-    else
-        return tab.key(s.options, s.v)
-    end
+    return s.v
 end
 
 _txt.enc.option.output.txt = function(s) return s.options end

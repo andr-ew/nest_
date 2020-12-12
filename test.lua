@@ -11,14 +11,15 @@ tab = require 'tabutil'
 
 --test n = { 2, 3 }
 n = nest_ {
-    --[[
-    o = _txt.enc.option1 {
+    o = _txt.enc.option {
+        --[[    
         options = { 'foo', 'bar', 'ding', 'bat' },
         flow = 'y',
-        --[[
+        --]]
+        ---[[
         x = 12,
         y = 12,
-        n = { 1, 2 },
+        n = { 2, 1 },
         flow = 'y',
         size = 10,
         margin = 0, 
@@ -30,12 +31,7 @@ n = nest_ {
             { 'd', 'e', 'f' },
             { 'h', 'i', 'j' }
         },
-        action = function(s, v) print(v) end
-    }
-    --]]
-    o = _key.option {
-        n = 2,
-        options = { 'a', 'b', 'c', 'd' },
-        action = function(s, v) print(v) end
+        --]]
+        action = function(s, v) print(s.options[s.v.y][s.v.x]) end
     }
 } :connect { key = key, enc = enc, screen = screen }  
