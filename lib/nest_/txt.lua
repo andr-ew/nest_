@@ -527,9 +527,9 @@ _txt.labelaffordance:copy(_txt.enc.number)
 _txt.enc.control = _enc.control:new()
 _txt.labelaffordance:copy(_txt.enc.control)
 
---[[
-_txt.enc.option = _enc.option:new()
-_txt.labelaffordance:copy(_txt.enc.option)
+---[[
+_txt.enc.option1 = _enc.option:new()
+_txt.labelaffordance:copy(_txt.enc.option1)
 --]]
 
 _txt.enc.option = _enc.option:new()

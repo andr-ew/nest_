@@ -288,7 +288,7 @@ _enc.control.input.muxhandler = _obj_:new {
 local tab = require 'tabutil'
 
 local function delta_option_point(self, value, d)
-    local i = tab.key(self.p_.options, value) or 0
+    local i = value or 0
     local v = i + d
 
     if self.wrap then
@@ -302,22 +302,13 @@ local function delta_option_point(self, value, d)
 
     local c = util.clamp(v, 1, #self.p_.options)
     if i ~= c then
-        return self.p_.options[c]
+        return c
     end
 end
 
 local function delta_option_line(self, value, dx, dy)
-    local i = 0
-    local j = 0
-
-    for x, w in ipairs(self.p_.options) do
-        for y, z in ipairs(w) do
-            if z == value then
-                i = x
-                j = y
-            end
-        end
-    end
+    local i = value.x
+    local j = value.y
 
     vx = i + (dx or 0)
     vy = j + (dy or 0)
@@ -345,12 +336,14 @@ local function delta_option_line(self, value, dx, dy)
     local cy = util.clamp(vy, 1, #self.p_.options[cx])
 
     if i ~= cx or j ~= cy then
-        return self.p_.options[cx][cy]
+        value.x = cx
+        value.y = cy
+        return value
     end
 end
 
 _enc.option = _enc.muxaffordance:new {
-    value = "",
+    value = 1,
     options = {},
     wrap = false
 }
@@ -359,19 +352,9 @@ _enc.option.copy = function(self, o)
     o = _enc.muxaffordance.copy(self, o)
 
     if type(o.p_.n) == 'table' then
-        local contains = false
-
-        for x, w in ipairs(self.p_.options) do
-            for y, z in ipairs(w) do
-                if z == o.v then
-                    contains = true
-                end
-            end
+        if type(o.v) ~= 'table' then
+            o.v = { x = 1, y = 1 }
         end
-
-        if not contains then o.v = o.p_.options[1][1] or "" end
-    else
-        if not tab.contains(o.p_.options, o.v) then o.v = o.p_.options[1] or "" end
     end
 
     return o
@@ -464,7 +447,7 @@ _key.number.input.muxhandler = _obj_:new {
 }
 
 _key.option = _enc.muxaffordance:new {
-    value = "",
+    value = 1,
     options = {},
     wrap = false,
     inc = 1,
@@ -474,8 +457,6 @@ _key.option = _enc.muxaffordance:new {
 
 _key.option.copy = function(self, o) 
     o = _enc.muxaffordance.copy(self, o)
-
-    if not tab.contains(o.p_.options, o.v) then o.v = o.p_.options[1] or "" end
 
     return o
 end
