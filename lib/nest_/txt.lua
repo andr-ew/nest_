@@ -473,49 +473,16 @@ _txt.affordance = _screen.affordance:new {
     selection = nil -- 1 or { 1, 2 } or { x = 1, y = 2 }, or { { x = 1, y = 2 }, x = 3, y = 4 } }
 }
 
-_txt.affordance.copy = function(self, o) 
-    o = _screen.affordance.copy(self, o)
-
-    print('copyyyyyyyyy', o.k)
-    print(o.test)
-
-    if type(o.p_.scroll_window) == 'number' then o.scroll_window = { 1, o.scroll_window } end
-    if type(o.p_.scroll_focus) == 'number' then o.scroll_focus = { 1, o.scroll_focus } end
-
-    return o
-end
-
 _txt.affordance.output.txt = function(s) return 'wrong' end
 
 _txt.affordance.output.txtdraw = function(s, txt) 
     --add scroll modality (based on properties). dump txt into a sublist buffer and scoot members
+    
+    if type(s.p_.scroll_window) == 'number' then s.scroll_window = { 1, s.scroll_window } end
+    if type(s.p_.scroll_focus) == 'number' then s.scroll_focus = { s.scroll_focus, s.scroll_focus } end
 
     if type(txt) == 'table' then
         local t = txt
-
-        local w = s.p_.scroll_window 
-        local f = s.p_.scroll_focus or w
-        local sel = s.p_.selected
-        local ssel = sel
-        if w and type(sel) ~= 'table' then
-            while sel > f[2] do
-                w[1] = w[1] + 1
-                w[2] = w[2] + 1
-            end
-            while sel < f[1] do
-                w[1] = w[1] - 1
-                w[2] = w[2] - 1
-            end
-
-            t = {}
-            local j = 0
-            for i = w[1], w[2] do
-                j = j + 1
-                t[j] = txt[i]
-                if i == sel then ssel = j end
-            end
-            --]]
-        end
 
         local plane = false
         for i,v in ipairs(t) do
@@ -524,10 +491,47 @@ _txt.affordance.output.txtdraw = function(s, txt)
             end 
         end
 
+        local w = s.p_.scroll_window 
+        local sel0 = s.p_.selected
+        local sel, sel2, sel3
+        if w then
+            local seltab = type(sel0) == 'table'
+            local ax = seltab and sel0.x 
+            local f = s.p_.scroll_focus or { w[1], w[2] }
+
+            sel = ax and sel0[s.p_.flow] or sel0
+
+            while sel > f[2] do
+                w[1] = w[1] + 1
+                w[2] = w[2] + 1
+                f[1] = f[1] + 1
+                f[2] = f[2] + 1
+            end
+            while sel < f[1] do
+                w[1] = w[1] - 1
+                w[2] = w[2] - 1
+                f[1] = f[1] - 1
+                f[2] = f[2] - 1
+            end
+
+            t = {}
+            local j = 0
+            for i = w[1], w[2] do
+                j = j + 1
+                t[j] = txt[i] or (plane) and { "" } or ""
+                if i == sel then sel2 = j end
+            end
+            
+            if ax then
+                sel3 = { x = sel0.x, y = sel0.y }
+                sel3[s.p_.flow] = sel2
+            end
+        end
+
         if plane then
-            txtplane(t, ssel, s.p_)                
+            txtplane(t, sel3 or sel2 or sel0, s.p_)                
         else
-            txtline(t, ssel, s.p_)                
+            txtline(t, sel2 or sel0, s.p_)
         end
     else
         txtpoint(txt, s.p_)   
@@ -566,7 +570,6 @@ _txt.enc.control = _enc.control:new()
 _txt.labelaffordance:copy(_txt.enc.control)
 
 _txt.enc.option = _enc.option:new()
-print("one")
 _txt.affordance:copy(_txt.enc.option)
 
 _txt.enc.option.lvl = { 4, 15 }
@@ -576,5 +579,3 @@ _txt.enc.option.selected = function(s)
 end
 
 _txt.enc.option.output.txt = function(s) return s.options end
-
-print('two')

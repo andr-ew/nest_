@@ -314,26 +314,26 @@ local function delta_option_line(self, value, dx, dy)
     vy = j + (dy or 0)
 
     if self.wrap then
-        while vx > #self.p_.options do
-            vx = vx - #self.options
-        end
-        while vx < 1 do
-            vx = vx + #self.p_.options + 1
-        end
-    end
-
-    local cx = util.clamp(vx, 1, #self.p_.options)
-
-    if self.wrap then
-        while vy > #self.p_.options[cx] do
-            vy = vy - #self.options[cx]
+        while vy > #self.p_.options do
+            vy = vy - #self.options
         end
         while vy < 1 do
-            vy = vy + #self.p_.options[cx] + 1
+            vy = vy + #self.p_.options + 1
         end
     end
 
-    local cy = util.clamp(vy, 1, #self.p_.options[cx])
+    local cy = util.clamp(vy, 1, #self.p_.options)
+
+    if self.wrap then
+        while vx > #self.p_.options[cy] do
+            vx = vx - #self.options[cy]
+        end
+        while vx < 1 do
+            vx = vx + #self.p_.options[cy] + 1
+        end
+    end
+
+    local cx = util.clamp(vx, 1, #self.p_.options[cy])
 
     if i ~= cx or j ~= cy then
         value.x = cx

@@ -12,14 +12,14 @@ tab = require 'tabutil'
 --test n = { 2, 3 }
 n = nest_ {
     o = _txt.enc.option {
-        ---[[    
+        --[[    
         options = { 'foo', 'bar', 'ding', 'bat', 'foo', 'bar', 'ding', 'bat' },
         flow = 'y',
-        scroll_window = 1,
-        test = "foobar",
+        scroll_window = 5,
+        scroll_focus = 3,
         --action = function(s, v, option) print(v, option) end
         --]]
-        --[[
+        ---[[
         x = 12,
         y = 12,
         n = { 2, 1 },
@@ -29,10 +29,20 @@ n = nest_ {
         padding = 3,
         lvl = 15,
         border = { 0, 15 },
+        scroll_window = 5,
+        scroll_focus = { 2, 4 },
         options = { 
             { 'a', 'b', 'c' },
             { 'd', 'e', 'f' },
-            { 'h', 'i', 'j' }
+            { 'h', 'i', 'j' },
+            { 'a', 'b', 'c' },
+            { 'd', 'e', 'f' },
+            { 'h', 'i', 'j' },
+            { 'a', 'b', 'c' },
+            { 'd', 'e', 'f' },
+            { 'h', 'i', 'j' },
+            { 'd', 'e', 'f' },
+            { 'h', 'i', 'j' },
         },
         action = function(s, v, o) print(o) end
         --]]
