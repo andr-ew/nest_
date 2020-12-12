@@ -30,35 +30,6 @@ _txt.screen.affordance {
 
 _screen.txt.label { value = '' }
 
-_txt.list_ {
-    x = 1 or {}
-    y = 1 or {}
-    lvl = { 2, 15 }
-    border = {}
-    fill = {}
-    cellsize = self.size + ? or { self.size + ?, self.size + ? } 
-    flow = 'x' or 'y'
-    items = nest_ {} or { {}, ... }
-}
-numbered children instead of items nest ?
-
-_txt.select_ {
-    selector = _affordance
-}
-
-_txt.scroll_ {
-    x = 1 or {}
-    y = 1 or {}
-    lvl = { 2, 15 }
-    border = {}
-    fill = {}
-    cellsize = self.size + ? or { self.size + ?, self.size + ? } 
-    flow = 'x' or 'y'
-    window = 6 or { 6, 6 }
-    selector = _affordance
-    items = nest_ {} or { {}, ... }
-}
-scrolling as a config for list, select, radio, etc ?
 
 _txt.enc.control {
     n = 2 or { 2, 3 }
@@ -75,21 +46,7 @@ _txt.enc.option {
     options = {}
 }
 
-_txt.enc.radio {
-    options = {} or { {}, ... }
-}
-
-_txt.enc.scroll {
-    options = {}
-}
-
 _txt.key.option {
-    n = 2 or { 2, 3 }
-    options = {}
-    inc
-}
-
-_txt.key.radio {
     n = 2 or { 2, 3 }
     options = {}
     inc
@@ -113,6 +70,19 @@ _txt.key.toggle {
     fingers = { 0, 3 }
     edge = 1
 }
+
+_txt.list_ {
+    input = _enc.option.input() ---??
+    x = 1 or {}
+    y = 1 or {}
+    lvl = { 2, 15 }
+    border = {}
+    fill = {}
+    cellsize = self.size + ? or { self.size + ?, self.size + ? } 
+    flow = 'x' or 'y'
+    items = nest_ {} or { {}, ... }
+}
+numbered children instead of items nest ?? not if we go the input route
 
 ```
 
