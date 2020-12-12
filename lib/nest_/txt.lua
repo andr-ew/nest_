@@ -507,13 +507,13 @@ _txt.label = _txt.affordance:new {
 
 _txt.label.output.txt = function(s) return s.v end
 
-_txt.enc.affordance = _txt.affordance:new {
+_txt.labelaffordance = _txt.affordance:new {
     label = function(s) return s.affordance.k end,
     lvl = { 4, 15 },
     margin = 5
 }
 
-_txt.enc.affordance.output.txt = function(s)
+_txt.labelaffordance.output.txt = function(s)
     if s.p_.label then 
         if type(s.v) == 'table' then
             return { s.p_.label, table.unpack(s.v) }
@@ -522,10 +522,33 @@ _txt.enc.affordance.output.txt = function(s)
 end
 
 _txt.enc.number = _enc.number:new()
-_txt.enc.affordance:copy(_txt.enc.number)
+_txt.labelaffordance:copy(_txt.enc.number)
 
 _txt.enc.control = _enc.control:new()
-_txt.enc.affordance:copy(_txt.enc.control)
+_txt.labelaffordance:copy(_txt.enc.control)
 
 _txt.enc.option = _enc.option:new()
-_txt.enc.affordance:copy(_txt.enc.option)
+_txt.labelaffordance:copy(_txt.enc.option)
+
+_txt.enc.radio = _enc.option:new()
+_txt.affordance:copy(_txt.enc.radio)
+
+_txt.enc.radio.lvl = { 4, 15 }
+
+---[[
+_txt.enc.radio.selected = function(s)
+    if type(s.options[1]) == 'table' then
+        for y,v in ipairs(s.options) do
+            for x,w in ipairs(v) do
+                if w == s.v then
+                    return { x = x, y = y }
+                end
+            end
+        end
+    else
+        return tab.key(s.options, s.v)
+    end
+end
+--]]
+
+_txt.enc.radio.output.txt = function(s) return s.options end

@@ -11,14 +11,24 @@ tab = require 'tabutil'
 
 --test n = { 2, 3 }
 n = nest_ {
-    num = _txt.label {
-        value = {
-            { 'foo', 'bar', 'ding', 'bat' },
-            { 'bar', 'foo', 'bat', 'ding' },
-            { 'bat', 'ding', 'bar', 'foo' }
-        },
+    o = _txt.enc.radio {
+        --options = { 'a', 'b', 'c', 'd' },
+        ---[[
+        x = 12,
+        y = 12,
+        n = { 1, 2 },
         flow = 'y',
-        lvl = { 2, 15 },
-        selected = { { x = 2, y = 1 }, { x = 3, y = 2 } }
+        size = 10,
+        margin = 0, 
+        padding = 3,
+        lvl = 15,
+        border = { 0, 15 },
+        options = { 
+            { 'a', 'b', 'c' },
+            { 'd', 'e', 'f' },
+            { 'h', 'i', 'j' }
+        },
+        --]]
+        action = function(s, v) print(v) end
     }
 } :connect { key = key, enc = enc, screen = screen }  
