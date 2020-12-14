@@ -66,6 +66,12 @@ local function txtpoint(txt, a, extents)
     end
 
     if not extents then
+        local lvl = a.lvl
+
+        if type(a.lvl) == 'table' and a.selected then
+            lvl = a.lvl[a.selected + 1]
+        end
+
         if a.fill > 0 then
             screen.level(a.fill)
             screen.rect(b.x - 1, b.y - 1, size.x + 1, size.y + 1)
@@ -78,7 +84,7 @@ local function txtpoint(txt, a, extents)
             screen.stroke()
         end
 
-        screen.level(a.lvl)
+        screen.level(lvl)
         screen.move(t.x, t.y)
 
         if tmode.x == 'right' then
@@ -443,14 +449,10 @@ local function txtplane(txt, selected, a)
     return placeaxis(txt, mode[a.flow], iax, lax, selected, cb(false), cb(true), b)
 end
 
+--------------------------------------------------------------------------------------------------------------------
+
 _txt = _group:new()
 _txt.devk = 'screen'
-
-_txt.enc = _group:new()
-_txt.enc.devk = 'enc'
-
-_txt.key = _group:new()
-_txt.key.devk = 'key'
 
 _txt.affordance = _screen.affordance:new {
     font_face = 1,
@@ -543,6 +545,8 @@ _txt.affordance.output.redraw = function(s, ...)
     s:txtdraw(s:txt())
 end
 
+--------------------------------------------------------------------------------------------------
+
 _txt.label = _txt.affordance:new {
     value = 'label'
 } 
@@ -550,12 +554,12 @@ _txt.label = _txt.affordance:new {
 _txt.label.output.txt = function(s) return s.v end
 
 _txt.labelaffordance = _txt.affordance:new {
-    label = function(s) return s.affordance.k end,
-    lvl = { 4, 15 },
+    label = function(s) if type(s.affordance.k) == 'string' then return s.affordance.k end end,
+    lvl = function(s) return s.p_.label and { 4, 15 } or 15 end,
     margin = 5
 }
 
-_txt.labelaffordance.output.txt = function(s)
+local function labeltxt(s)
     if s.p_.label then 
         if type(s.v) == 'table' then
             return { s.p_.label, table.unpack(s.v) }
@@ -563,19 +567,110 @@ _txt.labelaffordance.output.txt = function(s)
     else return s.v end
 end
 
+_txt.labelaffordance.output.txt = labeltxt
+
+_txt.enc = _group:new()
+_txt.enc.devk = 'enc'
+
 _txt.enc.number = _enc.number:new()
 _txt.labelaffordance:copy(_txt.enc.number)
 
 _txt.enc.control = _enc.control:new()
 _txt.labelaffordance:copy(_txt.enc.control)
 
-_txt.enc.option = _enc.option:new()
-_txt.affordance:copy(_txt.enc.option)
-
-_txt.enc.option.lvl = { 4, 15 }
-
-_txt.enc.option.selected = function(s)
-    return s.v
+_txt.option = _txt.affordance:new()
+_txt.option.lvl = { 4, 15 }
+_txt.option.selected = function(s) return s.v end
+_txt.option.output.txt = function(s) return s.options end
+_txt.option.output.ltxt = function(s)
+    if s.p_.label then 
+        if type(s.v) == 'table' then
+            return { s.p_.label, s.p_.options[s.v.y][s.v.x] }
+        else return { s.p_.label, s.p_.options[s.v] } end
+    else return s.p_.options[s.v] end
 end
 
-_txt.enc.option.output.txt = function(s) return s.options end
+_txt.enc.option = _enc.option:new()
+_txt.option:copy(_txt.enc.option)
+
+_txt.list = _txt.affordance:new { lvl = { 4, 15 } }
+_txt.list.selected = function(s) return s.v end
+_txt.list.output.txt = function(s)
+    local ret = {}
+    for i,v in ipairs(s.items) do
+        
+        --meh, this should be in an initialization function but init stuff is being overwritten by the enc type ://
+        v.enabled = function() return i == s.v end
+
+        ret[i] = v.output.ltxt and v.output:ltxt() or v.output:txt()
+    end
+
+    return ret
+end
+_txt.list.options = function(s) return s.items end
+
+_txt.enc.list = _enc.option:new()
+_txt.list:copy(_txt.enc.list)
+
+_txt.key = _group:new()
+_txt.key.devk = 'key'
+
+_txt.key.number = _key.number:new()
+_txt.labelaffordance:copy(_txt.key.number)
+
+_txt.key.option = _key.option:new()
+_txt.option:copy(_txt.key.option)
+
+_txt.binary = _txt.affordance:new {
+    lvl = { 4, 15 },
+    label = function(s) return s.affordance.k end
+}
+_txt.binary.selected = function(s) 
+    if type(s.p_.n) == 'table' then
+        local ret = {}
+        for i,v in ipairs(s.v) do
+            if v > 0 then ret[#ret + 1] = i end
+        end
+        
+        return ret
+    else return s.v end
+end
+_txt.binary.output.txt = function(s) return s.p_.label end
+_txt.binary.output.ltxt = labeltxt
+
+_txt.key.trigger = _key.trigger:new()
+_txt.binary:copy(_txt.key.trigger)
+_txt.key.trigger.output.redraw = function(s, ...) 
+    _txt.binary.output.redraw(s, ...)
+
+    if type(s.p_.n) == 'table' then
+        for x,w in ipairs(s.v) do 
+            if w > 0 then 
+                s.v[x] = w - 1/30/s.blinktime
+            else
+                s.v[x] = 0
+            end
+            
+            ret = true
+        end
+
+        return ret
+    else
+        if s.v > 0 then
+            s.v = s.v - 1/30/s.blinktime
+        else
+            s.v = 0
+        end
+        
+        return s.v > 0
+    end
+end
+
+_txt.key.momentary = _key.momentary:new()
+_txt.binary:copy(_txt.key.momentary)
+
+_txt.key.toggle = _key.toggle:new { lvl = _txt.binary.lvl }
+_txt.binary:copy(_txt.key.toggle)
+
+_txt.key.list = _key.option:new()
+_txt.list:copy(_txt.key.list)

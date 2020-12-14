@@ -55,7 +55,7 @@ _obj_ = {
     end,
     copy = function(self, o) 
         for k,v in pairs(self) do 
-            if not rawget(o, k) then
+            if rawget(o, k) == nil then
                 --if type(v) == "function" then
                     -- function pointers are not copied, instead they are referenced using metatables only when the objects are heierchachically related
                 --else
@@ -341,6 +341,13 @@ _affordance = nest_:new {
         self:init()
     end,
     print = function(self) end,
+    draw = function(self, devk)
+        if self.enabled == nil or self.p_.enabled == true then
+            if self.output then
+                self.output:draw(devk)
+            end
+        end
+    end,
     get = function(self, silent) 
         if not silent then
             return self:update()

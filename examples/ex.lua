@@ -1,23 +1,52 @@
 n = nest_ {
-    o = _txt.enc.radio {
-        --options = { 'a', 'b', 'c', 'd' },
-        ---[[
+    l = _txt.enc.list {
+        y = 4,
+        x = { 4, 64 },
+        n = 2,
+        items = nest_ { 
+            _txt.enc.control { n = 3, label = "foo" },
+            _txt.key.toggle { n = 3, label = "bar" },
+            _txt.enc.control { n = 3, label = "ding" },
+            _txt.enc.option { n = 3, label = "bat", options = { "a", "bbb", "c" } },
+            _txt.enc.control { n = 3, label = "foo" },
+            _txt.key.momentary { n = { 2, 3 }, label = "bar" },
+            _txt.enc.control { n = 3, label = "ding" },
+            _txt.enc.control { n = 3, label = "bat" }
+        },
+        flow = 'y',
+        scroll_window = 5,
+        scroll_focus = 3,
+    }
+} :connect { key = key, enc = enc, screen = screen }  
+
+n = nest_ {
+    o = _txt.enc.option {
         x = 12,
         y = 12,
-        n = { 1, 2 },
+        n = { 2, 1 },
         flow = 'y',
         size = 10,
         margin = 0, 
         padding = 3,
         lvl = 15,
         border = { 0, 15 },
+        scroll_window = 5,
+        scroll_focus = { 2, 4 },
         options = { 
             { 'a', 'b', 'c' },
             { 'd', 'e', 'f' },
-            { 'h', 'i', 'j' }
+            { 'h', 'i', 'j' },
+            { 'a', 'b', 'c' },
+            { 'd', 'e', 'f' },
+            { 'h', 'i', 'j' },
+            { 'a', 'b', 'c' },
+            { 'd', 'e', 'f' },
+            { 'h', 'i', 'j' },
+            { 'd', 'e', 'f' },
+            { 'h', 'i', 'j' },
         },
+        action = function(s, v, o) print(o) end
         --]]
-        action = function(s, v) print(v) end
     }
 } :connect { key = key, enc = enc, screen = screen }  
 

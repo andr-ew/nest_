@@ -293,7 +293,7 @@ local function delta_option_point(self, value, d)
 
     if self.wrap then
         while v > #self.p_.options do
-            v = v - #self.options
+            v = v - #self.p_.options
         end
         while v < 1 do
             v = v + #self.p_.options + 1
@@ -315,7 +315,7 @@ local function delta_option_line(self, value, dx, dy)
 
     if self.wrap then
         while vy > #self.p_.options do
-            vy = vy - #self.options
+            vy = vy - #self.p_.options
         end
         while vy < 1 do
             vy = vy + #self.p_.options + 1
@@ -326,7 +326,7 @@ local function delta_option_line(self, value, dx, dy)
 
     if self.wrap then
         while vx > #self.p_.options[cy] do
-            vx = vx - #self.options[cy]
+            vx = vx - #self.p_.options[cy]
         end
         while vx < 1 do
             vx = vx + #self.p_.options[cy] + 1
@@ -344,7 +344,7 @@ end
 
 _enc.option = _enc.muxaffordance:new {
     value = 1,
-    options = {},
+    --options = {},
     wrap = false
 }
 
@@ -363,7 +363,7 @@ end
 _enc.option.input.muxhandler = _obj_:new {
     point = function(s, n, d) 
         local v = delta_option_point(s, s.v, d)
-        return v, s.options[v], d
+        return v, s.p_.options[v], d
     end,
     line = function(s, n, d) 
         local i = tab.key(s.p_.n, n)
@@ -373,7 +373,7 @@ _enc.option.input.muxhandler = _obj_:new {
         if v then
             local del = minit(s.p_.n)
             del[i] = d
-            return v, s.options[v.y][v.x], del
+            return v, s.p_.options[v.y][v.x], del
         end
     end
 }
@@ -449,7 +449,7 @@ _key.number.input.muxhandler = _obj_:new {
 
 _key.option = _enc.muxaffordance:new {
     value = 1,
-    options = {},
+    --options = {},
     wrap = false,
     inc = 1,
     edge = 1,
@@ -467,7 +467,7 @@ _key.option.input.muxhandler = _obj_:new {
         if z == s.edge then 
             s.wrap = true
             local v = delta_option_point(s, s.v, s.inc)
-            return v, s.options[v], util.time() - s.tdown, s.inc
+            return v, s.p_.options[v], util.time() - s.tdown, s.inc
         else s.tdown = util.time()
         end
     end,
@@ -476,7 +476,7 @@ _key.option.input.muxhandler = _obj_:new {
             local i = tab.key(s.p_.n, n)
             local d = i == 2 and s.inc or -s.inc
             local v = delta_option_point(s, s.v, d)
-            return v, s.options[v], util.time() - s.tdown, d
+            return v, s.p_.options[v], util.time() - s.tdown, d
         else s.tdown = util.time()
         end
     end
