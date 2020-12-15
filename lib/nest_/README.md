@@ -58,8 +58,33 @@ _txt.screen.affordance {
     label = self.k or {}
 }
 
+
+*
+_txt.key.number
+
+*
+_txt.binary {
+    n = 2 or { 2, 3 } or { 1, 2, 3 }
+    fingers = { 0, 3 }
+    lvl = { 0, ..., 15 } 
+    edge = 1
+    label = nil
+    text = nil
+}
+
+
+
+*
+
+_txt.key.list {}
+
+```
+
+# DEMO PAGES
+```
 _screen.txt.label { value = '' }
 
+--------------------------------------
 
 _txt.enc.control {
     n = 2 or { 2, 3 }
@@ -72,41 +97,27 @@ _txt.enc.number {
     warp = 1
 }
 
+_txt.key.trigger {
+}
+_txt.key.momentary {
+}
+_txt.key.toggle {
+}
+
+-------------------------------------
+
 _txt.enc.option {
     options = {}
 }
 
-*
-_txt.key.number
-
-*
 _txt.key.option {
     n = 2 or { 2, 3 }
     options = {}
     inc
 }
 
-*
-_txt.binary {
-    n = 2 or { 2, 3 } or { 1, 2, 3 }
-    fingers = { 0, 3 }
-    lvl = { 0, ..., 15 } 
-    edge = 1
-    label = nil
-    text = nil
-}
+-------------------------------------
 
-*
-_txt.key.trigger {
-}
-*
-_txt.key.momentary {
-}
-*
-_txt.key.toggle {
-}
-
-*
 _txt.enc.list {
     x = 1 or {}
     y = 1 or {}
@@ -119,7 +130,10 @@ _txt.enc.list {
     items = nest_ {} or { {}, ... }
 }
 
-_txt.key.list {}
+------------------------------------
+
+
+
 
 ```
 
