@@ -23,7 +23,7 @@
   
 }
 
-[_txt.label](#label(type)) {
+[_txt.label](#labeltype) {
   - ...
   
 }
