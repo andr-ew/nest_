@@ -5,6 +5,7 @@
   - [font_size](#font_size)
   - [x](#x)
   - [y](#y)
+  - [label](#label)
   - [lvl](#lvl)
   - [border](#border)
   - [fill](#fill)
@@ -22,7 +23,7 @@
   
 }
 
-[_txt.label](#label) {
+[_txt.label](#label(type)) {
   - ...
   
 }
@@ -105,39 +106,48 @@
 
 a base affordance type for the `_txt` group - all other affordances in the group inherit from this type and share the display properties. the user may extend this type in order to define a custom affordance with text output.
 
-### label
+### label(type)
 
 an output only text type, `value` is displayed and may be a string, a table of strings, or a a table of tables of strings. useful for evaluating the various display properties.
 
 ### number
 
-like the `paramset` "number" type, an integer number
+like the `paramset` "number" type, an integer number. [label](#label) defaults to [k](../doc/core.md#k).
 
 ### control
 
-like the `paramset` "control" type, a number with musicaly convenient properties. a `controlspec` is used internally, which may be provided at init time rather than properties
+like the `paramset` "control" type, a number with musicaly convenient properties. a `controlspec` is used internally, which may be provided at init time rather than properties. [label](#label) defaults to [k](../doc/core.md#k).
 
 ### option
 
-like the `paramset` "option" type, a list of strings or numbers to be iterated through. the `value` property stored is the index of the active option (the value at this index is returned as the third argument to `action`)
+like the `paramset` "option" type, a list of strings or numbers to be iterated through. the `value` property stored is the index of the active option (the value at this index is returned as the third argument to `action`). all options are displayed, with the index `value` set to the `selected` property. useful in conjunction with the [`scroll_window`](#scroll_window) and [`scroll_focus`](#scroll_focus) properties.
 
 ### trigger
 
-an affordance that blinks for `blinktime` seconds and runs `action` on keypress.
+an affordance that blinks for `blinktime` seconds and runs `action` on keypress. [`selected`](#selected) is set to the high indicies of `value`. [label](#label) is the displayed text, which defaults to [k](../doc/core.md#k).
 
 ### momentary
 
-a "held" button where `value` goes high where a key is depressed, low where a key is released.
+a "held" button where `value` goes high where a key is depressed, low where a key is released. [`selected`](#selected) is set to the high indicies of `value`. [label](#label) is the displayed text, which defaults to [k](../doc/core.md#k).
 
 ### toggle
 
-a button where `value` toggles between high and low on a keypress. if `lvl` has a table length greater than two, a `toggle` button will cycle forward through those brightness values.
+a button where `value` toggles between high and low on a keypress. if `lvl` has a table length greater than two, a `toggle` button will cycle forward through those brightness values. [`selected`](#selected) is set to the high indicies of `value`. [label](#label) is the displayed text, which defaults to [k](../doc/core.md#k).
 
 # properties
 
 ### font_face
+
+a number indicating the font face
+
 ### font_size
+
+a number indicating the font size
+
 ### x
+
+
+
 ### y
 ### lvl
 ### border
