@@ -22,9 +22,7 @@
   
 }
 
-
-
-[_txt.label](#affordance) {
+[_txt.label](#label) {
   - ...
   
 }
@@ -106,6 +104,10 @@
 ### affordance
 
 a base affordance type for the `_txt` group - all other affordances in the group inherit from this type and share the display properties. the user may extend this type in order to define a custom affordance with text output.
+
+### label
+
+an output only text type, `value` is displayed and may be a string, a table of strings, or a a table of tables of strings. useful for evaluating the various display properties.
 
 ### number
 
