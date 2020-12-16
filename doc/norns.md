@@ -109,7 +109,7 @@ a button where `value` toggles between high and low on a keypress. if `lvl` has 
 
 ### n
 
-the index of the encoder or key to which an affordance will be mapped. assigning a table value to `n` will map to multiple inputs, usually assigning a table to `value` (`option` is an exeption)
+the index of the encoder or key to which an affordance will be mapped. assigning a table value to `n` will map to multiple inputs, either assigning a table to `value` or altering behavior (see [options](#options) and [inc](#inc))
 
 ### range
 
