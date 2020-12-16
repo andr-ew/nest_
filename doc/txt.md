@@ -57,6 +57,13 @@
   
 }
 
+[_txt.enc.list](#list) {
+  - ...
+  - [items](#items)
+  - [wrap](../doc/norns.md#wrap)
+  
+}
+
 [_txt.key.number](#number) {
   - ...
   - [n](../doc/norns.md#n)
@@ -73,6 +80,15 @@
   - [edge](../doc/grid.md#edge)
   - [wrap](../doc/norns.md#wrap)
   - [options](../doc/norns.md#options)
+  - [inc](../doc/norns.md#inc)
+  
+}
+
+[_txt.key.list](#list) {
+  - ...
+  - [items](#items)
+  - [edge](../doc/grid.md#edge)
+  - [wrap](../doc/norns.md#wrap)
   - [inc](../doc/norns.md#inc)
   
 }
@@ -108,7 +124,7 @@ a base affordance type for the `_txt` group - all other affordances in the group
 
 ### label(type)
 
-an output only text type, `value` is displayed and may be a string, a table of strings, or a a table of tables of strings. useful for evaluating the various display properties.
+an output only text type, `value` is displayed and may be a string, a table of strings, or a table of tables of strings. useful for evaluating the various display properties. each string provided will be it's own "text block" with positioning and sizing set based on a combination of multiple proeries in the parent affordance (think "norns css").
 
 ### number
 
@@ -121,6 +137,10 @@ like the `paramset` "control" type, a number with musicaly convenient properties
 ### option
 
 like the `paramset` "option" type, a list of strings or numbers to be iterated through. the `value` property stored is the index of the active option (the value at this index is returned as the third argument to `action`). all options are displayed, with the index `value` set to the `selected` property. useful in conjunction with the [`scroll_window`](#scroll_window) and [`scroll_focus`](#scroll_focus) properties.
+
+### list
+
+like option, but may display a list of other affordance types in the `_txt` group, enabling only the object at the `selected` index. think "params menu" but `nest_`y.
 
 ### trigger
 
@@ -138,22 +158,46 @@ a button where `value` toggles between high and low on a keypress. if `lvl` has 
 
 ### font_face
 
-a number indicating the font face
+a number indicating the font face.
 
 ### font_size
 
-a number indicating the font size
+a number indicating the font size.
 
 ### x
 
-
+the x component of the text position. this may be:
+- a single number, to specify where a text group starts from on this axis (alignment)
+- a table with two values, to specify where a text group begins and ends on this axis (justified)
+- a table of tables, to specify exact boundaries for each string in the text group on this axis (manual placement)
 
 ### y
+
+the y component of the text position. this may be:
+- a single number, to specify where a text group starts from on this axis (alignment)
+- a table with two values, to specify where a text group begins and ends on this axis (justified)
+- a table of tables, to specify exact boundaries for each string in the text group on this axis (manual placement)
+
 ### lvl
+
+bightness level of the text to display.
+
 ### border
+
+brightness level of the text box border. 0 for no border.
+
 ### fill
+
+brightness level of the text box fill. 0 for no fill.
+
 ### size
+
+a specifies a static width and height for the text box. a table of two sets width & height independently. the key `'auto'` spefifies that an axis should be sized automatically.
+
 ### padding
+
+
+
 ### margin
 ### flow
 ### align
