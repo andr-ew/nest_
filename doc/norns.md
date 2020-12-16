@@ -38,7 +38,7 @@
 
 [_key.number](#number) {
   - [n](#n)
-  - [edge](#edge)
+  - [edge](../doc/grid.md#edge)
   - [wrap](#wrap)
   - [inc](#inc)
   -
@@ -47,7 +47,7 @@
 
 [_key.option](#option) {
   - [n](#n)
-  - [edge](#edge)
+  - [edge](../doc/grid.md#edge)
   - [wrap](#wrap)
   - [options](#options)
   
@@ -55,22 +55,22 @@
 
 [_key.trigger](#trigger) {
   - [n](#n)
-  - [edge](#edge)
-  - [fingers](#fingers)
-  - [blinktime](#blinktime)
+  - [edge](../doc/grid.md#edge)
+  - [fingers](../doc/grid.md#fingers)
+  - [blinktime](../doc/grid.md#blinktime)
   
 }
 
 [_key.momentary](#momentary) {
   - [n](#n)
-  - [edge](#edge)
-  - [fingers](#fingers)
+  - [edge](../doc/grid.md#edge)
+  - [fingers](../doc/grid.md#fingers)
   
 }
 
 [_key.toggle](#toggle) {
   - [n](#n)
-  - [edge](#edge)
-  - [fingers](#fingers)
+  - [edge](../doc/grid.md#edge)
+  - [fingers](../doc/grid.md#fingers)
   
 }
