@@ -192,18 +192,38 @@ brightness level of the text box fill. 0 for no fill.
 
 ### size
 
-a specifies a static width and height for the text box. a table of two sets width & height independently. the key `'auto'` spefifies that an axis should be sized automatically.
+a specifies a static width and height for the text box. a table of two sets width & height independently. the flag `'auto'` spefifies that an axis should be sized automatically.
 
 ### padding
 
-
+the padding space between text and box edges for an auto-sized box.
 
 ### margin
+
+the space between multiple text boxes.
+
 ### flow
+
+specifies the axis over which a text group will flow. either `'x'` or `'y'`.
+
 ### align
+
+sets position alignment for a text group axis when x and/or y is a single number. may take the form:
+- `'left'`, `'center'` or `'right'`
+- `{ ['left' / 'center' / 'right'] , ['top' / 'bottom' / 'center'] }`
+
 ### line_wrap
+
+specifies a single line of a text group to wrap to the next line after this number of strings has been placed on the line.
+
 ### selection
+
+specifies an index or a table of indicies to be "selected" within a text group. for the properties `lvl`, `border`, `fill`, `font_face`, `font_size`, a table of two values my be provided, the first of which correlates to an unselected item, the second for a selected. this is mostly set by objects internally, see [types](#types).
+
 ### scroll_window
+
+when selection is used, specifies a number of text items to scroll through. useful for `option` or `list` affordances with many items.
+
 ### scroll_focus
-### font_headroom
-### font_leftroom
+
+specifies a boundary within the window the selection will move across before scrolling. either a single index or a table of min/max boundaries.
