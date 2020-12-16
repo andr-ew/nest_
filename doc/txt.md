@@ -105,7 +105,7 @@
 
 ### affordance
 
-a base affordance type for the `_enc` and `_key` groups - all other affordances in the group inherit from this type. the user may extend this type in order to define a custom affordance that responds to the relevant input.
+a base affordance type for the `_txt` group - all other affordances in the group inherit from this type and share the display properties. the user may extend this type in order to define a custom affordance with text output.
 
 ### number
 
@@ -132,3 +132,22 @@ a "held" button where `value` goes high where a key is depressed, low where a ke
 a button where `value` toggles between high and low on a keypress. if `lvl` has a table length greater than two, a `toggle` button will cycle forward through those brightness values.
 
 # properties
+
+### font_face
+### font_size
+### x
+### y
+### lvl
+### border
+### fill
+### size
+### padding
+### margin
+### flow
+### align
+### line_wrap
+### selection
+### scroll_window
+### scroll_focus
+### font_headroom
+### font_leftroom
