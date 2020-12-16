@@ -7,6 +7,7 @@
 
 [_enc.number](#number) {
   - [n](#n)
+  - [range](#range)
   - [wrap](#wrap)
   
 }
@@ -39,6 +40,7 @@
 [_key.number](#number) {
   - [n](#n)
   - [edge](../doc/grid.md#edge)
+  - [range](#range)
   - [wrap](#wrap)
   - [inc](#inc)
   -
@@ -50,6 +52,7 @@
   - [edge](../doc/grid.md#edge)
   - [wrap](#wrap)
   - [options](#options)
+  - [inc](#inc)
   
 }
 
@@ -103,5 +106,31 @@ a "held" button where `value` goes high where a key is depressed, low where a ke
 
 a button where `value` toggles between high and low on a keypress. if `lvl` has a table length greater than two, a `toggle` button will cycle forward through those brightness values.
 
-# methods
+# properties
 
+### n
+
+the index of the encoder or key to which an affordance will be mapped. assigning a table value to `n` will map to multiple inputs, usually assigning a table to `value` (`option` is an exeption)
+
+### range
+
+a table in the format `{ min, max }` to specify the range of `value`
+
+### wrap
+
+a boolean value to specify whether to wrap back over the `range` boundaries
+
+### inc
+
+when n is a single value for a `_key` affordance, inc is a positive or negative number to specify by how much `value` is incrimented on a keypress. when `n` is a table, keys one and two specify an incriment of -1 and +1 which is multiplied by `inc`
+
+### step
+### units
+### quantum
+### warp
+
+see http://norns.local/doc/classes/controlspec.html#controlspec:new
+
+### options
+
+a table of dispay values for the `option` type. when `n` is a table for `_enc.option`, `options` is treated on a nested matrix of tables, with two encoders specifying x and y indicies within the matrix
