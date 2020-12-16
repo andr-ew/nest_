@@ -43,7 +43,6 @@
   - [range](#range)
   - [wrap](#wrap)
   - [inc](#inc)
-  -
   
 }
 
