@@ -1,21 +1,36 @@
 # types
 
-
-
 [_txt.affordance](#affordance) {
-  - 
+  - [font_face](#font_face)
+  - [font_size](#font_size)
+  - [x](#x)
+  - [y](#y)
+  - [lvl](#lvl)
+  - [border](#border)
+  - [fill](#fill)
+  - [size](#size)
+  - [padding](#padding)
+  - [margin](#margin)
+  - [flow](#flow)
+  - [align](#align)
+  - [line_wrap](#line_wrap)
+  - [selection](#selection)
+  - [scroll_window](#scroll_window)
+  - [scroll_focus](#scroll_focus)
+  - [font_headroom](#font_headroom)
+  - [font_leftroom](#font_leftroom)
   
 }
 
 
 
 [_txt.label](#affordance) {
-  ...
-  - 
+  - ...
   
 }
 
 [_txt.enc.number](#number) {
+  - ...
   - [n](../doc/norns.md#n)
   - [range](../doc/norns.md#range)
   - [wrap](../doc/norns.md#wrap)
@@ -23,6 +38,7 @@
 }
 
 [_txt.enc.control](#control) {
+  - ...
   - [n](#n)
   - [controlspec](../doc/norns.md#controlspec)
   - [range](../doc/norns.md#range)
@@ -35,6 +51,7 @@
 }
 
 [_txt.enc.option](#option) {
+  - ...
   - [n](../doc/norns.md#n)
   - [wrap](../doc/norns.md#wrap)
   - [options](../doc/norns.md#options)
@@ -42,6 +59,7 @@
 }
 
 [_txt.key.number](#number) {
+  - ...
   - [n](../doc/norns.md#n)
   - [edge](../doc/grid.md#edge)
   - [range](../doc/norns.md#range)
@@ -51,6 +69,7 @@
 }
 
 [_txt.key.option](#option) {
+  - ...
   - [n](../doc/norns.md#n)
   - [edge](../doc/grid.md#edge)
   - [wrap](../doc/norns.md#wrap)
@@ -60,6 +79,7 @@
 }
 
 [_txt.key.trigger](#trigger) {
+  - ...
   - [n](../doc/norns.md#n)
   - [edge](../doc/grid.md#edge)
   - [fingers](../doc/grid.md#fingers)
@@ -68,6 +88,7 @@
 }
 
 [_txt.key.momentary](#momentary) {
+  - ...
   - [n](../doc/norns.md#n)
   - [edge](../doc/grid.md#edge)
   - [fingers](../doc/grid.md#fingers)
@@ -75,6 +96,7 @@
 }
 
 [_txt.key.toggle](#toggle) {
+  - ...
   - [n](../doc/norns.md#n)
   - [edge](../doc/grid.md#edge)
   - [fingers](../doc/grid.md#fingers)
