@@ -128,11 +128,11 @@ an output only text type, `value` is displayed and may be a string, a table of s
 
 ### number
 
-like the `paramset` "number" type, an integer number. [label](#label) defaults to [k](../doc/core.md#k).
+like the `paramset` "number" type, an integer number. [`label`](#label) defaults to [`k`](../doc/core.md#k).
 
 ### control
 
-like the `paramset` "control" type, a number with musicaly convenient properties. a `controlspec` is used internally, which may be provided at init time rather than properties. [label](#label) defaults to [k](../doc/core.md#k).
+like the `paramset` "control" type, a number with musicaly convenient properties. a `controlspec` is used internally, which may be provided at init time rather than properties. [`label`](#label) defaults to [`k`](../doc/core.md#k).
 
 ### option
 
