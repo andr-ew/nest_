@@ -41,6 +41,36 @@ add :link(_control or function() return control end) to _control, link two contr
 # txt
 ```
 
+RENAME
+
+left, right, top, bottom -> start, end
+
+ADD
+
+underline property
+
+sumbmenus inside list:
+
+items = nest_ {
+    nest_ {
+        label = 'more items',
+        items = {
+        }
+    },
+    nest_ {
+        label = 'even more items',
+        nest_ {
+            label = 'yet more items',
+            items = {
+            }
+        }
+        items = {
+        }
+    }
+}
+
+display strings inside list.itmes like headers in the params menu
+
 MAP
 
 _txt.screen.affordance {

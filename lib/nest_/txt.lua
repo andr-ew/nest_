@@ -211,7 +211,7 @@ local function placeaxis(txt, mode, iax, lax, selected, place, extents, a)
 
             iax[flow] = iax[flow] + ((dim[flow] + margin[flow] + 1) * dir)
             
-            if a.wrap and j >= a.wrap then
+            if a.line_wrap and j >= a.line_wrap then
                 j = 1
                 iax[flow] = a[flow]
                 iax[noflow] = iax[noflow] + dim[noflow] + margin[noflow] + 1
@@ -467,7 +467,7 @@ _txt.affordance = _screen.affordance:new {
     size = nil,
     flow = 'x',
     align = 'left',
-    wrap = nil,
+    line_wrap = nil,
     font_headroom = 3/8,
     font_leftroom = 1/16,
     scroll_window = nil, -- 6
@@ -593,7 +593,7 @@ end
 _txt.enc.option = _enc.option:new()
 _txt.option:copy(_txt.enc.option)
 
-_txt.list = _txt.affordance:new { lvl = { 4, 15 } }
+_txt.list = _txt.affordance:new { lvl = { 4, 15 }, flow = 'y' }
 _txt.list.selected = function(s) return s.v end
 _txt.list.output.txt = function(s)
     local ret = {}

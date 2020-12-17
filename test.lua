@@ -24,7 +24,7 @@ n = nest_ {
             _txt.enc.control { n = 3, label = "ding" },
             _txt.enc.control { n = 3, label = "bat" }
         },
-        flow = 'y',
+        --flow = 'y',
         scroll_window = 5,
         scroll_focus = 3,
     }
