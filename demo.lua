@@ -276,7 +276,7 @@ t = nest_ {
             },
             enabled = tpage
         },
-        input = nest_ {
+        numerical = nest_ {
             --[[
             trigger = _txt.key.trigger {
                 x = 2, y = 14,
@@ -315,13 +315,61 @@ t = nest_ {
                 action = function(self, value) print(self.k, value) end
             },
             enabled = tpage
+        },
+        option = nest_ {
+            option1 = _txt.key.option {
+                x = 2, y = 24,
+                n = { 2, 3 },
+                line_wrap = 3,
+                options = { 'one', 'two', 'three', 'four', 'five' },
+                action = function(self, value, option) print(self.k, option) end
+            },
+            option2 = _txt.enc.option {
+                x = 82,
+                y = 24,
+                n = { 3, 2 },
+                flow = 'y',
+                size = 10,
+                margin = 0, 
+                padding = 3,
+                border = { 0, 15 },
+                options = { 
+                    { 'a', 'b', 'c', 'd' },
+                    { 'e', 'f', 'g', 'h' },
+                    { 'i', 'j', 'k', 'l' },
+                    { 'm', 'n', 'o', 'p' }
+                },
+                action = function(self, value, option) print(self.k, option) end
+            },
+            enabled = tpage
+        },
+        list = nest_ {
+            list1 = _txt.enc.list {
+                y = 14,
+                x = { 2, 96 },
+                n = 2,
+                items = nest_ { 
+                    _txt.enc.control { n = 3, label = "control 1" },
+                    _txt.key.toggle { n = 3, label = "toggle" },
+                    _txt.enc.control { n = 3, label = "control 2" },
+                    _txt.enc.option { n = 3, label = "option", options = { "a", "b", "c", "d" } },
+                    _txt.enc.control { n = 3, label = "control 3" },
+                    _txt.key.momentary { n = { 2, 3 }, label = "momentary" },
+                    _txt.enc.control { n = 3, label = "control 4" },
+                    _txt.enc.control { n = 3, label = "control 5" }
+                },
+                flow = 'y',
+                scroll_window = 5,
+                scroll_focus = 3,
+            },
+            enabled = tpage
         }
     },
     tab = _txt.enc.option {
         x = 2, y = 2, n = 1, margin = 6,
         options = {
             "label",
-            "input",
+            "numerical",
             "option",
             "list"
         }
