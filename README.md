@@ -66,4 +66,4 @@ include 'lib/nest_/grid'
 include 'lib/nest_/txt'
 ```
 
-alternatively, you can incude modules as externally (`nest_` will be a dependency): `include 'nest_/lib/nest_/core'`
+alternatively, you can incude modules externally (`nest_` will be a dependency): `include 'nest_/lib/nest_/core'`
