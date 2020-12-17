@@ -15,7 +15,7 @@
   - [flow](#flow)
   - [align](#align)
   - [line_wrap](#line_wrap)
-  - [selection](#selection)
+  - [selected](#selected)
   - [scroll_window](#scroll_window)
   - [scroll_focus](#scroll_focus)
   - [font_headroom](#font_headroom)
@@ -216,7 +216,7 @@ sets position alignment for a text group axis when x and/or y is a single number
 
 specifies a single line of a text group to wrap to the next line after this number of strings has been placed on the line.
 
-### selection
+### selected
 
 specifies an index or a table of indicies to be "selected" within a text group. for the properties `lvl`, `border`, `fill`, `font_face`, `font_size`, a table of two values my be provided, the first of which correlates to an unselected item, the second for a selected. this is mostly set by objects internally, see [types](#types).
 
