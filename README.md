@@ -25,7 +25,7 @@ currently in beta ! current documentation covers existing features, will continu
 start here !
 
 - [`demo`](demo.lua): demos of library affordances on each device
-- [`twigs`](twigs.lua): a musical demonstration, ditonic keyboard + pitched delays
+- [twigs](twigs.lua): a musical demonstration, ditonic keyboard + pitched delays
 
 # Studies
 
