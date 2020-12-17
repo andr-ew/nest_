@@ -178,6 +178,10 @@ the y component of the text position. this may be:
 - a table with two values, to specify where a text group begins and ends on this axis (justified)
 - a table of tables, to specify exact boundaries for each string in the text group on this axis (manual placement)
 
+### label
+
+a label to be displayed for input types. defaults to [k](../doc/core.md#k). set `label = false` to remove the label,
+
 ### lvl
 
 bightness level of the text to display.
