@@ -180,7 +180,7 @@ the y component of the text position. this may be:
 
 ### label
 
-a label to be displayed for input types. defaults to [k](../doc/core.md#k). set `label = false` to remove the label,
+a label to be displayed for input types. defaults to [k](../doc/core.md#k). set `label = false` to remove the label.
 
 ### lvl
 
