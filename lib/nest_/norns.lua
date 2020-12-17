@@ -19,7 +19,7 @@ nest_.connect = function(self, objects, fps)
                 object = vv,
                 redraw = function() 
                     vv:all(0)
-                    self:draw(kk, elapsed) 
+                    self:draw(kk) 
                     vv:refresh()
                 end,
                 handler = function(...)
@@ -52,11 +52,13 @@ nest_.connect = function(self, objects, fps)
 
             _G[kk] = devs[kk].handler
         elseif k == 'screen' then
+            local kk = k
+
             devs[kk] = _dev:new {
                 object = screen,
                 redraw = function()
                     screen.clear()
-                    self:draw('screen', elapsed)
+                    self:draw('screen')
                     screen.update()
                 end
             }
@@ -107,6 +109,7 @@ _screen = _group:new()
 _screen.devk = 'screen'
 
 _screen.affordance = _affordance:new {
+    aa = 0,
     output = _output:new()
 }
 
@@ -198,8 +201,8 @@ _enc.number = _enc.muxaffordance:new {
     wrap = false
 }
 
-_enc.number.new = function(self, o)
-    o = _enc.muxaffordance.new(self, o)
+_enc.number.copy = function(self, o)
+    o = _enc.muxaffordance.copy(self, o)
 
     local v = minit(o.p_.n)
     if type(v) == 'table' and (type(o.v) ~= 'table' or (type(o.v) == 'table' and #o.v ~= #v)) then o.v = v end
@@ -251,10 +254,10 @@ _enc.control = _enc.muxaffordance:new {
     wrap = false
 }
 
-_enc.control.new = function(self, o)
+_enc.control.copy = function(self, o)
     local cs = o.controlspec
 
-    o = _enc.muxaffordance.new(self, o)
+    o = _enc.muxaffordance.copy(self, o)
 
     o.controlspec = cs or controlspec.new(o.p_.range[1], o.p_.range[2], o.p_.warp, o.p_.step, o.v, o.p_.units, o.p_.quantum, o.p_.wrap)
 
@@ -285,12 +288,12 @@ _enc.control.input.muxhandler = _obj_:new {
 local tab = require 'tabutil'
 
 local function delta_option_point(self, value, d)
-    local i = tab.key(self.p_.options, value) or 0
+    local i = value or 0
     local v = i + d
 
     if self.wrap then
         while v > #self.p_.options do
-            v = v - #self.options
+            v = v - #self.p_.options
         end
         while v < 1 do
             v = v + #self.p_.options + 1
@@ -299,76 +302,59 @@ local function delta_option_point(self, value, d)
 
     local c = util.clamp(v, 1, #self.p_.options)
     if i ~= c then
-        return self.p_.options[c]
+        return c
     end
 end
 
 local function delta_option_line(self, value, dx, dy)
-    local i = 0
-    local j = 0
-
-    for x, w in ipairs(self.p_.options) do
-        for y, z in ipairs(w) do
-            if z == value then
-                i = x
-                j = y
-            end
-        end
-    end
+    local i = value.x
+    local j = value.y
 
     vx = i + (dx or 0)
     vy = j + (dy or 0)
 
     if self.wrap then
-        while vx > #self.p_.options do
-            vx = vx - #self.options
-        end
-        while vx < 1 do
-            vx = vx + #self.p_.options + 1
-        end
-    end
-
-    local cx = util.clamp(vx, 1, #self.p_.options)
-
-    if self.wrap then
-        while vy > #self.p_.options[cx] do
-            vy = vy - #self.options[cx]
+        while vy > #self.p_.options do
+            vy = vy - #self.p_.options
         end
         while vy < 1 do
-            vy = vy + #self.p_.options[cx] + 1
+            vy = vy + #self.p_.options + 1
         end
     end
 
-    local cy = util.clamp(vy, 1, #self.p_.options[cx])
+    local cy = util.clamp(vy, 1, #self.p_.options)
+
+    if self.wrap then
+        while vx > #self.p_.options[cy] do
+            vx = vx - #self.p_.options[cy]
+        end
+        while vx < 1 do
+            vx = vx + #self.p_.options[cy] + 1
+        end
+    end
+
+    local cx = util.clamp(vx, 1, #self.p_.options[cy])
 
     if i ~= cx or j ~= cy then
-        return self.p_.options[cx][cy]
+        value.x = cx
+        value.y = cy
+        return value
     end
 end
 
 _enc.option = _enc.muxaffordance:new {
-    value = "",
-    options = {},
+    value = 1,
+    --options = {},
     wrap = false
 }
 
-_enc.option.new = function(self, o) 
-    o = _enc.muxaffordance.new(self, o)
+_enc.option.copy = function(self, o) 
+    o = _enc.muxaffordance.copy(self, o)
 
     if type(o.p_.n) == 'table' then
-        local contains = false
-
-        for x, w in ipairs(self.p_.options) do
-            for y, z in ipairs(w) do
-                if z == o.v then
-                    contains = true
-                end
-            end
+        if type(o.v) ~= 'table' then
+            o.v = { x = 1, y = 1 }
         end
-
-        if not contains then o.v = o.p_.options[1][1] or "" end
-    else
-        if not tab.contains(o.p_.options, o.v) then o.v = o.p_.options[1] or "" end
     end
 
     return o
@@ -376,7 +362,8 @@ end
 
 _enc.option.input.muxhandler = _obj_:new {
     point = function(s, n, d) 
-        return delta_option_point(s, s.v, d), d
+        local v = delta_option_point(s, s.v, d)
+        return v, s.p_.options[v], d
     end,
     line = function(s, n, d) 
         local i = tab.key(s.p_.n, n)
@@ -386,7 +373,7 @@ _enc.option.input.muxhandler = _obj_:new {
         if v then
             local del = minit(s.p_.n)
             del[i] = d
-            return v, del
+            return v, s.p_.options[v.y][v.x], del
         end
     end
 }
@@ -461,18 +448,16 @@ _key.number.input.muxhandler = _obj_:new {
 }
 
 _key.option = _enc.muxaffordance:new {
-    value = "",
-    options = {},
+    value = 1,
+    --options = {},
     wrap = false,
     inc = 1,
     edge = 1,
     tdown = 0
 }
 
-_key.option.new = function(self, o) 
-    o = _enc.muxaffordance.new(self, o)
-
-    if not tab.contains(o.p_.options, o.v) then o.v = o.p_.options[1] or "" end
+_key.option.copy = function(self, o) 
+    o = _enc.muxaffordance.copy(self, o)
 
     return o
 end
@@ -481,7 +466,8 @@ _key.option.input.muxhandler = _obj_:new {
     point = function(s, n, z) 
         if z == s.edge then 
             s.wrap = true
-            return delta_option_point(s, s.v, s.inc), util.time() - s.tdown, s.inc
+            local v = delta_option_point(s, s.v, s.inc)
+            return v, s.p_.options[v], util.time() - s.tdown, s.inc
         else s.tdown = util.time()
         end
     end,
@@ -489,7 +475,8 @@ _key.option.input.muxhandler = _obj_:new {
         if z == s.edge then 
             local i = tab.key(s.p_.n, n)
             local d = i == 2 and s.inc or -s.inc
-            return delta_option_point(s, s.v, d), util.time() - s.tdown, d
+            local v = delta_option_point(s, s.v, d)
+            return v, s.p_.options[v], util.time() - s.tdown, d
         else s.tdown = util.time()
         end
     end
@@ -499,8 +486,8 @@ _key.binary = _key.muxaffordance:new {
     fingers = nil
 }
 
-_key.binary.new = function(self, o) 
-    o = _key.muxaffordance.new(self, o)
+_key.binary.copy = function(self, o) 
+    o = _key.muxaffordance.copy(self, o)
 
     rawset(o, 'list', {})
 
@@ -608,8 +595,8 @@ _key.momentary.input.muxhandler = _obj_:new {
 
 _key.toggle = _key.binary:new { edge = 1, lvl = { 0, 15 } } -- it is wierd that lvl is being used w/o an output :/
 
-_key.toggle.new = function(self, o) 
-    o = _key.binary.new(self, o)
+_key.toggle.copy = function(self, o) 
+    o = _key.binary.copy(self, o)
 
     rawset(o, 'toglist', {})
 
@@ -691,8 +678,8 @@ _key.toggle.input.muxhandler = _obj_:new {
 
 _key.trigger = _key.binary:new { edge = 1, blinktime = 0.1 }
 
-_key.trigger.new = function(self, o) 
-    o = _key.binary.new(self, o)
+_key.trigger.copy = function(self, o) 
+    o = _key.binary.copy(self, o)
 
     rawset(o, 'triglist', {})
 

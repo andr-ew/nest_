@@ -52,6 +52,23 @@ _obj_ = {
     print = function(self) print(tostring(self)) end,
     replace = function(self, k, v)
         rawset(self, k, formattype(self, k, v, self._.clone_type))
+    end,
+    copy = function(self, o) 
+        for k,v in pairs(self) do 
+            if rawget(o, k) == nil then
+                --if type(v) == "function" then
+                    -- function pointers are not copied, instead they are referenced using metatables only when the objects are heierchachically related
+                --else
+                if type(v) == "table" and v.is_obj then
+                    local clone = self[k]:new()
+                    o[k] = formattype(o, k, clone, o._.clone_type) ----
+                else rawset(o,k,v) end 
+            end
+        end
+
+        table.sort(o._.zsort, zcomp)
+
+        return o
     end
 }
 
@@ -62,7 +79,7 @@ function _obj_:new(o, clone_type)
         k = nil,
         z = 0,
         zsort = {}, -- list of obj children sorted by descending z value
-        clone_type = clone_type
+        clone_type = clone_type,
     }
 
     o = o or {}
@@ -73,7 +90,7 @@ function _obj_:new(o, clone_type)
             if k == "_" then return _
             elseif index_nickname(t,k) then return index_nickname(t,k)
             elseif _[k] ~= nil then return _[k]
-            elseif self[k] ~= nil then return self[k]
+            --elseif self[k] ~= nil then return self[k]
             else return nil end
         end,
         __newindex = function(t, k, v)
@@ -95,7 +112,7 @@ function _obj_:new(o, clone_type)
         __call = function(idk, ...) -- dunno what's going on w/ the first arg to this metatmethod
             return o:new(...)
         end,
-        __tostring = function(t) return tostring(t.k) end
+        --__tostring = function(t) return tostring(t.k) end
     })
 
     --[[
@@ -125,19 +142,8 @@ function _obj_:new(o, clone_type)
         format_nickname(o, k, v)
     end
 
-    for k,v in pairs(self) do 
-        if not rawget(o, k) then
-            if type(v) == "function" then
-                -- function pointers are not copied to child, instead they are referenced using metatables
-            elseif type(v) == "table" and v.is_obj then
-                local clone = self[k]:new()
-                o[k] = formattype(o, k, clone, _.clone_type) ----
-            else rawset(o,k,v) end 
-        end
-    end
+    o = self:copy(o)
 
-    table.sort(_.zsort, zcomp)
-    
     return o
 end
 
@@ -151,7 +157,9 @@ _input = _obj_:new {
             local hargs = self:filter(args)
             
             if hargs ~= nil and self.affordance then
-                if self.devs[self.devk] then self.devs[self.devk].dirty = true end
+                for i,v in ipairs(self.affordance.zsort) do
+                    if v.devk and self.devs[v.devk] then self.devs[v.devk].dirty = true end
+                end
  
                 if self.handler then 
                     local aargs = table.pack(self:handler(table.unpack(hargs)))
@@ -191,19 +199,21 @@ function _input:new(o)
     mt.__index = function(t, k) 
         if k == "_" then return _
         elseif _[k] ~= nil then return _[k]
-        else
+        else return _.affordance and _.affordance[k]
+            --[[
             local c = _.affordance and _.affordance[k]
             
             -- catch shared keys, otherwise privilege affordance keys
             if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' then return self[k]
             else return c or self[k] end
+            ]]--
         end
     end
 
     mt.__newindex = function(t, k, v)
         local c = _.affordance and _.affordance[k]
     
-        if c and type(c) ~= 'function' then _.affordance[k] = v
+        if c then _.affordance[k] = v
         else mtn(t, k, v) end
     end
 
@@ -264,11 +274,11 @@ nest_ = _obj_:new {
             end
         end
     end,
-    draw = function(self, devk, t)
+    draw = function(self, devk)
         for i,v in ipairs(self.zsort) do
             if self.enabled == nil or self.p_.enabled == true then
                 if v.draw then
-                    v:draw(devk, t)
+                    v:draw(devk)
                 end
             end
         end
@@ -331,6 +341,13 @@ _affordance = nest_:new {
         self:init()
     end,
     print = function(self) end,
+    draw = function(self, devk)
+        if self.enabled == nil or self.p_.enabled == true then
+            if self.output then
+                self.output:draw(devk)
+            end
+        end
+    end,
     get = function(self, silent) 
         if not silent then
             return self:update()
@@ -355,13 +372,11 @@ function _affordance:new(o)
 
     --mt.__tostring = function(t) return '_affordance' end
 
-    mt.__newindex = function(t, k, v) 
-        mtn(t, k, v)
-        if type(v) == 'table' then if v.is_input or v.is_output then
-            rawset(v._, 'affordance', o)
-            v.devk = v.devk or o.devk
-        end end
-    end
+    return o
+end
+
+function _affordance:copy(o)
+    o = nest_.copy(self, o)
 
     for k,v in pairs(o) do
         if type(v) == 'table' then if v.is_input or v.is_output then
@@ -369,7 +384,7 @@ function _affordance:new(o)
             v.devk = v.devk or o.devk
         end end
     end
- 
+
     return o
 end
 
