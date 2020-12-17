@@ -136,7 +136,7 @@ like the `paramset` "control" type, a number with musicaly convenient properties
 
 ### option
 
-like the `paramset` "option" type, a list of strings or numbers to be iterated through. the `value` property stored is the index of the active option (the value at this index is returned as the third argument to `action`). all options are displayed, with the index `value` set to the `selected` property. useful in conjunction with the [`scroll_window`](#scroll_window) and [`scroll_focus`](#scroll_focus) properties.
+like the `paramset` "option" type, a list of strings or numbers to be iterated through. the `value` property stored is the index of the active option (the value at this index is returned as the third argument to `action`). all options are displayed, with the index `value` set to the [`selected`](#selected) property. useful in conjunction with the [`scroll_window`](#scroll_window) and [`scroll_focus`](#scroll_focus) properties.
 
 ### list
 
