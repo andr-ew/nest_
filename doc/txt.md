@@ -148,7 +148,7 @@ an affordance that blinks for `blinktime` seconds and runs `action` on keypress.
 
 ### momentary
 
-a "held" button where `value` goes high where a key is depressed, low where a key is released. [`selected`](#selected) is set to the high indicies of `value`. [label](#label) is the displayed text, which defaults to [k](../doc/core.md#k).
+a "held" button where `value` goes high where a key is depressed, low where a key is released. [`selected`](#selected) is set to the high indicies of `value`. [`label`](#label) is the displayed text, which defaults to [`k`](../doc/core.md#k).
 
 ### toggle
 
@@ -180,7 +180,7 @@ the y component of the text position. this may be:
 
 ### label
 
-a label to be displayed for input types. defaults to [k](../doc/core.md#k). set `label = false` to remove the label.
+a label to be displayed for input types. defaults to [`k`](../doc/core.md#k). set `label = false` to remove the label.
 
 ### lvl
 
