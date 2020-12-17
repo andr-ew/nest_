@@ -144,7 +144,7 @@ like option, but may display a list of other affordance types in the `_txt` grou
 
 ### trigger
 
-an affordance that blinks for `blinktime` seconds and runs `action` on keypress. [`selected`](#selected) is set to the high indicies of `value`. [label](#label) is the displayed text, which defaults to [k](../doc/core.md#k).
+an affordance that blinks for `blinktime` seconds and runs `action` on keypress. [`selected`](#selected) is set to the high indicies of `value`. [`label`](#label) is the displayed text, which defaults to [`k`](../doc/core.md#k).
 
 ### momentary
 
@@ -152,7 +152,7 @@ a "held" button where `value` goes high where a key is depressed, low where a ke
 
 ### toggle
 
-a button where `value` toggles between high and low on a keypress. if `lvl` has a table length greater than two, a `toggle` button will cycle forward through those brightness values. [`selected`](#selected) is set to the high indicies of `value`. [label](#label) is the displayed text, which defaults to [k](../doc/core.md#k).
+a button where `value` toggles between high and low on a keypress. if `lvl` has a table length greater than two, a `toggle` button will cycle forward through those brightness values. [`selected`](#selected) is set to the high indicies of `value`. [`label`](#label) is the displayed text, which defaults to [`k`](../doc/core.md#k).
 
 # properties
 
