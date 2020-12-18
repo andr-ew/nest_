@@ -1,5 +1,12 @@
 -- paginated demos of affordances included in nest_ 
 
+include 'lib/nest_/core'
+include 'lib/nest_/norns'
+include 'lib/nest_/grid'
+include 'lib/nest_/txt'
+
+-------------------------------------------------utility functions
+
 function r()
     norns.script.load(norns.state.script)
 end
@@ -15,11 +22,6 @@ function print_matrix_1d(v) print(stringrow(v)) end
 function print_matrix_2d(v) 
     for _,row in ipairs(v) do print_matrix_1d(row) end
 end
-
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
-include 'lib/nest_/txt'
 
 local function gpage(self) return g.tab.value + 1 == self.k end
 local function tpage(self) return t.tab.options[t.tab.value] == self.k end
@@ -232,10 +234,11 @@ g = nest_ {
     g = grid.connect()
 }
 
----------------------------------------------txt
+-------------------------------------------------txt
 
 t = nest_ {
     page = nest_ {
+        -----------------------------------------label
         label = nest_ {
             label1 = _txt.label {
                 x = 2, y = 14,
@@ -276,6 +279,7 @@ t = nest_ {
             },
             enabled = tpage
         },
+        -----------------------------------------number, control, momentary, toggle
         numerical = nest_ {
             --[[
             trigger = _txt.key.trigger {
@@ -316,6 +320,7 @@ t = nest_ {
             },
             enabled = tpage
         },
+        -----------------------------------------option
         option = nest_ {
             option1 = _txt.key.option {
                 x = 2, y = 24,
@@ -343,6 +348,7 @@ t = nest_ {
             },
             enabled = tpage
         },
+        -----------------------------------------list
         list = nest_ {
             list1 = _txt.enc.list {
                 y = 14,
