@@ -29,7 +29,13 @@ control {
     x = { 40, 24 },
     aa = false,
     lvl = 15,
-    
+    controlspec
+    range = { 0, 1 },
+    step = 0.01,
+    units = '',
+    quantum = 0.01,
+    warp = 'lin',
+    wrap = false
 }
 
 option {
