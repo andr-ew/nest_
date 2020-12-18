@@ -6,9 +6,6 @@ nest_.connect = function(self, objects, fps)
     local devs = {}
 
     local fps = fps or 30
-    local elapsed = 0
-
-    -- elapsed // 3 % 2
 
     for k,v in pairs(objects) do
         if k == 'g' or k == 'a' then
@@ -27,7 +24,19 @@ nest_.connect = function(self, objects, fps)
                 end
             }
 
-            v[(kk == 'g') and 'key' or 'delta'] = devs[kk].handler
+            if k == 'a' then
+                devs.akey = _dev:new {
+                    handler = function(...)
+                        self:update('akey', {...}, {})
+                    end
+                }
+
+                v.key = devs.akey.handler
+                v.delta = devs.a.handler
+            else
+                v.key = devs.g.handler
+            end
+
         elseif k == 'm' or k == 'h' then
             local kk = k
             local vv = v

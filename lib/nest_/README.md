@@ -58,6 +58,7 @@ toggle {
     range = { 1, 2 },
 }
 
+(simple versions, n is number)
 _arc.key.trigger
 _arc.key.momentary
 _arc.key.toggle
@@ -145,8 +146,9 @@ display strings inside list.itmes like headers in the params menu
 
 # etc
 ```
-_etc.et24_
-_etc.filebrowser_
+_etc.et12
+_etc.et24
+_etc.filebrowser
 
 ```
 
@@ -156,6 +158,8 @@ _etc.filebrowser_
 ADD
 
 _grid.affordance.wrap
+
+_grid.toggle: range argument
 
 _grid.numtog ?
 _grid.shape (eathsea) named combinations of normalized trigger presses for line & plane. add the naming feature to trigger ? (un-normalized)
