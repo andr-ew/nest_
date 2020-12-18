@@ -1,4 +1,5 @@
--- paginated demos of affordances included in nest_ 
+--paginated demos of 
+--affordances included in nest_ 
 
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
