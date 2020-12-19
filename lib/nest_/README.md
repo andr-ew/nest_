@@ -8,6 +8,10 @@ fill {
     lvl = 15
 }
 
+delta {
+    n = 1
+}
+
 number {
     n = 1,
     x = { 33, 32 },
@@ -106,6 +110,11 @@ add :link(_control or function() return control end) to _control, link two contr
 ```
 # norns
 ```
+ADD 
+
+_enc.delta
+_enc.affordance.sens (impliment in input.filter, v easy)
+
 ```
 
 # txt
