@@ -81,7 +81,6 @@ nest_.connect = function(self, objects, fps)
     clock.run(function() 
         while true do 
             clock.sleep(1/fps)
-            elapsed = elapsed + 1/fps
             
             for k,v in pairs(devs) do 
                 if v.redraw and v.dirty then 

@@ -5,27 +5,13 @@ end
 
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
-include 'lib/nest_/txt'
+include 'lib/nest_/arc'
 
 tab = require 'tabutil'
 
 n = nest_ {
-    l = _txt.enc.list {
-        y = 4,
-        x = { 4, 64 },
-        n = 2,
-        items = nest_ { 
-            _txt.enc.control { n = 3, label = "foo" },
-            _txt.key.toggle { n = 3, label = "bar" },
-            _txt.enc.control { n = 3, label = "ding" },
-            _txt.enc.option { n = 3, label = "bat", options = { "a", "bbb", "c" } },
-            _txt.enc.control { n = 3, label = "foo" },
-            _txt.key.momentary { n = { 2, 3 }, label = "bar" },
-            _txt.enc.control { n = 3, label = "ding" },
-            _txt.enc.control { n = 3, label = "bat" }
-        },
-        --flow = 'y',
-        scroll_window = 5,
-        scroll_focus = 3,
+    f = _arc.fill {
+        v = { 1/6, 5/6 },
+        n = 1
     }
-} :connect { key = key, enc = enc, screen = screen }  
+} :connect { a = arc.connect() }  

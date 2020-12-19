@@ -1,7 +1,6 @@
 # arc
 
 ```
-
 fill {
     n = 1,
     x = { 1, 64 },
@@ -26,7 +25,7 @@ number {
 
 control {
     n = 1,
-    x = { 40, 24 },
+    x = { 42, 24 },
     aa = false,
     lvl = 15,
     controlspec
