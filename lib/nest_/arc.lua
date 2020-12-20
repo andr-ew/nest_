@@ -157,6 +157,70 @@ _arc.number.output.redraw = function(s, a, v)
     end
 end
 
+_arc.control = _arc.affordance:new {
+    x = { 42, 24 },
+    lvl = { 0, 4, 15 },
+    controlspec = nil,
+    range = { 0, 1 },
+    step = 0, --0.01,
+    units = '',
+    quantum = 0.01,
+    warp = 'lin',
+    wrap = false
+}
+
+_arc.control.copy = function(self, o)
+    local cs = o.controlspec
+
+    o = _arc.affordance.copy(self, o)
+
+    o.controlspec = cs or controlspec.new(o.p_.range[1], o.p_.range[2], o.p_.warp, o.p_.step, o.v, o.p_.units, o.p_.quantum, o.p_.wrap)
+
+    return o
+end
+
+_arc.control.input.handler = function(self, n, d)
+    local value = self.controlspec:unmap(self.v) + (d * self.controlspec.quantum)
+
+    if self.controlspec.wrap then
+        while value > 1 do
+            value = value - 1
+        end
+        while value < 0 do
+            value = value + 1
+        end
+    end
+    
+    local c = self.controlspec:map(util.clamp(value, 0, 1))
+    if self.v ~= c then
+        return c
+    end
+end
+
+_arc.control.output.redraw = function(s, a, v)
+    local range = s.p_.x[2] - s.p_.x[1]
+    
+    if s.p_.x[1] > s.p_.x[2] then
+        range = 64 + range
+    end
+    
+    local scale = math.floor(s.controlspec:unmap(v) * range)
+
+    if s.aa then
+        a:segment(s.p_.n, (s.p_.x[1] / 64) * 2 * math.pi, ((s.p_.x[1] + scale) / 64) * 2 * math.pi, lvl(s, 1))
+    else
+        fill(s, a, function(i)
+            local l = 0
+            local m = util.linlin(1, range, s.p_.controlspec.minval, s.p_.controlspec.maxval, i)
+            local v = scale + 1
+            if i == v then l = 2
+            elseif i > v and m <= 0 then l = 1
+            elseif i < v and m >= 0 then l = 1 end
+            return lvl(s, l)
+        end)
+    end
+end
+
 _arc.key.affordance = _affordance:new { 
     n = 2,
     edge = 1,
