@@ -15,7 +15,7 @@ n = nest_ {
         n = 4,
         sens = 1/16,
         size = { 1, 2, 4, 8 },
-        margin = 2,
+        margin = 0,
         lvl = { 0, 4, 15 },
         action = function(s, v) print(v) end
     }

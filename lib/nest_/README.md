@@ -52,6 +52,7 @@ option {
     sens = 1,
     range = { 1, 4 },
     include = { 1, 2, 4 },
+    glyphs = { { 0, 15, 4, ... }, { 15, 4, 7, .... }, ... }
     options = 4,
     margin = 0
 }
