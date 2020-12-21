@@ -10,10 +10,13 @@ include 'lib/nest_/arc'
 tab = require 'tabutil'
 
 n = nest_ {
-    f = _arc.control {
+    f = _arc.option {
+        x = { 42, 24 },
         n = 4,
-        sens = 1/2,
-        controlspec = controlspec.BIPOLAR,
+        sens = 1/16,
+        size = { 1, 2, 4, 8 },
+        margin = 2,
+        lvl = { 0, 4, 15 },
         action = function(s, v) print(v) end
     }
 } :connect({ a = arc.connect() }, 120)

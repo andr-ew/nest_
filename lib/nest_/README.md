@@ -1,6 +1,8 @@
 # arc
 
 ```
+allow single number for x, indicating starting point for a circle of 64
+
 fill {
     n = 1,
     x = { 1, 64 },
@@ -26,6 +28,7 @@ number {
     -- v = v + (d * sens * inc * (step * 64)) (clamp range, wrap)
     -- ledx = x[1] + ((v * inc) // (x[2] - x[1])) (start indicator)
 }
+lvl: add three number mode, middle fills in range
 
 control {
     n = 1,
@@ -48,6 +51,7 @@ option {
     lvl = 15,
     sens = 1,
     range = { 1, 4 },
+    include = { 1, 2, 4 },
     options = 4,
     margin = 0
 }
@@ -106,6 +110,8 @@ add creates{} list of creation time functions
 add targets{} list of target nest keys in self 
 
 add :link(_control or function() return control end) to _control, link two controls by appending actions when values are the same type. also allow link to param (overwrites param action)
+
+nest:disconnect() : for disconnecting and reconnecting nests to devices
 
 ```
 # norns

@@ -23,24 +23,32 @@ _arc.fill = _affordance:new {
     output = _output:new()
 }
 
-local function fill(s, a, cb)
-    local x2 = s.p_.x[1]
+local function xxx(s)
+    local x = s.p_.x
+    x = (type(x) == 'table') and x or { x, (x + 63 % 64) }
+    x = x == 0 and 64 or x
+    return x
+end
+
+local function fill(s, a, x, cb)
+    local x2 = x[1]
     local i = 0
-    if s.p_.x[1] > s.p_.x[2] then
+    local n = s.p_.n
+    if x[1] > x[2] then
         x2 = 1
-        for x = s.p_.x[1], 64 do
+        for y = x[1], 64 do
             i = i + 1
 
             local lvl = cb(i)
-            if lvl > 0 then a:led(s.p_.n, x, lvl) end
+            if lvl > 0 then a:led(n, y, lvl) end
         end
     end
     
-    for x = x2, s.p_.x[2] do
+    for y = x2, x[2] do
         i = i + 1
 
         local lvl = cb(i)
-        if lvl > 0 then a:led(s.p_.n, x, lvl) end
+        if lvl > 0 then a:led(n, y, lvl) end
     end
 end
 
@@ -50,46 +58,42 @@ local lvl = function(s, i)
 end
 
 _arc.fill.output.redraw = function(s, a, v)
-    if type(s.p_.x) == 'table' then
-        local vmode = 1
-        local vscale
-        local range = s.p_.x[2] - s.p_.x[1] + 1
-        
-        if s.p_.x[1] > s.p_.x[2] then
-            range = 64 + range
-        end
+    local vmode = 1
+    local vscale
+    local x = xxx(s)
+    local range = x[2] - x[1] + 1
+    
+    if x[1] > x[2] then
+        range = 64 + range
+    end
 
-        if type(v) == 'table' then
-            vmode = 3
-            if #v == 2 then
-                vmode = 2
-                vscale = { math.floor(v[1] * range), math.ceil(v[2] * range) }
-            end
-        else
-            vscale = math.floor(v * range)
-        end
-
-        if s.aa and vmode <3 then
-            if vmode == 1 then vscale = { vscale, vscale } end
-
-            a:segment(s.p_.n, (vscale[1] / 64) * 2 * math.pi, (vscale[2] / 64) * 2 * math.pi, lvl(s, 1))
-        else
-            fill(s, a, function(i)
-                local j = 0
-                if vmode == 1 then
-                    if i == vscale then j = 1 end
-                elseif vmode == 2 then
-                    if i >= vscale[1] and i <= vscale[2] then j = 1 end
-                else
-                    j = v[i]
-                end 
-
-                return lvl(s, j)
-            end)
+    if type(v) == 'table' then
+        vmode = 3
+        if #v == 2 then
+            vmode = 2
+            vscale = { math.floor(v[1] * range), math.ceil(v[2] * range) }
         end
     else
-        local lvl = lvl(s, (type(v) == 'table') and v[1] or v)
-        if lvl > 0 then a:led(s.p_.n, s.p_.x, lvl) end
+        vscale = math.floor(v * range)
+    end
+
+    if s.aa and vmode <3 then
+        if vmode == 1 then vscale = { vscale, vscale } end
+
+        a:segment(s.p_.n, (vscale[1] / 64) * 2 * math.pi, (vscale[2] / 64) * 2 * math.pi, lvl(s, 1))
+    else
+        fill(s, a, x, function(i)
+            local j = 0
+            if vmode == 1 then
+                if i == vscale then j = 1 end
+            elseif vmode == 2 then
+                if i >= vscale[1] and i <= vscale[2] then j = 1 end
+            else
+                j = v[i]
+            end 
+
+            return lvl(s, j)
+        end)
     end
 end
 
@@ -115,33 +119,35 @@ _arc.number = _arc.affordance:new {
 
 _arc.number.input.handler = function(self, n, d)
     local value = self.value
+    local range = s.p_.range
 
     local v = value + (d * self.inc)
 
-    if self.wrap then
-        while v > self.range[2] do
-            v = v - (self.range[2] - self.range[1])
+    if self.p_.wrap then
+        while v > range[2] do
+            v = v - (range[2] - range[1])
         end
-        while v < self.range[1] do
-            v = v + (self.range[2] - self.range[1])
+        while v < range[1] do
+            v = v + (range[2] - range[1])
         end
     end
 
-    local c = util.clamp(v,self.range[1],self.range[2])
+    local c = util.clamp(v, range[1], range[2])
     if value ~= c then
         return c
     end
 end
 
 _arc.number.output.redraw = function(s, a, v)
-    local range = s.p_.x[2] - s.p_.x[1] + 1
+    local x = xxx(s)
+    local range = x[2] - x[1] + 1
     
-    if s.p_.x[1] > s.p_.x[2] then
+    if x[1] > x[2] then
         range = 64 + range
     end
     
     if lvl(s, 0) == 0 then
-        a:led(s.p_.n, math.floor(((v * range) + s.p_.x[1])) % 64, lvl(s, 1))
+        a:led(s.p_.n, math.floor(((v * range) + x[1])) % 64, lvl(s, 1))
     else
         local _, remainder = math.modf(v / s.cycle)
         local mod
@@ -151,7 +157,7 @@ _arc.number.output.redraw = function(s, a, v)
         else mod = v % s.cycle end
 
         local scale = math.floor(mod * range) + 1
-        fill(s, a, function(i)
+        fill(s, a, x, function(i)
             return lvl(s, i == scale and 1 or 0)
         end)
     end
@@ -182,7 +188,7 @@ end
 _arc.control.input.handler = function(self, n, d)
     local value = self.controlspec:unmap(self.v) + (d * self.controlspec.quantum)
 
-    if self.controlspec.wrap then
+    if self.p_.controlspec.wrap then
         while value > 1 do
             value = value - 1
         end
@@ -191,25 +197,26 @@ _arc.control.input.handler = function(self, n, d)
         end
     end
     
-    local c = self.controlspec:map(util.clamp(value, 0, 1))
+    local c = self.p_.controlspec:map(util.clamp(value, 0, 1))
     if self.v ~= c then
         return c
     end
 end
 
 _arc.control.output.redraw = function(s, a, v)
-    local range = s.p_.x[2] - s.p_.x[1]
+    local x = xxx(s)
+    local range = x[2] - x[1]
     
-    if s.p_.x[1] > s.p_.x[2] then
+    if x[1] > x[2] then
         range = 64 + range
     end
     
     local scale = math.floor(s.controlspec:unmap(v) * range)
 
     if s.aa then
-        a:segment(s.p_.n, (s.p_.x[1] / 64) * 2 * math.pi, ((s.p_.x[1] + scale) / 64) * 2 * math.pi, lvl(s, 1))
+        a:segment(s.p_.n, (x[1] / 64) * 2 * math.pi, ((x[1] + scale) / 64) * 2 * math.pi, lvl(s, 1))
     else
-        fill(s, a, function(i)
+        fill(s, a, x, function(i)
             local l = 0
             local m = util.linlin(1, range, s.p_.controlspec.minval, s.p_.controlspec.maxval, i)
             local v = scale + 1
@@ -218,6 +225,75 @@ _arc.control.output.redraw = function(s, a, v)
             elseif i < v and m >= 0 then l = 1 end
             return lvl(s, l)
         end)
+    end
+end
+
+_arc.option = _arc.affordance:new {
+    v = 1, -- { 1, 3 }
+    options = 4,
+    size = nil, -- 10, { 10, 10 20, 10 }
+    range = function(s) return { 1, s.options } end, -- { 1, 3 }, { 1, 2, 4 }
+    margin = 0
+}
+
+_arc.option.input.handler = function(self, n, d)
+    local v = self.value + d
+    local range = self.p_.range
+    local include = self.p_.include
+
+    if self.p_.wrap then
+        while v > range[2] do
+            v = v - (range[2] - range[1])
+        end
+        while v < range[1] do
+            v = v + (range[2] - range[1])
+        end
+    end
+
+    if include then ----------------------------
+    end
+
+    local c = util.clamp(v,range[1],range[2])
+
+    if self.value ~= c then
+        return c, math.floor(c)
+    end
+end
+
+_arc.option.output.redraw = function(s, a, v)
+    local x = xxx(s)
+    local count = x[2] - x[1]
+    
+    if x[1] > x[2] then
+        count = 64 + count
+    end
+    
+    local options = s.p_.options
+    local margin = s.p_.margin
+    local stab = type(s.p_.size) == 'table'
+    local size = s.p_.size or (count/options - s.p_.margin)
+    local range = s.p_.range
+    local include = s.p_.include
+    local n = s.p_.n
+    local lvl = type(s.p_.lvl) == 'table' and s.p_.lvl or { s.p_.lvl }
+    while #lvl < 3 do table.insert(lvl, 1, 0) end
+
+    local st = 0
+    for i = 1, options do
+        local sel = (v >= i and v < i + 1)
+        local inrange = i >= range[1] and i <= range[2]
+        local isinclude = true
+        if include and not tab.contains(include, i) then isinclude = false end
+        local l = 1 + (sel and 1 or 0) + ((inrange and isinclude) and 1 or 0)
+        local sz = (stab and size[i] or size)
+
+        if lvl[l] > 0 then
+            for j = st, st + sz - 1 do
+                a:led(n, math.floor(j + x[1]) % 64, lvl[l])
+            end
+        end
+        
+        st = st + sz + margin
     end
 end
 
