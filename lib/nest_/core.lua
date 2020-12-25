@@ -122,9 +122,9 @@ function _obj_:new(o, clone_type)
     ]]
     _.p_ = {}
 
-    local function resolve(s, f) 
+    local function resolve(s, f, ...) 
         if type(f) == 'function' then
-            return resolve(s, f(s))
+            return resolve(s, f(s, ...))
         else return f end
     end
 
@@ -132,6 +132,11 @@ function _obj_:new(o, clone_type)
         __index = function(t, k) 
             if o[k] then
                 return resolve(o, o[k])
+            end
+        end,
+        __call = function(idk, k, ...)
+            if o[k] then
+                return resolve(o, o[k], ...)
             end
         end,
         __newindex = function(t, k, v) o[k] = v end

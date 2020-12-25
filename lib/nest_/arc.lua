@@ -26,7 +26,8 @@ _arc.fill = _affordance:new {
 local function xxx(s)
     local x = s.p_.x
     x = (type(x) == 'table') and x or { x, (x + 63 % 64) }
-    x = x == 0 and 64 or x
+    x[1] = x[1] == 0 and 64 or x[1]
+    x[2] = x[2] == 0 and 64 or x[2]
     return x
 end
 
@@ -85,14 +86,14 @@ _arc.fill.output.redraw = function(s, a, v)
         fill(s, a, x, function(i)
             local j = 0
             if vmode == 1 then
-                if i == vscale then j = 1 end
+                if i == vscale then j = lvl(s, 1) end
             elseif vmode == 2 then
-                if i >= vscale[1] and i <= vscale[2] then j = 1 end
+                if i >= vscale[1] and i <= vscale[2] then j = lvl(s, 1) end
             else
-                j = v[i]
+                j = v[i] or 0
             end 
 
-            return lvl(s, j)
+            return j
         end)
     end
 end
@@ -119,7 +120,7 @@ _arc.number = _arc.affordance:new {
 
 _arc.number.input.handler = function(self, n, d)
     local value = self.value
-    local range = s.p_.range
+    local range = self.p_.range
 
     local v = value + (d * self.inc)
 
@@ -147,7 +148,7 @@ _arc.number.output.redraw = function(s, a, v)
     end
     
     if lvl(s, 0) == 0 then
-        a:led(s.p_.n, math.floor(((v * range) + x[1])) % 64, lvl(s, 1))
+        a:led(s.p_.n, math.floor(((v/s.cycle * range) + x[1])) % 64, lvl(s, 1))
     else
         local _, remainder = math.modf(v / s.cycle)
         local mod
@@ -238,7 +239,7 @@ _arc.option = _arc.affordance:new {
 
 _arc.option.input.handler = function(self, n, d)
     local v = self.value + d
-    local range = self.p_.range
+    local range = { self.p_.range[1], self.p_.range[2] + 1 - self.p_.sens }
     local include = self.p_.include
 
     if self.p_.wrap then
@@ -250,11 +251,16 @@ _arc.option.input.handler = function(self, n, d)
         end
     end
 
-    if include then ----------------------------
+    if include then
+        local i = 0
+        while not tab.contains(include, math.floor(v)) do
+            v = v + ((d > 0) and 1 or -1)
+            i = i + 1
+            if i > 64 then break end -- seat belt
+        end
     end
 
     local c = util.clamp(v,range[1],range[2])
-
     if self.value ~= c then
         return c, math.floor(c)
     end
@@ -269,38 +275,78 @@ _arc.option.output.redraw = function(s, a, v)
     end
     
     local options = s.p_.options
-    local margin = s.p_.margin
-    local stab = type(s.p_.size) == 'table'
-    local size = s.p_.size or (count/options - s.p_.margin)
-    local range = s.p_.range
-    local include = s.p_.include
     local n = s.p_.n
-    local lvl = type(s.p_.lvl) == 'table' and s.p_.lvl or { s.p_.lvl }
-    while #lvl < 3 do table.insert(lvl, 1, 0) end
+    local vr = math.floor(v)
 
-    local st = 0
-    for i = 1, options do
-        local sel = (v >= i and v < i + 1)
-        local inrange = i >= range[1] and i <= range[2]
-        local isinclude = true
-        if include and not tab.contains(include, i) then isinclude = false end
-        local l = 1 + (sel and 1 or 0) + ((inrange and isinclude) and 1 or 0)
-        local sz = (stab and size[i] or size)
+    if s.glyph then
+        local gl = s.p_('glyph', vr, count)
 
-        if lvl[l] > 0 then
-            for j = st, st + sz - 1 do
-                a:led(n, math.floor(j + x[1]) % 64, lvl[l])
-            end
+        for j, w in ipairs(gl) do
+            a:led(n, math.floor(j + x[1]) % 64, w)
         end
-        
-        st = st + sz + margin
+    else
+        local margin = s.p_.margin
+        local stab = type(s.p_.size) == 'table'
+        local size = s.p_.size or (count/options - s.p_.margin)
+        local range = s.p_.range
+        local include = s.p_.include
+        local lvl = type(s.p_.lvl) == 'table' and s.p_.lvl or { s.p_.lvl }
+        while #lvl < 3 do table.insert(lvl, 1, 0) end
+
+        local st = 0
+        for i = 1, options do
+            local sel = vr == i
+            local inrange = i >= range[1] and i <= range[2]
+            local isinclude = true
+            if include and not tab.contains(include, i) then isinclude = false end
+            local l = 1 + (sel and 1 or 0) + ((inrange and isinclude) and 1 or 0)
+            local sz = (stab and size[i] or size)
+
+            if lvl[l] > 0 then
+                for j = st, st + sz - 1 do
+                    a:led(n, math.floor(j + x[1]) % 64, lvl[l])
+                end
+            end
+            
+            st = st + sz + margin
+        end
     end
 end
 
 _arc.key.affordance = _affordance:new { 
     n = 2,
     edge = 1,
+    tdown = 0,
     input = _input:new()
 }
 
 _arc.key.affordance.input.filter = _arc.delta.input.filter
+
+_arc.key.momentary = _arc.key.affordance:new()
+_arc.key.momentary.input.handler = function(s, n, z)
+    local theld
+    if z > 0 then 
+        s.tdown = util.time()
+    else theld = util.time() - s.tdown end
+    return z, theld
+end
+
+_arc.key.trigger = _arc.key.affordance:new()
+_arc.key.trigger.input.handler = function(s, n, z)
+    local theld
+    if z > 0 then 
+        s.tdown = util.time()
+    else theld = util.time() - s.tdown end
+
+    if z == s.p_.edge then return 1, theld end
+end
+
+_arc.key.toggle = _arc.key.affordance:new()
+_arc.key.toggle.input.handler = function(s, n, z)
+    local theld
+    if z > 0 then 
+        s.tdown = util.time()
+    else theld = util.time() - s.tdown end
+
+    if z == s.p_.edge then return ~ s.v & 1, theld end
+end

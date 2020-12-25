@@ -1,7 +1,7 @@
 # arc
 
 ```
-allow single number for x, indicating starting point for a circle of 64
+remove v from fill
 
 fill {
     n = 1,
@@ -28,7 +28,6 @@ number {
     -- v = v + (d * sens * inc * (step * 64)) (clamp range, wrap)
     -- ledx = x[1] + ((v * inc) // (x[2] - x[1])) (start indicator)
 }
-lvl: add three number mode, middle fills in range
 
 control {
     n = 1,
@@ -52,11 +51,12 @@ option {
     sens = 1,
     range = { 1, 4 },
     include = { 1, 2, 4 },
-    glyphs = { { 0, 15, 4, ... }, { 15, 4, 7, .... }, ... }
+    glyph = function(s, v) end
     options = 4,
     margin = 0
 }
 
+?
 toggle {
     n = 1,
     x = { 33, 32 },
@@ -64,7 +64,8 @@ toggle {
     lvl = { 0, 15 },
     sens = 1,
     range = { 1, 2 },
-}
+} 
+?
 
 (simple versions, n is number)
 _arc.key.trigger
@@ -85,6 +86,16 @@ RENAME
 lvl -> level. add a lvl as a nickname
 add en as a nickname for enabled
 zsort -> children. require children to be nest_'s
+
+REFACTOR
+
+consider splitting up "value" into a raw value (state) and a user facig value (meaning). the difference between these two concepts is made most evident by the option types.
+
+implimentation could be an actual value ("raw", maybe keep the nickname "v" for now to avoid measurable refactoring work) and a key (stick with "value") which is a (non-silent) proxy to getter/setter functions.
+
+_affordance:refresh() instead of argumentless update, just to manually dirty the flag after any manual property change (value or otherwise)
+
+create readonly properties, which cannot be overwritten outside of the p_ proxy or a constructor. the _ table can basically become this. when the obj is printed, don't print functions in this table, we can put the builtins here and hide them on user print. properties like x, y, n, which we don't want to be editable after creation, can be put in this table after initialization
 
 ADD
 
@@ -120,7 +131,7 @@ nest:disconnect() : for disconnecting and reconnecting nests to devices
 ADD 
 
 _enc.delta
-_enc.affordance.sens (impliment in input.filter, v easy)
+_enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range delta stuff for option as in _arc.option
 
 ```
 
@@ -185,8 +196,11 @@ _grid.preset
 
 REFACTOR
 
+remove v from fill
+
 grid.fader -> grid.control
 embed controlspec in grid.fader, align properties with argument names
-add min and max to number
+
+add range to number, default to 1-based
 
 ```
