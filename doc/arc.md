@@ -12,7 +12,7 @@
 }
 
 [_arc.number](#number) {
-  ...
+  - ...
   - [cycle](#cycle)
   - [inc](#inc)
   - [indicator](#indicator)
@@ -20,7 +20,7 @@
 }
 
 [_arc.control](#control) {
-  ...
+  - ...
   - [controlspec](#controlspec)
   - [range](#range)
   - [step](#step)
@@ -31,6 +31,7 @@
 }
 
 [_arc.option](#option) {
+  - ...
   - [options](#options)
   - [range](#range)
   - [include](#include)
@@ -46,11 +47,11 @@
 
 }
 
-_arc.key.momentary
+_arc.key.momentary { ... }
 
-_arc.key.trigger
+_arc.key.trigger { ... }
 
-_arc.key.toggle
+_arc.key.toggle { ... }
 
 
 ### affordance
