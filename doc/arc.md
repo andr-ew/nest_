@@ -1,7 +1,7 @@
 # types
 
 [_arc.affordance](#affordance) {
-  - [n[(#x)
+  - [n](#x)
   - [x](#x)
   - value
   - [lvl](#lvl)
