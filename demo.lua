@@ -437,7 +437,64 @@ a = nest_ {
             enabled = apage
         },
         -------------------------------------control
+        nest_ {
+            control1 = _arc.control {
+                n = 2,
+                sens = 1/2,
+                action = function(self, value) print(self.k, value) end
+            },
+            control2 = _arc.control {
+                n = 3,
+                sens = 1/4,
+                range = { -1, 1 },
+                action = function(self, value) print(self.k, value) end
+            },
+            control3 = _arc.control {
+                n = 4,
+                x = { 40, 40 + 12 },
+                sens = 1,
+                lvl = { 4, 4, 15 },
+                action = function(self, value) print(self.k, value) end
+            },
+            enabled = apage
+        },
         -------------------------------------option
+        nest_ {
+            option1 = _arc.option {
+                x = { 42, 24 },
+                n = 2,
+                sens = 1/16,
+                range = { 1, 4 },
+                size = { 1, 2, 4, 8, 16 },
+                margin = 1,
+                lvl = { 0, 4, 15 },
+                action = function(s, v) print(math.floor(v)) end
+            },
+            option2 = _arc.option {
+                --x = { 42, 24 },
+                n = 3,
+                sens = 1/16,
+                include = { 1, 2, 4 },
+                size = 4,
+                margin = 0,
+                lvl = { 0, 4, 15 },
+                action = function(s, v) print(math.floor(v)) end
+            },
+            option3 = _arc.option {
+                n = 4,
+                sens = 1/16,
+                options = 2,
+                glyph = function(s, v, c)
+                    local r = {}
+                    for i = 1, c do
+                        r[i] = v == 1 and math.floor(i * 15 / c) or 15 - math.ceil(i * 15 / c)
+                    end
+                    return r
+                end,
+                action = function(s, v) print(math.floor(v)) end
+            },
+            enabled = apage
+        }
     },
     tab = _arc.option {
         x = { 42, 24 }, n = 1,
