@@ -56,7 +56,19 @@ _arc.key.toggle { ... }
 
 ### affordance
 
+a base affordance type for the `_arc` group - all other affordances in the group inherit from this type. the user may extend this type in order to define a custom affordance for arc i/o.
 
+### number
+
+a fractional number controlled by arc roatation, one full rotation of of the indicator is equal to the value of [`cycle`](#cycle). the [`range`](#range) of `value` may be fininite or infinite (`math.huge`).
+
+### control
+
+like the `paramset` "control" type, a number with musicaly convenient properties. a `controlspec` is used internally, which may be provided at init time rather than properties.
+
+### option
+
+an integer affordance with a "tab" style output or the ability to display user-defined glyphs for each value.
 
 # properties
 
