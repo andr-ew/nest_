@@ -22,10 +22,12 @@ currently in beta ! current documentation covers existing features, will continu
 
 # Demos
 
-start here ! (run `norns.fetch("https://github.com/andr-ew/nest_")` in maiden to download)
+start here !
 
 - [`demo`](demo.lua): demos of library affordances per device
 - `twigs`: a musical demonstration, ditonic keyboard + pitched delays
+
+run `norns.fetch("https://github.com/andr-ew/nest_")` in maiden to download
 
 # Studies
 
