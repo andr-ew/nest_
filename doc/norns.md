@@ -125,7 +125,7 @@ when n is a single value for a `_key` affordance, inc is a positive or negative 
 
 ### controlspec
 
-may be provided in place of `range`, `step`, `units`, `quantum`, `warp`. see http://norns.local/doc/classes/controlspec.html#controlspec:new
+a [`controlspec`](http://norns.local/doc/classes/controlspec.html#controlspec:new) instance which may be provided in place of `range`, `step`, `units`, `quantum`, `warp`. 
 
 ### step
 
