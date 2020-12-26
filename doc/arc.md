@@ -47,8 +47,11 @@
 }
 
 _arc.key.momentary
+
 _arc.key.trigger
+
 _arc.key.toggle
+
 
 ### affordance
 
