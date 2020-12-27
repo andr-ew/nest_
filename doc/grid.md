@@ -13,27 +13,27 @@
 
 }
 
-[_grid.fill](#fill) ([demo](../demo.lua#L39)) { ... }
+[_grid.fill](#fill) { ... } ([demo](../demo.lua#L39))
 
-[_grid.number](#number) { ... }
+[_grid.number](#number) { ... } ([demo](../demo.lua#L58))
 
 [_grid.fader](#fader) {
   - ...
   - range
   
-}
+} ([demo](../demo.lua#L87))
 
 [_grid.trigger](#trigger) { 
   - ... 
   - blinktime
   
-}
+} ([demo](../demo.lua#L115))
 
-[_grid.momentary](#momentary) { ... }
+[_grid.momentary](#momentary) { ... } ([demo](../demo.lua#L175))
 
-[_grid.toggle](#toggle) { ... }
+[_grid.toggle](#toggle) { ... } ([demo](../demo.lua#L145))
 
-[_grid.range](#range) { ... }
+[_grid.range](#range) { ... } ([demo](../demo.lua#L205))
 
 _grid.pattern { ... }
 
