@@ -72,6 +72,26 @@ an integer affordance with a "tab" style output or the ability to display user-d
 
 # properties
 
+### n
+
+the index of the ring to which an affordance will be mapped (single integer only).
+
+### x
+
+the led or range of leds to send output to. defaults to `{ 33, 32 }`, a full circle starting at 33.
+
+### lvl
+
+sets the brightness levels for the affordance. may be a single value, or a table of 2-3 values depending on the range of output levels present.
+
+### range
+
+a table in the format `{ min, max }` to specify the range of `value`
+
+### sens
+
+fraction specifing input sensitivity. the lower the number, the slower the change in `value`.
+
 ### step
 
 see http://norns.local/doc/classes/controlspec.html#controlspec:new
