@@ -13,27 +13,27 @@
 
 }
 
-[_grid.fill](#fill) { ... } ([demo](../demo.lua#L39))
+[_grid.fill](#fill) ([demo](../demo.lua#L39)) { ... }
 
-[_grid.number](#number) { ... } ([demo](../demo.lua#L58))
+[_grid.number](#number) ([demo](../demo.lua#L58)) { ... }
 
-[_grid.fader](#fader) {
+[_grid.fader](#fader) ([demo](../demo.lua#L87)) {
   - ...
   - range
   
-} ([demo](../demo.lua#L87))
+}
 
-[_grid.trigger](#trigger) { 
+[_grid.trigger](#trigger) ([demo](../demo.lua#L118)) { 
   - ... 
   - blinktime
   
-} ([demo](../demo.lua#L115))
+}
 
-[_grid.momentary](#momentary) { ... } ([demo](../demo.lua#L175))
+[_grid.momentary](#momentary) ([demo](../demo.lua#L175)) { ... }
 
-[_grid.toggle](#toggle) { ... } ([demo](../demo.lua#L145))
+[_grid.toggle](#toggle) ([demo](../demo.lua#L145)) { ... }
 
-[_grid.range](#range) { ... } ([demo](../demo.lua#L205))
+[_grid.range](#range) ([demo](../demo.lua#L205)) { ... }
 
 _grid.pattern { ... }
 
