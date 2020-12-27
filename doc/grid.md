@@ -13,27 +13,27 @@
 
 }
 
-[_grid.fill](#fill) ([demo](../demo.lua#L40)) { ... }
+[_grid.fill](#fill) { ... }
 
-[_grid.number](#number) ([demo](../demo.lua#L58)) { ... }
+[_grid.number](#number) { ... }
 
-[_grid.fader](#fader) ([demo](../demo.lua#L87)) {
+[_grid.fader](#fader) {
   - ...
   - range
   
 }
 
-[_grid.trigger](#trigger) ([demo](../demo.lua#L118)) { 
+[_grid.trigger](#trigger) { 
   - ... 
   - blinktime
   
 }
 
-[_grid.momentary](#momentary) ([demo](../demo.lua#L175)) { ... }
+[_grid.momentary](#momentary) { ... }
 
-[_grid.toggle](#toggle) ([demo](../demo.lua#L145)) { ... }
+[_grid.toggle](#toggle) { ... }
 
-[_grid.range](#range) ([demo](../demo.lua#L205)) { ... }
+[_grid.range](#range) { ... }
 
 _grid.pattern { ... }
 
