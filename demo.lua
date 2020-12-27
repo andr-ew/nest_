@@ -1,4 +1,13 @@
--- paginated demos of affordances included in nest_ 
+--paginated demos of 
+--affordances included in nest_ 
+
+include 'lib/nest_/core'
+include 'lib/nest_/norns'
+include 'lib/nest_/grid'
+include 'lib/nest_/txt'
+include 'lib/nest_/arc'
+
+-------------------------------------------------utility functions
 
 function r()
     norns.script.load(norns.state.script)
@@ -15,12 +24,6 @@ function print_matrix_1d(v) print(stringrow(v)) end
 function print_matrix_2d(v) 
     for _,row in ipairs(v) do print_matrix_1d(row) end
 end
-
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
-include 'lib/nest_/txt'
-include 'lib/nest_/arc'
 
 local function gpage(self) return g.tab.value + 1 == self.k end
 local function tpage(self) return t.tab.options[t.tab.value] == self.k end
@@ -234,7 +237,7 @@ g = nest_ {
     g = grid.connect()
 }
 
----------------------------------------------txt
+-------------------------------------------------txt
 
 t = nest_ {
     page = nest_ {
