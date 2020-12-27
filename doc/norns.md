@@ -113,7 +113,7 @@ the index of the encoder or key to which an affordance will be mapped. assigning
 
 ### range
 
-a table in the format `{ min, max }` to specify the range of `value`
+a table in the format `{ min, max }` to specify the range of `value`.
 
 ### wrap
 
