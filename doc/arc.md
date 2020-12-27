@@ -14,7 +14,6 @@
 [_arc.number](#number) {
   - ...
   - [cycle](#cycle)
-  - [inc](#inc)
   - [indicator](#indicator)
   
 }
@@ -84,13 +83,25 @@ the led or range of leds to send output to. defaults to `{ 33, 32 }`, a full cir
 
 sets the brightness levels for the affordance. may be a single value, or a table of 2-3 values depending on the range of output levels present.
 
-### range
-
-a table in the format `{ min, max }` to specify the range of `value`
-
 ### sens
 
 fraction specifing input sensitivity. the lower the number, the slower the change in `value`.
+
+### range
+
+a table in the format `{ min, max }` to specify the range of `value`.
+
+### wrap
+
+a boolean value to specify whether to wrap back over the `range` boundaries.
+
+### cycle
+
+indicates the amount that `value` will be incrimented after a full cycle through `x`.
+
+### indicator
+
+width of the led indicator displayed.
 
 ### step
 
@@ -107,3 +118,24 @@ see http://norns.local/doc/classes/controlspec.html#controlspec:new
 ### warp
 
 see http://norns.local/doc/classes/controlspec.html#controlspec:new
+
+### options 
+
+an integer option count
+
+### include
+
+an optional table of integers from 1 - `options`. integers not included are skipped over on arc deltas.
+
+### size
+
+the size of the option tab. a single number or a table of numbers per option.
+
+### margin
+
+space between each option tab.
+
+### glyph
+
+a table that, when present, specifies a brightness level per arc led rather than the `option` tab display. usuful when formatted as a pointer function in conjuction with special arguments `glyph = function(self, value, led_count) return {} end`.
+
