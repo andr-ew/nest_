@@ -42,7 +42,7 @@
 
 [_arc.key.affordance](#key) {
   - [n](#n)
-  - [edge](#edge)
+  - [edge](../doc/grid.md#edge)
 
 }
 
