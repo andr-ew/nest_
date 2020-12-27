@@ -13,7 +13,7 @@
 
 }
 
-[_grid.fill](#fill) { ... }
+[_grid.fill](#fill) ([demo](../demo.lua#L39)) { ... }
 
 [_grid.number](#number) { ... }
 
