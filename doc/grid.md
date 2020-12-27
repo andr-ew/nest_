@@ -15,7 +15,7 @@
 
 [_grid.fill](#fill) { ... }
 
-[_grid.value](#value) { ... }
+[_grid.number](#number) { ... }
 
 [_grid.fader](#fader) {
   - ...
@@ -65,9 +65,9 @@ two_by_two = _grid.affordance {
 
 a simple output-only affordance which draws the provided `x` and `y` dimentions to the provided brightness level
 
-### value
+### number
 
-a "radio button" style affordance for which an integer `value` is assinged to index of the last key pressed. `x` and `y` dimentions set the size of the affordance and the range of `value`.
+a integer or "radio button" style affordance for which an integer `value` is assinged to index of the last key pressed. `x` and `y` dimentions set the size of the affordance and the range of `value`.
 
 ### fader
 

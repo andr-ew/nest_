@@ -27,6 +27,8 @@ start here !
 - [`demo`](demo.lua): demos of library affordances per device
 - `twigs`: a musical demonstration, ditonic keyboard + pitched delays
 
+run `norns.fetch("https://github.com/andr-ew/nest_")` in maiden to download
+
 # Studies
 
 1. [nests of affordances](./study/study1.md)
@@ -49,7 +51,7 @@ the various types and interface buidling blocks of nestworld are split up into a
 - [`nest_/core`](./doc/core.md)
 - [`nest_/norns`](./doc/norns.md)
 - [`nest_/grid`](./doc/grid.md)
-- `nest_/arc`
+- [`nest_/arc`](./doc/arc.md)
 - [`nest_/txt`](./doc/txt.md)
 
 

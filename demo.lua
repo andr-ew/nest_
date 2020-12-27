@@ -5,6 +5,7 @@ include 'lib/nest_/core'
 include 'lib/nest_/norns'
 include 'lib/nest_/grid'
 include 'lib/nest_/txt'
+include 'lib/nest_/arc'
 
 -------------------------------------------------utility functions
 
@@ -26,6 +27,7 @@ end
 
 local function gpage(self) return g.tab.value + 1 == self.k end
 local function tpage(self) return t.tab.options[t.tab.value] == self.k end
+local function apage(self) return math.floor(a.tab.value) == self.k end
 
 -------------------------------------------------grid
 
@@ -239,48 +241,7 @@ g = nest_ {
 
 t = nest_ {
     page = nest_ {
-        -----------------------------------------label
-        label = nest_ {
-            label1 = _txt.label {
-                x = 2, y = 14,
-                value = "hello, nest_"
-            },
-            label2 = _txt.label {
-                x = 2, y = 24, 
-                margin = 6,
-                padding = 2,
-                lvl = 0,
-                fill = 15,
-                value = { "one", "two", "three" }
-            },
-            label3 = _txt.label {
-                x = { 46, 128 - 2 }, y = 44,
-                lvl = { 15, 7, 2 },
-                value = { "four", "five", "six" }
-            },
-            label4 = _txt.label {
-                x = 128 - 2, y = 64 - 4,
-                margin = 8,
-                align = { 'right', 'bottom' },
-                lvl = { 2, 7, 15 },
-                value = { "seven", "eight", "nine" }
-            },
-            label5 = _txt.label {
-                x = 128 - 2, y = 14,
-                flow = 'y',
-                align = 'right',
-                --lvl = 7,
-                value = { "ten", "eleven", "twelve" }
-            },
-            label6 = _txt.label {
-                x = { 2, 44 - 4 },
-                y = { 38, 64 - 2 },
-                border = 15,
-                value = "button"
-            },
-            enabled = tpage
-        },
-        -----------------------------------------number, control, momentary, toggle
+        -------------------------------------numerical
         numerical = nest_ {
             --[[
             trigger = _txt.key.trigger {
@@ -321,7 +282,48 @@ t = nest_ {
             },
             enabled = tpage
         },
-        -----------------------------------------option
+        -------------------------------------label / display properies
+        label = nest_ {
+            label1 = _txt.label {
+                x = 2, y = 14,
+                value = "hello, nest_"
+            },
+            label2 = _txt.label {
+                x = 2, y = 24, 
+                margin = 6,
+                padding = 2,
+                lvl = 0,
+                fill = 15,
+                value = { "one", "two", "three" }
+            },
+            label3 = _txt.label {
+                x = { 46, 128 - 2 }, y = 44,
+                lvl = { 15, 7, 2 },
+                value = { "four", "five", "six" }
+            },
+            label4 = _txt.label {
+                x = 128 - 2, y = 64 - 4,
+                margin = 8,
+                align = { 'right', 'bottom' },
+                lvl = { 2, 7, 15 },
+                value = { "seven", "eight", "nine" }
+            },
+            label5 = _txt.label {
+                x = 128 - 2, y = 14,
+                flow = 'y',
+                align = 'right',
+                --lvl = 7,
+                value = { "ten", "eleven", "twelve" }
+            },
+            label6 = _txt.label {
+                x = { 2, 44 - 4 },
+                y = { 38, 64 - 2 },
+                border = 15,
+                value = "button"
+            },
+            enabled = tpage
+        },
+        -------------------------------------option (also see tab)
         option = nest_ {
             option1 = _txt.key.option {
                 x = 2, y = 24,
@@ -349,7 +351,7 @@ t = nest_ {
             },
             enabled = tpage
         },
-        -----------------------------------------list
+        -------------------------------------list
         list = nest_ {
             list1 = _txt.enc.list {
                 y = 14,
@@ -375,8 +377,8 @@ t = nest_ {
     tab = _txt.enc.option {
         x = 2, y = 2, n = 1, margin = 6,
         options = {
-            "label",
             "numerical",
+            "label",
             "option",
             "list"
         }
@@ -386,3 +388,122 @@ t = nest_ {
     enc = enc,
     screen = screen
 }
+
+---------------------------------------------arc
+
+a = nest_ {
+    page = {
+        -------------------------------------fill & delta
+        nest_ {
+            fill1 = _arc.fill {
+                n = 2,
+                v = 1/64,
+                lvl = 15
+            },
+            fill2 = _arc.fill {
+                n = 3,
+                v = { 0.2, 0.5 },
+                lvl = 7
+            },
+            fill3 = _arc.fill {
+                n = 4,
+                v = { 0, 4, 7, 15, 0, 4, 7, 15 }
+            },
+            delta = _arc.delta {
+                n = 2,
+                action = function(self, d) print(self.k, d) end
+            },
+            enabled = apage
+        },
+        -------------------------------------number
+        nest_ {
+            number1 = _arc.number {
+                n = 2,
+                sens = 1/2,
+                action = function(self, value) print(self.k, value) end
+            },
+            number2 = _arc.number {
+                n = 3,
+                sens = 1/6,
+                value = 0.2,
+                range = { 0.2, 0.4 },
+                wrap = true,
+                action = function(self, value) print(self.k, value) end
+            },
+            number3 = _arc.number {
+                n = 4,
+                sens = 2,
+                range = { -math.huge, math.huge },
+                cycle = 20,
+                action = function(self, value) print(self.k, value) end
+            },
+            enabled = apage
+        },
+        -------------------------------------control
+        nest_ {
+            control1 = _arc.control {
+                n = 2,
+                sens = 1/2,
+                action = function(self, value) print(self.k, value) end
+            },
+            control2 = _arc.control {
+                n = 3,
+                sens = 1/4,
+                range = { -1, 1 },
+                action = function(self, value) print(self.k, value) end
+            },
+            control3 = _arc.control {
+                n = 4,
+                x = { 40, 40 + 12 },
+                sens = 1,
+                lvl = { 4, 4, 15 },
+                action = function(self, value) print(self.k, value) end
+            },
+            enabled = apage
+        },
+        -------------------------------------option
+        nest_ {
+            option1 = _arc.option {
+                x = { 42, 24 },
+                n = 2,
+                sens = 1/16,
+                range = { 1, 4 },
+                size = { 1, 2, 4, 8, 16 },
+                margin = 1,
+                lvl = { 0, 4, 15 },
+                action = function(s, v) print(math.floor(v)) end
+            },
+            option2 = _arc.option {
+                --x = { 42, 24 },
+                n = 3,
+                sens = 1/16,
+                include = { 1, 2, 4 },
+                size = 4,
+                margin = 0,
+                lvl = { 0, 4, 15 },
+                action = function(s, v) print(math.floor(v)) end
+            },
+            option3 = _arc.option {
+                n = 4,
+                sens = 1/16,
+                options = 2,
+                glyph = function(s, v, c)
+                    local r = {}
+                    for i = 1, c do
+                        r[i] = v == 1 and math.floor(i * 15 / c) or 15 - math.ceil(i * 15 / c)
+                    end
+                    return r
+                end,
+                action = function(s, v) print(math.floor(v)) end
+            },
+            enabled = apage
+        }
+    },
+    tab = _arc.option {
+        x = { 42, 24 }, n = 1,
+        sens = 1/16,
+        options = 4,
+        size = 3,
+        lvl = { 0, 4, 15 },
+    }
+} :connect({ a = arc.connect() }, 120) -- refresh @ 120 fps instead of the default 30
