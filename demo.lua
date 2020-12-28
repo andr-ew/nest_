@@ -95,7 +95,7 @@ g = nest_ {
             fader_1d = _grid.fader {
                 x = { 1, 7 },
                 y = 5,
-                range = { -1, 1 },
+                range = { 0, 1 },
                 action = function(self, value) 
                     print(self.k, value) 
                 end
@@ -103,7 +103,7 @@ g = nest_ {
             fader_2d = _grid.fader {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                range = { -1, 1 },
+                range = { 0, 1 },
                 action = function(self, value) 
                     print(self.k) 
                     tab.print(value)
@@ -253,7 +253,8 @@ t = nest_ {
                 range = { 1, 8 },
                 wrap = true,
                 align = { 'left', 'bottom' },
-                action = function(self, value) print(self.k, value) end
+                action = function(self, value) print(self.k, value) end,
+                label ="foo"
             },
             control = _txt.enc.control {
                 x = 64, y = 32,

@@ -233,6 +233,8 @@ _arc.option = _arc.affordance:new {
     v = 1, -- { 1, 3 }
     options = 4,
     size = nil, -- 10, { 10, 10 20, 10 }
+    include = nil,
+    glyph = nil,
     range = function(s) return { 1, s.options } end, -- { 1, 3 }, { 1, 2, 4 }
     margin = 0
 }
