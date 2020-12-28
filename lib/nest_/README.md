@@ -1,3 +1,10 @@
+# readme
+
+```
+build personalized interfaces as a waypoint into existing musical processes (a sampler, a synth voice, a sequence)
+
+```
+
 # arc
 
 ```
