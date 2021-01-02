@@ -113,25 +113,38 @@ end
 
 ----------------------------------------------------------------------------------------------------
 
-local pattern_time = include 'lib/pattern_time'
+local pattern_time = require 'pattern_time'
 
 _pattern = _metaaffordance:new {
     event = _obj_:new {
         path = nil,
         package = nil
     },
+    --persistent = true, -- move to affordance ?
+    capture = 'input',
     pass = function(self, sender, v, handler_args) 
-        self.pattern_time.watch(self.event:new {
+        self:watch(self.event:new {
             path = sender:path(target),
-            package = self.mode == 'v' and v or handler_args
+            package = self.capture == 'value' and v or handler_args
         })
     end
 }
 
 function _pattern:copy(o) 
-    o = _metaaffordance.new(self, o)
+    o = _metaaffordance.copy(self, o)
 
     local pt = pattern_time.new()
+    local mt = getmetatable(o)
+    local mti = mt.__index
+
+    --alias _pattern to pattern_time instance
+    mt.__index = function(t, k)
+        if k == 'new' then return mti(t, k)
+        elseif pt[k] then return pt[k]
+        else return mti(t, k) end
+    end
+
+    return o
 end
 
 ----------------------------------------------------------------------------------------------------
