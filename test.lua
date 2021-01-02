@@ -9,24 +9,21 @@ include 'lib/nest_/norns'
 tab = require 'tabutil'
 
 n = nest_ {
-    a1 = nest_ {
-        a2 = nest_ {
-        },
-        b2 = nest_ {
-            a3 = nest_ {
-                value = 1
-            }
-        }
-    },
-    b1 = nest_ {
-        a2 = nest_ {
-            a3 = nest_ {
-            },
-            b3 = nest_ {
-                a4 = nest_ {
-                    value = 1
-                }
-            }
-        }
+    momentary_0d = _grid.momentary {
+        x = 1,
+        y = 3,
+        lvl = { 4, 15 },
+        action = function(self, value) 
+            print(self.k, v) 
+        end
+    }, 
+    momentary_1d = _grid.momentary {
+        x = { 1, 7 },
+        y = 5,
+        lvl = { 4, 15 },
+        action = function(self, value) 
+            print(self.k)
+            print_matrix_1d(value)
+        end
     }
 }
