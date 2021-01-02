@@ -113,6 +113,29 @@ end
 
 ----------------------------------------------------------------------------------------------------
 
+local pattern_time = include 'lib/pattern_time'
+
+_pattern = _metaaffordance:new {
+    event = _obj_:new {
+        path = nil,
+        package = nil
+    },
+    pass = function(self, sender, v, handler_args) 
+        self.pattern_time.watch(self.event:new {
+            path = sender:path(target),
+            package = self.mode == 'v' and v or handler_args
+        })
+    end
+}
+
+function _pattern:copy(o) 
+    o = _metaaffordance.new(self, o)
+
+    local pt = pattern_time.new()
+end
+
+----------------------------------------------------------------------------------------------------
+
 _screen = _group:new()
 _screen.devk = 'screen'
 

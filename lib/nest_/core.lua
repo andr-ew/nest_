@@ -438,34 +438,6 @@ function _metaaffordance:new(o)
     return o
 end
 
---local pt = include 'lib/pattern_time'
-
-_pattern = _metaaffordance:new {
-    event = _obj_:new {
-        path = nil,
-        package = nil
-    },
-    pass = function(self, sender, v, handler_args) 
-        self.pattern_time.watch(self.event:new {
-            path = sender:path(target),
-            package = self.mode == 'v' and v or handler_args
-        })
-    end,
-    process = function(self, event) end,
-    pass = function() end,
-    rec = function() end,
-    loop = function() end,
-    rate = function() end,
-    play = function() end,
-    quantize = function() end
-}
-
-function _pattern:new(o) 
-    o = _obj_.new(self, o)
-
-    --o.pattern_time = pt.new()
-end
-
 _group = _obj_:new {}
 
 function _group:new(o)
