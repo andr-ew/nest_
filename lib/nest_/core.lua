@@ -288,6 +288,51 @@ nest_ = _obj_:new {
             end
         end
     end,
+    path = function(self)
+        --local fk = from and from[#from]
+        local p = {}
+
+        --[[
+        local function pmatch(o)
+            local op = o:path()
+            local match = true
+            for i,v in ipairs(op) do
+                if from[i] then
+                elseif from[i] == v then
+                else
+                    match = false
+                    break
+                end
+            end
+
+            return match
+        end
+        --]]
+
+        local function look(o)
+            if (not o.p) then --or (fk and o.p.k == fk and pmatch(o.p)) then
+                return p, o
+            else
+                table.insert(p, 1, o.k)
+                return look(o.p)
+            end
+        end
+
+        return look(self)
+    end,
+    find = function(self, path)
+        local p = self
+        for i,k in ipairs(path) do
+            if p[k] then p = p[k] 
+            else 
+                print(self.k or "global" .. ": can't find " .. k) 
+                p = nil
+                break
+            end
+        end
+
+        return p
+    end,
     set = function(self, t) end,
     get = function(self) end,
     write = function(self) end,

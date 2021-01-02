@@ -14,6 +14,8 @@ _affordance:refresh() instead of argumentless update, just to manually dirty the
 
 ADD
 
+add path functionality to _obj_: construct relative string path from parent to child and evalue string path to child
+
 _obj_:put() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
 
 support _affordance { input = false } properly when input already exists. use booleans in the constructor to essentially nullify default values, even when they are _obj_ (i.e., members of zsort)
@@ -23,8 +25,6 @@ nest_.redraw
 nest_.focus - focus on a single nest & children for a device & effectively disable otherelatives. will need it's own variable in the _dev. great for popup interfaces
 
 nest_ get/set: table macros nest = { nest = { control = value } } 
-
-add path functionality to _obj_: construct relative string path from parent to child and evalue string path to child
 
 add actions{} list of action functions
 add inits{} list of init functions
