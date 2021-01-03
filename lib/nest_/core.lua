@@ -248,6 +248,13 @@ _output = _obj_:new {
 
 _output.new = _input.new
 
+local nest_id = 0 -- incrimenting numeric ID assigned to every nest_ instantiated
+
+local function nextid()
+    nest_id =  nest_id + 1
+    return nest_id
+end
+
 nest_ = _obj_:new {
     do_init = function(self)
         if self.pre_init then self:pre_init() end
@@ -307,30 +314,12 @@ nest_ = _obj_:new {
             end
         end
     end,
-    path = function(self)
-        --local fk = from and from[#from]
+    path = function(self, pathto)
         local p = {}
 
-        --[[
-        local function pmatch(o)
-            local op = o:path()
-            local match = true
-            for i,v in ipairs(op) do
-                if from[i] then
-                elseif from[i] == v then
-                else
-                    match = false
-                    break
-                end
-            end
-
-            return match
-        end
-        --]]
-
         local function look(o)
-            if (not o.p) then --or (fk and o.p.k == fk and pmatch(o.p)) then
-                return p, o
+            if (not o.p) or (pathto and pathto.id == o.p.id) then
+                return p
             else
                 table.insert(p, 1, o.k)
                 return look(o.p)
@@ -390,6 +379,7 @@ function nest_:new(o, ...)
     local _ = o._ 
 
     _.is_nest = true
+    _.id = nextid()
     _.enabled = true
     _.devs = {}
     _.observers_enabled = true
@@ -461,7 +451,6 @@ _observer = _obj_:new {
     is_observer = true,
     pass = function(self, sender, v, handler_args) end,
     target = nil,
-    tglob = nil, --store the top level nest_ of target for reference in the process function
     capture = nil
 }
 
@@ -479,8 +468,6 @@ function _observer:new(o)
 
             if type(vv) == 'table' and vv.is_nest then 
                 table.insert(vv._.ob_links, o)
-                local _, glob = vv:path()
-                o.tglob = glob
             end
         else
             mtn(t, k, v)
@@ -490,6 +477,7 @@ function _observer:new(o)
     return o
 end
 
+----- this should happen at init time, not create time !! use :init() once it's implimented
 function _observer:copy(o)
     o = _input.copy(self, o)
 
@@ -498,8 +486,6 @@ function _observer:copy(o)
 
         if type(vv) == 'table' and vv.is_nest then 
             table.insert(vv._.ob_links, o)
-            local _, glob = vv:path()
-            o.tglob = glob
         end
     end
 

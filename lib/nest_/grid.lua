@@ -346,7 +346,18 @@ _grid.toggle.new = function(self, o)
 end
 
 local function toggle(s, v)
-    return (v + 1) % (((type(s.lvl) == 'table') and #s.lvl > 1) and (#s.lvl) or 2)
+    local vv = (v + 1) % (((type(s.lvl) == 'table') and #s.lvl > 1) and (#s.lvl) or 2)
+
+    if s.range then
+        while v > s.range[2] do
+            v = v - (s.range[2] - s.range[1]) - 1
+        end
+        while v < s.range[1] do
+            v = v + (s.range[2] - s.range[1]) + 1
+        end
+    end
+
+    return vv
 end
 
 _grid.toggle.input.muxhandler = _obj_:new {

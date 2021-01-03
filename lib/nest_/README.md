@@ -12,7 +12,11 @@ REFACTOR
 
 _metaaffordace.target: table of nests rather than single nest ?
 
+delegate most of the facilities of _obj_ into _input/_output/nest_. _obj_ should house only the copy & new behavior
+
 ADD
+
+nest_ get/set: table macros nest = { nest = { control = { value = value } } } 
 
 _obj_:put() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
 
@@ -21,8 +25,6 @@ support _affordance { input = false } properly when input already exists. use bo
 nest_.redraw
 
 nest_.focus - focus on a single nest & children for a device & effectively disable otherelatives. will need it's own variable in the _dev. great for popup interfaces
-
-nest_ get/set: table macros nest = { nest = { control = value } } 
 
 add actions{} list of action functions
 add inits{} list of init functions
@@ -116,8 +118,6 @@ _etc.filebrowser
 ```
 
 ADD
-
-_grid.toggle: range argument
 
 _grid.pattern
 _grid.switchpat --switch btw multiple patterns ? or use this as the multiplex behavior ?

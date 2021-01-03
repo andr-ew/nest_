@@ -119,12 +119,12 @@ _pattern = _observer:new {
     --persistent = true, -- move to affordance ?
     pass = function(self, sender, v, handler_args) 
         self:watch {
-            path = sender:path(target),
+            path = sender:path(self.target),
             package = self.capture == 'value' and v or handler_args
         }
     end,
     process = function(self, e)
-        local o = self.tglob:find(e.path)
+        local o = self.target:find(e.path)
 
         o.value = self.capture == 'value' and e.package or (o.action and o:action(o, table.unpack(e.package)) or e.package[1])
         o:refresh(self.capture ~= 'value')
@@ -149,6 +149,9 @@ function _pattern:new(o)
 
     return o
 end
+
+_preset = _observer:new {
+}
 
 ----------------------------------------------------------------------------------------------------
 
