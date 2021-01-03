@@ -5,25 +5,17 @@ end
 
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
+include 'lib/nest_/grid'
 
 tab = require 'tabutil'
 
 n = nest_ {
-    momentary_0d = _grid.momentary {
-        x = 1,
-        y = 3,
-        lvl = { 4, 15 },
-        action = function(self, value) 
-            print(self.k, v) 
-        end
-    }, 
-    momentary_1d = _grid.momentary {
+    m = _grid.number {
         x = { 1, 7 },
         y = 5,
         lvl = { 4, 15 },
         action = function(self, value) 
-            print(self.k)
-            print_matrix_1d(value)
+            print(self.k, value)
         end
     }
-}
+} :connect { g = grid.connect() }

@@ -196,7 +196,7 @@ _input = _obj_:new {
 
         if not silent then
             local defaults = self.arg_defaults or {}
-            self.affordance.v = self.action and self.action(self.affordance.v, table.unpack(defaults)) or self.affordance.v
+            self.affordance.v = self.affordance.action and self.affordance:action(self.affordance.v, table.unpack(defaults)) or self.affordance.v
         end
     end
 }
@@ -297,7 +297,7 @@ nest_ = _obj_:new {
                 v:refresh(silent)
             end
         end
-    end
+    end,
     draw = function(self, devk)
         for i,v in ipairs(self.zsort) do
             if self.enabled == nil or self.p_.enabled == true then
@@ -472,7 +472,7 @@ function _metaaffordance:new(o)
     
     --mt.__tostring = function() return '_metaaffordance' end
 
-    --[[
+    ---[[
     mt.__newindex = function(t, k, v)
         mtn(t, k, v)
 
@@ -481,7 +481,8 @@ function _metaaffordance:new(o)
 
             if type(vv) == 'table' and vv.is_nest then 
                 table.insert(vv._.mc_links, o)
-                table.insert(o.tglob, 
+                local _, glob = vv:path()
+                o.tglob = glob
             end
         end
     end

@@ -10,6 +10,7 @@ zsort -> children. require children to be nest_'s
 
 REFACTOR
 
+change _metaaffordance to _observer, (not an affordance), therfore an affordance may have multiple _pattern children
 
 _metaaffordace.target: table of nests rather than single nest ?
 
@@ -118,18 +119,18 @@ _etc.filebrowser
 
 ADD
 
+_grid.toggle: range argument
+
+_grid.pattern
+_grid.switchpat --switch btw multiple patterns ? or use this as the multiplex behavior ?
+_grid.preset
+
 trigger & toggle t argument: restrict to range of held time when edge == 0 
 
-_grid.affordance.wrap
-
-_grid.toggle: range argument
+_grid.affordance.wrap ?
 
 _grid.numtog ?
 _grid.shape (eathsea) named combinations of normalized trigger presses for line & plane. add the naming feature to trigger ? (un-normalized)
-
-_grid.pattern
-_grid.switchpat --switch btw multiple patterns
-_grid.preset
 
 REFACTOR
 
