@@ -150,9 +150,6 @@ function _pattern:new(o)
     return o
 end
 
-_preset = _observer:new {
-}
-
 ----------------------------------------------------------------------------------------------------
 
 _screen = _group:new()

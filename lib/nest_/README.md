@@ -17,6 +17,7 @@ delegate most of the facilities of _obj_ into _input/_output/nest_. _obj_ should
 ADD
 
 nest_ get/set: table macros nest = { nest = { control = { value = value } } } 
+(overload these for persistent _observers)
 
 _obj_:put() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
 
