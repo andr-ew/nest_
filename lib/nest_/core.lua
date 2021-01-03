@@ -157,7 +157,7 @@ _input = _obj_:new {
     handler = nil,
     devk = nil,
     filter = function(self, devk, args) return args end,
-    update = function(self, devk, args, mc)
+    update = function(self, devk, args, ob)
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
@@ -172,8 +172,8 @@ _input = _obj_:new {
                     if aargs[1] then 
                         self.affordance.v = self.action and self.action(self.affordance or self, table.unpack(aargs)) or aargs[1]
 
-                        if self.metaaffordances_enabled then
-                            for i,w in ipairs(mc) do
+                        if self.observers_enabled then
+                            for i,w in ipairs(ob) do
                                 w:pass(self.affordance, self.affordance.v, aargs)
                             end
                         end
@@ -265,7 +265,7 @@ nest_ = _obj_:new {
 
         return self 
     end,
-    update = function(self, devk, args, mc)
+    update = function(self, devk, args, ob)
         --[[
         if devk == nil or args == nil then -- called w/o arguments
 
@@ -280,13 +280,13 @@ nest_ = _obj_:new {
         
         elseif self.enabled == nil or self.p_.enabled == true then
         --]]
-            if self.metaaffordances_enabled then 
-                for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
+            if self.observers_enabled then 
+                for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
             end 
 
             for i,v in ipairs(self.zsort) do 
                 if v.update then
-                    v:update(devk, args, mc)
+                    v:update(devk, args, ob)
                 end
             end
         --end
@@ -392,8 +392,8 @@ function nest_:new(o, ...)
     _.is_nest = true
     _.enabled = true
     _.devs = {}
-    _.metaaffordances_enabled = true
-    _.mc_links = {}
+    _.observers_enabled = true
+    _.ob_links = {}
 
     local mt = getmetatable(o)
     --mt.__tostring = function(t) return 'nest_' end
@@ -448,7 +448,7 @@ function _affordance:copy(o)
     o = nest_.copy(self, o)
 
     for k,v in pairs(o) do
-        if type(v) == 'table' then if v.is_input or v.is_output then
+        if type(v) == 'table' then if v.is_input or v.is_output or v.is_observer then
             rawset(v._, 'affordance', o)
             v.devk = v.devk or o.devk
         end end
@@ -457,42 +457,47 @@ function _affordance:copy(o)
     return o
 end
 
-_metaaffordance = _affordance:new {
+_observer = _obj_:new {
+    is_observer = true,
     pass = function(self, sender, v, handler_args) end,
     target = nil,
     tglob = nil, --store the top level nest_ of target for reference in the process function
-    capture = 'input'
+    capture = nil
 }
 
-function _metaaffordance:new(o)
-    o = _affordance.new(self, o)
+function _observer:new(o)
+    o = _input.new(self, o)
 
     local mt = getmetatable(o)
     local mtn = mt.__newindex
     
-    --mt.__tostring = function() return '_metaaffordance' end
+    --mt.__tostring = function() return '_observer' end
 
-    ---[[
     mt.__newindex = function(t, k, v)
-        mtn(t, k, v)
-
         if k == 'target' then 
             vv = t._p[k]
 
             if type(vv) == 'table' and vv.is_nest then 
-                table.insert(vv._.mc_links, o)
+                table.insert(vv._.ob_links, o)
                 local _, glob = vv:path()
                 o.tglob = glob
             end
+        else
+            mtn(t, k, v)
         end
     end
-    --]]
     
+    return o
+end
+
+function _observer:copy(o)
+    o = _input.copy(self, o)
+
     if o.target then
         vv = o.p_.target
 
         if type(vv) == 'table' and vv.is_nest then 
-            table.insert(vv._.mc_links, o)
+            table.insert(vv._.ob_links, o)
             local _, glob = vv:path()
             o.tglob = glob
         end

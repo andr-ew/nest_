@@ -115,10 +115,8 @@ end
 
 local pattern_time = require 'pattern_time'
 
-_pattern = _metaaffordance:new {
-    pattern_lib = pattern_time,
+_pattern = _observer:new {
     --persistent = true, -- move to affordance ?
-    capture = 'input',
     pass = function(self, sender, v, handler_args) 
         self:watch {
             path = sender:path(target),
@@ -133,8 +131,8 @@ _pattern = _metaaffordance:new {
     end
 }
 
-function _pattern:copy(o) 
-    o = _metaaffordance.copy(self, o)
+function _pattern:new(o) 
+    o = _observer.new(self, o)
 
     local pt = pattern_time.new()
     pt.process = function(e) o:process(e) end
@@ -196,26 +194,6 @@ _enc.muxaffordance.input.muxhandler = _obj_:new {
 }
 
 _enc.muxaffordance.input.handler = function(s, k, ...)
-    return s.muxhandler[k](s, ...)
-end
-
-_enc.metaaffordance = _metaaffordance:new { 
-    n = 2,
-    input = _input:new()
-}
-
-_enc.metaaffordance.input.filter = _enc.affordance.input.filter
-
-_enc.muxmetaaffordance = _enc.metaaffordance:new()
-
-_enc.muxmetaaffordance.input.filter = _enc.muxaffordance.input.filter
-
-_enc.muxmetaaffordance.input.muxhandler = _obj_:new {
-    point = { function(s, z) end },
-    line = { function(s, v, z) end }
-}
-
-_enc.muxmetaaffordance.input.handler = function(s, k, ...)
     return s.muxhandler[k](s, ...)
 end
 
@@ -450,25 +428,6 @@ _key.muxaffordance.input.muxhandler = _obj_:new {
 }
 
 _key.muxaffordance.input.handler = _enc.muxaffordance.input.handler
-
-_key.metaaffordance = _metaaffordance:new { 
-    n = 2,
-    edge = 1,
-    input = _input:new()
-}
-
-_key.metaaffordance.input.filter = _key.affordance.input.filter
-
-_key.muxmetaaffordance = _key.metaaffordance:new()
-
-_key.muxmetaaffordance.input.filter = _key.muxaffordance.input.filter
-
-_key.muxmetaaffordance.input.muxhandler = _obj_:new {
-    point = { function(s, z) end },
-    line = { function(s, v, z) end }
-}
-
-_key.muxmetaaffordance.input.handler = _enc.muxmetaaffordance.input.handler
 
 _key.number = _key.muxaffordance:new {
     inc = 1,

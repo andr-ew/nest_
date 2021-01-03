@@ -47,14 +47,6 @@ _grid.affordance.input.filter = function(s, args)
     else return nil end
 end
 
-_grid.metaaffordance = _metaaffordance:new {
-    v = 0,
-    x = 1,
-    y = 1,
-    lvl = 15,
-    input = _input:new(),
-    output = _output:new()
-}
 _grid.muxaffordance = _grid.affordance:new()
 
 -- update -> filter -> handler -> muxhandler -> action -> v
@@ -118,11 +110,6 @@ _grid.muxaffordance.output.redraw = function(s, g, v)
         end
     end
 end
-
-_grid.muxmetacntrl = _grid.metaaffordance:new {
-    input = _grid.muxaffordance.input:new(),
-    output = _grid.muxaffordance.output:new()
-}
 
 _grid.binary = _grid.muxaffordance:new({ count = nil, fingers = nil }) -- local supertype for binary, toggle, trigger
 
