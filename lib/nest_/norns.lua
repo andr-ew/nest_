@@ -116,17 +116,20 @@ end
 local pattern_time = require 'pattern_time'
 
 _pattern = _metaaffordance:new {
-    event = _obj_:new {
-        path = nil,
-        package = nil
-    },
+    pattern_lib = pattern_time,
     --persistent = true, -- move to affordance ?
     capture = 'input',
     pass = function(self, sender, v, handler_args) 
-        self:watch(self.event:new {
+        self:watch {
             path = sender:path(target),
             package = self.capture == 'value' and v or handler_args
-        })
+        }
+    end,
+    process = function(self, e)
+        local o = self.tglob:find(e.path)
+
+        o.value = self.capture == 'value' and e.package or (o.action and o:action(o, table.unpack(e.package)) or e.package[1])
+        o:refresh(self.capture ~= 'value')
     end
 }
 
@@ -134,6 +137,8 @@ function _pattern:copy(o)
     o = _metaaffordance.copy(self, o)
 
     local pt = pattern_time.new()
+    pt.process = function(e) o:process(e) end
+
     local mt = getmetatable(o)
     local mti = mt.__index
 

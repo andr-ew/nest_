@@ -180,6 +180,7 @@ _input = _obj_:new {
                     end
                 end
             end
+        --[[
         elseif devk == nil or args == nil then -- called w/o arguments
             local defaults = self.arg_defaults or {}
             self.affordance.v = self.action and self.action(self.affordance or self, self.affordance.v, table.unpack(defaults)) or self.affordance.v
@@ -187,6 +188,15 @@ _input = _obj_:new {
             if self.devs[self.devk] then self.devs[self.devk].dirty = true end
 
             return self.affordance.v
+        --]]
+        end
+    end,
+    refresh = function(self, silent)
+        if self.devs[self.devk] then self.devs[self.devk].dirty = true end
+
+        if not silent then
+            local defaults = self.arg_defaults or {}
+            self.affordance.v = self.action and self.action(self.affordance.v, table.unpack(defaults)) or self.affordance.v
         end
     end
 }
@@ -256,6 +266,7 @@ nest_ = _obj_:new {
         return self 
     end,
     update = function(self, devk, args, mc)
+        --[[
         if devk == nil or args == nil then -- called w/o arguments
 
             local ret = nil
@@ -268,6 +279,7 @@ nest_ = _obj_:new {
             return ret
         
         elseif self.enabled == nil or self.p_.enabled == true then
+        --]]
             if self.metaaffordances_enabled then 
                 for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
             end 
@@ -277,8 +289,15 @@ nest_ = _obj_:new {
                     v:update(devk, args, mc)
                 end
             end
-        end
+        --end
     end,
+    refresh = function(self, silent)
+        for i,v in ipairs(self.zsort) do 
+            if v.refresh then
+                v:refresh(silent)
+            end
+        end
+    end
     draw = function(self, devk)
         for i,v in ipairs(self.zsort) do
             if self.enabled == nil or self.p_.enabled == true then
@@ -441,7 +460,8 @@ end
 _metaaffordance = _affordance:new {
     pass = function(self, sender, v, handler_args) end,
     target = nil,
-    mode = 'handler' -- or 'v'
+    tglob = nil, --store the top level nest_ of target for reference in the process function
+    capture = 'input'
 }
 
 function _metaaffordance:new(o)
@@ -452,31 +472,28 @@ function _metaaffordance:new(o)
     
     --mt.__tostring = function() return '_metaaffordance' end
 
+    --[[
     mt.__newindex = function(t, k, v)
         mtn(t, k, v)
 
         if k == 'target' then 
-            vv = v
-
-            if type(v) == 'functon' then 
-                vv = v()
-            end
+            vv = t._p[k]
 
             if type(vv) == 'table' and vv.is_nest then 
                 table.insert(vv._.mc_links, o)
+                table.insert(o.tglob, 
             end
         end
     end
+    --]]
     
     if o.target then
-        vv = o.target
-
-        if type(o.target) == 'functon' then 
-            vv = o.target()
-        end
+        vv = o.p_.target
 
         if type(vv) == 'table' and vv.is_nest then 
             table.insert(vv._.mc_links, o)
+            local _, glob = vv:path()
+            o.tglob = glob
         end
     end
 

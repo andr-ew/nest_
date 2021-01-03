@@ -10,11 +10,10 @@ zsort -> children. require children to be nest_'s
 
 REFACTOR
 
-_affordance:refresh() instead of argumentless update, just to manually dirty the flag after any manual property change (value or otherwise)
+
+_metaaffordace.target: table of nests rather than single nest ?
 
 ADD
-
-add path functionality to _obj_: construct relative string path from parent to child and evalue string path to child
 
 _obj_:put() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
 
@@ -49,6 +48,7 @@ build personalized interfaces as a waypoint into existing musical processes (a s
 REFACTOR
 
 remove v from fill
+arc.option: store v as an int & store the float remainder from delta values as a seperate float
 
 ADD
 
@@ -65,6 +65,8 @@ trigger & toggle t argument: restrict to range of held time when edge == 0
 
 _enc.delta
 _enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range delta stuff for option as in _arc.option
+
+*.option: remove the option string action argument, encourage indexing options instead
 
 ```
 
