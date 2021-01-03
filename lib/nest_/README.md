@@ -10,8 +10,6 @@ zsort -> children. require children to be nest_'s
 
 REFACTOR
 
-change _metaaffordance to _observer, (not an affordance), therfore an affordance may have multiple _pattern children
-
 _metaaffordace.target: table of nests rather than single nest ?
 
 ADD
