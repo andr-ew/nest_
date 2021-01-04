@@ -261,7 +261,7 @@ nest_ = _obj_:new {
     do_init = function(self)
         if self.pre_init then self:pre_init() end
         if self.init then self:init() end
-        self:update()
+        self:refresh()
 
         for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.do_init then v:do_init() end end end
     end,
@@ -286,9 +286,9 @@ nest_ = _obj_:new {
             end
             
             return ret
-        
-        elseif self.enabled == nil or self.p_.enabled == true then
-        --]]
+        --]] 
+        if self.enabled == nil or self.p_.enabled == true then
+
             if self.observers_enabled then 
                 for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
             end 
@@ -298,7 +298,7 @@ nest_ = _obj_:new {
                     v:update(devk, args, ob)
                 end
             end
-        --end
+        end
     end,
     refresh = function(self, silent)
         local ret = nil
