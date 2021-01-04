@@ -529,7 +529,7 @@ function _observer:copy(o)
     return o
 end
 
-_preset = _observer:new {
+_preset = _observer:new { -------------------------------
 }
 
 _group = _obj_:new {}

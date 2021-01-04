@@ -116,7 +116,6 @@ end
 local pattern_time = require 'pattern_time'
 
 _pattern = _observer:new {
-    --persistent = true, -- move to affordance ?
     pass = function(self, sender, v, in_v, handler_args) 
         local package
         if self.capture == 'value' then
@@ -139,7 +138,9 @@ _pattern = _observer:new {
 
         o.value = self.capture == 'value' and (type(p) == 'table' and p:new() or p) or (o.action and o:action(table.unpack(p)) or p[1])
         o:refresh(self.capture ~= 'value')
-    end
+    end,
+    get = function() end,
+    set = function() end
 }
 
 function _pattern:new(o) 
