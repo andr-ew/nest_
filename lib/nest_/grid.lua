@@ -138,7 +138,8 @@ end
 _grid.binary.new = function(self, o) 
     o = _grid.muxaffordance.new(self, o)
 
-    rawset(o, 'list', {})
+    --rawset(o, 'list', {})
+    o.list = {}
 
     local _, axis = input_contained(o, { -1, -1 })
 
@@ -327,7 +328,8 @@ _grid.toggle = _grid.binary:new { edge = 1 }
 _grid.toggle.new = function(self, o) 
     o = _grid.binary.new(self, o)
 
-    rawset(o, 'toglist', {})
+    --rawset(o, 'toglist', {})
+    o.toglist = {}
 
     local _, axis = input_contained(o, { -1, -1 })
 
@@ -408,7 +410,8 @@ _grid.toggle.input.muxhandler = _obj_:new {
             
             if #s.toglist < min then
                 for j,w in ipairs(s.v) do s.v[j] = 0 end
-                s.toglist = {}
+                --s.toglist = {}
+                s:replace('toglist', {})
             end
 
             return s.v, s.ttog, theld, add, rem, s.toglist
@@ -459,7 +462,8 @@ _grid.toggle.input.muxhandler = _obj_:new {
                         s.v[x][y] = 0
                     end
                 end
-                s.toglist = {}
+                --s.toglist = {}
+                s:replace('toglist', {})
             end
 
             return s.v, s.ttog, theld, add, rem, s.toglist
@@ -472,7 +476,8 @@ _grid.trigger = _grid.binary:new { edge = 1, blinktime = 0.1 }
 _grid.trigger.new = function(self, o) 
     o = _grid.binary.new(self, o)
 
-    rawset(o, 'triglist', {})
+    --rawset(o, 'triglist', {})
+    o.triglist = {}
 
     local _, axis = input_contained(o, { -1, -1 })
     o.tdelta = minit(axis)
@@ -522,7 +527,8 @@ _grid.trigger.input.muxhandler = _obj_:new {
             ret = true
             lret = hlist
         elseif s.edge == 0 and #hlist >= min - 1 and (max == nil or #hlist <= max - 1)and hrem and not hadd then
-            s.triglist = {}
+            --s.triglist = {}
+            s:replace('triglist', {})
 
             for i,w in ipairs(hlist) do 
                 if s.v[w] <= 0 then
@@ -549,13 +555,13 @@ _grid.trigger.input.muxhandler = _obj_:new {
         local ret = false
         local lret
 
-        if s.edge == 1 and #hlist > min and hadd then
+        if s.edge == 1 and hlist and #hlist > min and hadd then
             s.v[hadd.x][hadd.y] = 1
             s.tdelta[hadd.x][hadd.y] = util.time() - s.tlast[hadd.x][hadd.y]
 
             ret = true
             lret = hlist
-        elseif s.edge == 1 and #hlist == min and hadd then
+        elseif s.edge == 1 and hlist and #hlist == min and hadd then
             for i,w in ipairs(hlist) do 
                 s.v[w.x][w.y] = 1
 
@@ -565,7 +571,8 @@ _grid.trigger.input.muxhandler = _obj_:new {
             ret = true
             lret = hlist
         elseif s.edge == 0 and #hlist >= min - 1 and hrem and not hadd then
-            s.triglist = {}
+            --s.triglist = {}
+            s:replace('triglist', {})
 
             for i,w in ipairs(hlist) do 
                 if s.v[w.x][w.y] <= 0 then
@@ -704,7 +711,8 @@ _grid.number = _grid.muxaffordance:new { edge = 1, fingers = nil, tdown = 0, fil
 _grid.number.new = function(self, o) 
     o = _grid.muxaffordance.new(self, o)
 
-    rawset(o, 'hlist', {})
+    --rawset(o, 'hlist', {})
+    o.hlist = {}
     o.count = { 1, 1 }
 
     local _, axis = input_contained(o, { -1, -1 })
@@ -735,7 +743,8 @@ _grid.number.input.muxhandler = _obj_:new {
             if s.edge == 1 then 
                 if i ~= s.v or (not s.filtersame) then 
                     local len = #s.hlist
-                    s.hlist = {}
+                    --s.hlist = {}
+                    s:replace('hlist', {})
 
                     if max == nil or len <= max then
                         s.vlast = s.v
@@ -748,7 +757,8 @@ _grid.number.input.muxhandler = _obj_:new {
                 if #s.hlist >= min then
                     i = s.hlist[#s.hlist]
                     local len = #s.hlist
-                    s.hlist = {}
+                    --s.hlist = {}
+                    s:replace('hlist', {})
 
                     if max == nil or len <= max then
                         if i ~= s.v or (not s.filtersame) then 
@@ -777,7 +787,8 @@ _grid.number.input.muxhandler = _obj_:new {
             if s.edge == 1 then 
                 if (not (i.x == s.v.x and i.y == s.v.y)) or (not s.filtersame) then 
                     local len = #s.hlist
-                    s.hlist = {}
+                    --s.hlist = {}
+                    s:replace('hlist', {})
                     s.vlast.x = s.v.x
                     s.vlast.y = s.v.y
                     s.v.x = i.x
@@ -793,7 +804,8 @@ _grid.number.input.muxhandler = _obj_:new {
                 if #s.hlist >= min then
                     i = s.hlist[#s.hlist]
                     local len = #s.hlist
-                    s.hlist = {}
+                    --s.hlist = {}
+                    s:replace('hlist', {})
 
                     if max == nil or len <= max then
                         if (not (i.x == s.v.x and i.y == s.v.y)) or (not s.filtersame) then 
@@ -931,7 +943,8 @@ _grid.range = _grid.muxaffordance:new { edge = 1, fingers = { 2, 2 }, tdown = 0,
 _grid.range.new = function(self, o) 
     o = _grid.muxaffordance.new(self, o)
 
-    rawset(o, 'hlist', {})
+    --rawset(o, 'hlist', {})
+    o.hlist = {}
     o.count = { 1, 1 }
     o.fingers = { 1, 1 }
     
@@ -962,7 +975,8 @@ _grid.range.input.muxhandler = _obj_:new {
                 if #s.hlist >= 2 then 
                     local v = { s.hlist[1], s.hlist[#s.hlist] }
                     table.sort(v)
-                    s.hlist = {}
+                    --s.hlist = {}
+                    s:replace('hlist', {})
                     return v, util.time() - s.tdown 
                 end
             end
@@ -971,7 +985,8 @@ _grid.range.input.muxhandler = _obj_:new {
                 if s.edge == 0 then
                     local v = { s.hlist[1], s.hlist[#s.hlist] }
                     table.sort(v)
-                    s.hlist = {}
+                    --s.hlist = {}
+                    s:replace('hlist', {})
                     return v, util.time() - s.tdown 
                 end
             else
@@ -995,7 +1010,8 @@ _grid.range.input.muxhandler = _obj_:new {
                     table.sort(v, function(a, b) 
                         return a.x < b.x
                     end)
-                    s.hlist = {}
+                    --s.hlist = {}
+                    s:replace('hlist', {})
                     return v, util.time() - s.tdown 
                 end
             end
@@ -1006,7 +1022,8 @@ _grid.range.input.muxhandler = _obj_:new {
                     table.sort(v, function(a, b) 
                         return a.x < b.x
                     end)
-                    s.hlist = {}
+                    --s.hlist = {}
+                    s:replace('hlist', {})
                     return v, util.time() - s.tdown 
                 end
             else

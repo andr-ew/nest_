@@ -117,16 +117,27 @@ local pattern_time = require 'pattern_time'
 
 _pattern = _observer:new {
     --persistent = true, -- move to affordance ?
-    pass = function(self, sender, v, handler_args) 
+    pass = function(self, sender, v, in_v, handler_args) 
+        local package
+        if self.capture == 'value' then
+            package = type(v) == 'table' and v:new() or v
+        else
+            package = _obj_()
+            for i,w in ipairs(handler_args) do
+                package[i] = type(w) == 'table' and w:new() or w
+            end
+        end
+
         self:watch {
             path = sender:path(self.target),
-            package = self.capture == 'value' and v or handler_args
+            package = package 
         }
     end,
     process = function(self, e)
         local o = self.target:find(e.path)
+        local p = e.package
 
-        o.value = self.capture == 'value' and e.package or (o.action and o:action(o, table.unpack(e.package)) or e.package[1])
+        o.value = self.capture == 'value' and (type(p) == 'table' and p:new() or p) or (o.action and o:action(table.unpack(p)) or p[1])
         o:refresh(self.capture ~= 'value')
     end
 }
