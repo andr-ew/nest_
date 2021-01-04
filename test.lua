@@ -17,5 +17,13 @@ n = nest_ {
         action = function(self, value) 
             print(self.k, value)
         end
+    },
+    m2 = _grid.number {
+        x = { 8, 16 },
+        y = { 6, 8 },
+        lvl = { 4, 15 },
+        action = function(self, value) 
+            print(self.k, value)
+        end
     }
 } :connect { g = grid.connect() }

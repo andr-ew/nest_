@@ -197,6 +197,8 @@ _input = _obj_:new {
         if not silent then
             local defaults = self.arg_defaults or {}
             self.affordance.v = self.affordance.action and self.affordance:action(self.affordance.v, table.unpack(defaults)) or self.affordance.v
+
+            return self.affordance.v
         end
     end
 }
@@ -299,11 +301,14 @@ nest_ = _obj_:new {
         --end
     end,
     refresh = function(self, silent)
+        local ret = nil
         for i,v in ipairs(self.zsort) do 
             if v.refresh then
-                v:refresh(silent)
+                ret = v:refresh(silent)
             end
         end
+
+        return ret
     end,
     draw = function(self, devk)
         for i,v in ipairs(self.zsort) do
@@ -341,8 +346,20 @@ nest_ = _obj_:new {
 
         return p
     end,
-    set = function(self, t) end,
-    get = function(self) end,
+    set = function(self, t, silent) 
+        for k,v in pairs(t) do
+            if self[k] and type(self[k]) == 'table' and self[k].is_obj and self[k].set then
+                self[k]:set(v, silent)
+            end
+        end
+    end,
+    get = function(self, silent)
+        local t = _obj_:new()
+        for i,v in ipairs(self.zsort) do
+            if v.is_obj and rawget(v, 'get') then t[v.k] = v:get(silent) end
+        end
+        return t
+    end,
     write = function(self) end,
     read = function(self) end
 }
@@ -407,15 +424,35 @@ _affordance = nest_:new {
             end
         end
     end,
+    get = function(self, silent)
+        local t = nest_.get(self, silent)
+
+        t.value = type(self.value) == 'table' and self.value:new() or self.value -- watch out for value ~= _obj_ !
+        if silent == false then self:refresh(false) end
+
+        return t
+    end,
+    set = function(self, t, silent)
+        nest_.set(self, t, silence)
+
+        if t.value then 
+            if type(t.value) == 'table' then self.value = t.value:new()
+            else self.value = t.value end
+        end
+
+        self:refresh(silent)
+    end
+    --[[
     get = function(self, silent) 
         if not silent then
-            return self:update()
+            return self:refresh()
         else return self.v end
     end,
     set = function(self, v, silent)
         self:replace('v', v or self.v)
-        return self:get(silent)
+        if not self.silent then return self:refresh() end
     end
+    --]]
 }
 
 function _affordance:new(o)
