@@ -135,6 +135,39 @@ local function minit(axis)
     return v
 end
 
+-- accept clock function entry in lvl table as animation
+--[[
+
+blinking toggle
+lvl = { 
+    0,
+    4,
+    function(self, draw)
+        while true do
+            draw(5)
+            clock.sleep(0.1)
+            draw(0)
+            clock.sleep(0.1)
+            draw(5)
+            clock.sleep(0.1)
+            draw(0)
+            clock.sleep(0.6)
+        end
+    end
+}
+
+trigger
+lvl = {
+    0,
+    function(self, draw)
+        draw(15)
+        clock.sleep(0.1)
+        draw(0)
+    end
+}
+
+--]]
+
 _grid.binary.new = function(self, o) 
     o = _grid.muxaffordance.new(self, o)
 
@@ -347,6 +380,8 @@ _grid.toggle.new = function(self, o)
     return o
 end
 
+-- include (same as _arc.option.include)
+-- include/range: table entry per grid key
 local function toggle(s, v)
     local vv = (v + 1) % (((type(s.lvl) == 'table') and #s.lvl > 1) and (#s.lvl) or 2)
 
@@ -362,6 +397,7 @@ local function toggle(s, v)
     return vv
 end
 
+--[[
 local function togglehigh(s, v)
     local vv = ((type(s.lvl) == 'table') and #s.lvl > 1) and (#s.lvl - 1) or 1
 
@@ -376,6 +412,7 @@ local function togglehigh(s, v)
 
     return vv
 end
+--]]
 
 _grid.toggle.input.muxhandler = _obj_:new {
     point = function(s, x, y, z)
@@ -610,6 +647,7 @@ _grid.trigger.input.muxhandler = _obj_:new {
     end
 }
 
+-- refactor to use animation clock method
 _grid.trigger.output.muxredraw = _obj_:new {
     point = function(s, g, v)
         local l = lvl(s, 0)
