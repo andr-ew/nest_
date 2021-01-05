@@ -117,20 +117,15 @@ _etc.filebrowser
 
 ADD
 
-_grid.numbertoggle
+_grid.toggle.lvl -- accept clock funtion entry in table as animation
+_grid.toggle.include -- (same as _arc.option.include)
 
-_grid.pattern.toggle
-_grid.pattern.numbertoggle --switch btw multiple patterns
-_grid.preset.number
+_grid.pattern (toggle)
+_grid.preset (number)
 
 trigger & toggle t argument: restrict to range of held time when edge == 0 
 
-_grid.affordance.wrap ?
-_grid.shape (eathsea) named combinations of normalized trigger presses for line & plane. add the naming feature to trigger ? (un-normalized)
-
 REFACTOR
-
-remove v from fill
 
 grid.fader -> grid.control
 embed controlspec in grid.fader, align properties with argument names
@@ -141,6 +136,11 @@ add range to number, default to 1-based
 
 ?????
 ```
+_grid.affordance.wrap ?
+_grid.shape (eathsea) named combinations of normalized trigger presses for line & plane. add the naming feature to trigger ? (un-normalized)
+
+remove v from fill ?
+
 ? _obj_.metatable - allow access to the metatable for e.g. reassigning the __call metamethod, which is both useful when pointed to new and set. ?? what if we defaulted it to set but overrode it for library objects? 
 simpler solution would just be adding a property called __call which the metatable references. the other things we probs don't want to expose
 
