@@ -59,7 +59,7 @@ _obj_ = {
         for i,w in ipairs(self._.zsort) do 
             if w.k == k then table.remove(self._.zsort, i) end
         end
-    end
+    end,
     copy = function(self, o) 
         for k,v in pairs(self) do 
             if rawget(o, k) == nil then
