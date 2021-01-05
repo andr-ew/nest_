@@ -53,6 +53,13 @@ _obj_ = {
     replace = function(self, k, v)
         rawset(self, k, formattype(self, k, v, self._.clone_type))
     end,
+    remove = function(self, k)
+        self[k] = nil
+
+        for i,w in ipairs(self._.zsort) do 
+            if w.k == k then table.remove(self._.zsort, i) end
+        end
+    end
     copy = function(self, o) 
         for k,v in pairs(self) do 
             if rawget(o, k) == nil then
@@ -346,6 +353,7 @@ nest_ = _obj_:new {
 
         return p
     end,
+    observers_enabled = true,
     set = function(self, t, silent) 
         for k,v in pairs(t) do
             if self[k] and type(self[k]) == 'table' and self[k].is_obj and self[k].set then
@@ -353,13 +361,16 @@ nest_ = _obj_:new {
             end
         end
     end,
-    get = function(self, silent)
-        local t = _obj_:new()
-        for i,v in ipairs(self.zsort) do
-            if v.is_obj and rawget(v, 'get') then t[v.k] = v:get(silent) end
+    get = function(self, silent, test)
+        if test == nil or test(self) then
+            local t = _obj_:new()
+            for i,v in ipairs(self.zsort) do
+                if v.is_obj and rawget(v, 'get') then t[v.k] = v:get(silent, test) end
+            end
+            return t
         end
-        return t
     end,
+    persistent = true,
     write = function(self) end,
     read = function(self) end
 }
@@ -424,13 +435,15 @@ _affordance = nest_:new {
             end
         end
     end,
-    get = function(self, silent)
-        local t = nest_.get(self, silent)
+    get = function(self, silent, test)
+        if test == nil or test(self) then
+            local t = nest_.get(self, silent)
 
-        t.value = type(self.value) == 'table' and self.value:new() or self.value -- watch out for value ~= _obj_ !
-        if silent == false then self:refresh(false) end
+            t.value = type(self.value) == 'table' and self.value:new() or self.value -- watch out for value ~= _obj_ !
+            if silent == false then self:refresh(false) end
 
-        return t
+            return t
+        end
     end,
     set = function(self, t, silent)
         nest_.set(self, t, silence)
@@ -529,8 +542,87 @@ function _observer:copy(o)
     return o
 end
 
-_preset = _observer:new { -------------------------------
+_preset = _observer:new { 
+    capture = 'value',
+    state = nest_:new(),
+    pass = function(self, sender, v)
+        local o = state[self.v]:find(sender:path(self.target))
+        if o then
+            o.value = type(v) == 'table' and v:new() or v
+        end
+    end,
+    store = function(self, n) 
+        self.state:replace(n, self.target:get(true, function(self) return self.p_.observers_enabed end))
+    end,
+    recall = function(self, n)
+        self.target:set(self.state[n], false)
+    end,
+    clear = function(self, n)
+        self.state:remove(n) --- meh, i wish zsort wasn't so annoying :/
+    end,
+    copy = function(self, n_src, n_dest)
+        self.state:replace(n_src, self.state[n_dest]:new())
+    end,
+    get = function(self, silent, test) 
+        if test == nil or test(self) then
+            return _obj_:new { state = self.state:new() }
+        end
+    end,
+    set = function(self, t)
+        if t.state then
+            self.state = t.state:new()
+        end
+    end
 }
+
+local pattern_time = require 'pattern_time'
+
+_pattern = _observer:new {
+    pass = function(self, sender, v, in_v, handler_args) 
+        local package
+        if self.capture == 'value' then
+            package = type(v) == 'table' and v:new() or v
+        else
+            package = _obj_()
+            for i,w in ipairs(handler_args) do
+                package[i] = type(w) == 'table' and w:new() or w
+            end
+        end
+
+        self:watch {
+            path = sender:path(self.target),
+            package = package 
+        }
+    end,
+    process = function(self, e)
+        local o = self.target:find(e.path)
+        local p = e.package
+
+        o.value = self.capture == 'value' and (type(p) == 'table' and p:new() or p) or (o.action and o:action(table.unpack(p)) or p[1])
+        o:refresh(self.capture ~= 'value')
+    end,
+    get = function() end,
+    set = function() end
+}
+
+function _pattern:new(o) 
+    o = _observer.new(self, o)
+
+    local pt = pattern_time.new()
+    pt.process = function(e) o:process(e) end
+
+    local mt = getmetatable(o)
+    local mti = mt.__index
+
+    --alias _pattern to pattern_time instance
+    mt.__index = function(t, k)
+        if k == 'new' then return mti(t, k)
+        elseif pt[k] then return pt[k]
+        else return mti(t, k) end
+    end
+
+    return o
+end
 
 _group = _obj_:new {}
 

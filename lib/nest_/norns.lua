@@ -113,57 +113,6 @@ end
 
 ----------------------------------------------------------------------------------------------------
 
-local pattern_time = require 'pattern_time'
-
-_pattern = _observer:new {
-    pass = function(self, sender, v, in_v, handler_args) 
-        local package
-        if self.capture == 'value' then
-            package = type(v) == 'table' and v:new() or v
-        else
-            package = _obj_()
-            for i,w in ipairs(handler_args) do
-                package[i] = type(w) == 'table' and w:new() or w
-            end
-        end
-
-        self:watch {
-            path = sender:path(self.target),
-            package = package 
-        }
-    end,
-    process = function(self, e)
-        local o = self.target:find(e.path)
-        local p = e.package
-
-        o.value = self.capture == 'value' and (type(p) == 'table' and p:new() or p) or (o.action and o:action(table.unpack(p)) or p[1])
-        o:refresh(self.capture ~= 'value')
-    end,
-    get = function() end,
-    set = function() end
-}
-
-function _pattern:new(o) 
-    o = _observer.new(self, o)
-
-    local pt = pattern_time.new()
-    pt.process = function(e) o:process(e) end
-
-    local mt = getmetatable(o)
-    local mti = mt.__index
-
-    --alias _pattern to pattern_time instance
-    mt.__index = function(t, k)
-        if k == 'new' then return mti(t, k)
-        elseif pt[k] then return pt[k]
-        else return mti(t, k) end
-    end
-
-    return o
-end
-
-----------------------------------------------------------------------------------------------------
-
 _screen = _group:new()
 _screen.devk = 'screen'
 
