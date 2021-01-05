@@ -828,6 +828,7 @@ _grid.number.input.muxhandler = _obj_:new {
     end
 }
 
+
 _grid.number.output.muxredraw = _obj_:new {
     point = function(s, g, v)
         local lvl = lvl(s, 1)
@@ -855,7 +856,9 @@ _grid.number.output.muxredraw = _obj_:new {
     end
 }
 
-_grid.fader = _grid.number:new { range = { 0, 1 }, lvl = { 0, 4, 15 } }
+-- grid.numbertoggle ---------------------------------------------------------------------
+
+_grid.fader = _grid.number:new { range = { 0, 1 }, lvl = { 0, 4, 15 } } ----> grid.control
 
 _grid.fader.input.muxhandler = _obj_:new {
     point = function(s, x, y, z) 
@@ -1069,5 +1072,7 @@ _grid.range.output.muxredraw = _obj_:new {
         end
     end
 }
+
+-- grid.preset.number, grid.pattern.toggle, grid.patern.numbertoggle
 
 return _grid

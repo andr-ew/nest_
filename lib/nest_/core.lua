@@ -181,7 +181,9 @@ _input = _obj_:new {
 
                         if self.observers_enabled then
                             for i,w in ipairs(ob) do
-                                w:pass(self.affordance, self.affordance.v, aargs)
+                                if w.affordance.id ~= self.affordance.id then 
+                                    w:pass(self.affordance, self.affordance.v, aargs)
+                                end
                             end
                         end
                     end
@@ -552,7 +554,9 @@ _preset = _observer:new {
         end
     end,
     store = function(self, n) 
-        self.state:replace(n, self.target:get(true, function(self) return self.p_.observers_enabed end))
+        self.state:replace(n, self.target:get(true, function(o) 
+            return o.p_.observers_enabed and o.id ~= self.id
+        end))
     end,
     recall = function(self, n)
         self.target:set(self.state[n], false)
@@ -579,20 +583,20 @@ local pattern_time = require 'pattern_time'
 
 _pattern = _observer:new {
     pass = function(self, sender, v, in_v, handler_args) 
-        local package
-        if self.capture == 'value' then
-            package = type(v) == 'table' and v:new() or v
-        else
-            package = _obj_()
-            for i,w in ipairs(handler_args) do
-                package[i] = type(w) == 'table' and w:new() or w
+            local package
+            if self.capture == 'value' then
+                package = type(v) == 'table' and v:new() or v
+            else
+                package = _obj_()
+                for i,w in ipairs(handler_args) do
+                    package[i] = type(w) == 'table' and w:new() or w
+                end
             end
-        end
 
-        self:watch {
-            path = sender:path(self.target),
-            package = package 
-        }
+            self:watch(_obj_:new {
+                path = sender:path(self.target),
+                package = package 
+            })
     end,
     process = function(self, e)
         local o = self.target:find(e.path)
@@ -601,8 +605,26 @@ _pattern = _observer:new {
         o.value = self.capture == 'value' and (type(p) == 'table' and p:new() or p) or (o.action and o:action(table.unpack(p)) or p[1])
         o:refresh(self.capture ~= 'value')
     end,
-    get = function() end,
-    set = function() end
+    get = function(self, silent, test) 
+        if test == nil or test(self) then
+            local t = _obj_:new { event = {}, time = {}, count = self.count, step = self.step }
+
+            for i = 1, self.count do
+                t.time[i] = self.time[i]
+                t.event[i] = self.event[i]:new()
+            end
+        end
+    end,
+    set = function(self, t)
+        if t.event then
+            self.count = t.count
+            self.step = t.step
+            for i = 1, t.count do
+                self.time[i] = t.time[i]
+                self.event[i] = t.event[i]:new()
+            end
+        end
+    end
 }
 
 function _pattern:new(o) 
