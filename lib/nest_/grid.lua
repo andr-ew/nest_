@@ -291,8 +291,10 @@ _grid.binary.output.muxhandler = _obj_:new {
             clock.cancel(s.clock)
         end
     --]]
+        print('output.handler', v)
     end,
-    line = function(s, v) end,
+    line_x = function(s, v) end,
+    line_y = function(s, v) end,
     plane = function(s, v) end
 }
 

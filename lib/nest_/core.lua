@@ -182,6 +182,8 @@ _input = _obj_:new {
                                 end
                             end
                         end
+
+                        return true
                     end
                 end
                 
@@ -194,7 +196,7 @@ _input = _obj_:new {
                     end
                 end
                 --]]
-                return true
+                --return true
             end
         --[[
         elseif devk == nil or args == nil then -- called w/o arguments
@@ -460,14 +462,14 @@ _affordance = nest_:new {
     end,
     refresh = function(self, silent)
         if not silent then
-            local defaults = v.arg_defaults or {}
+            local defaults = self.arg_defaults or {}
             self.v = self.action and self:action(self.v, table.unpack(defaults)) or self.v
         end
 
         for i,v in ipairs(self.zsort) do 
             if v.is_output and self.devs[v.devk] then 
                 self.devs[v.devk].dirty = true
-                if v.handler then v:handler(self.v)
+                if v.handler then v:handler(self.v) end
             end
         end
 
