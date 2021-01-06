@@ -19,6 +19,9 @@ nest_.connect = function(self, objects, fps)
                     self:draw(kk) 
                     vv:refresh()
                 end,
+                refresh = function()
+                    vv:refresh()
+                end,
                 handler = function(...)
                     self:update(kk, {...}, {})
                 end
@@ -65,6 +68,9 @@ nest_.connect = function(self, objects, fps)
 
             devs[kk] = _dev:new {
                 object = screen,
+                refresh = function()
+                    screen.update()
+                end,
                 redraw = function()
                     screen.clear()
                     self:draw('screen')

@@ -153,6 +153,7 @@ _grid.binary.new = function(self, o)
     o.tlast = minit(axis)
     o.theld = minit(axis)
     o.vinit = minit(axis)
+    o.frame = minit(axis)
     o.blank = {}
 
     o.arg_defaults = {
@@ -278,20 +279,19 @@ local lclock = function(s, g, x, y, lvl)
 
 _grid.binary.output.muxhandler = _obj_:new {
     point = function(s, v) 
-    --[[
         local lvl = lvl(s, v)
+        local d = s.devs.g
 
         if type(lvl) == 'function' then
             s.clock = clock.run(function()
                 lvl(s, function(l)
-                    
+                    s.frame = l
+                    d.dirty = true
                 end)
             end)
         else
             clock.cancel(s.clock)
         end
-    --]]
-        print('output.handler', v)
     end,
     line_x = function(s, v) end,
     line_y = function(s, v) end,
@@ -306,10 +306,8 @@ _grid.binary.output.muxredraw = _obj_:new {
     point = function(s, g, v)
         local lvl = lvl(s, v)
 
-        if type(lvl) == 'function' then
-        else
-            if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
-        end
+        if type(lvl) == 'function' then lvl = s.frame end
+        if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
     end,
     line_x = function(s, g, v)
         for x,l in ipairs(v) do 

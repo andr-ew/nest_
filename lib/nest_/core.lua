@@ -266,11 +266,16 @@ _output = _obj_:new {
             if self.redraw then self.devs[devk].dirty = self:redraw(self.devs[devk].object, self.v, t) or self.devs[devk].dirty end -- refactor dirty flag set
         end
     end,
+    --[[
+    -- this is a tiny bit of a gotcha since it breaks layering, but for now it feels worth saving the cycles -- maybe I'll factor this out later
     draw_clean = function(self, f, ...)
         if (self.enabled == nil or self.p_.enabled) then
-            f(self.devs[self.devk].object, self.v, ...)
+            local d = self.devs[self.devk]
+            f(d.object, self.v, ...)
+            d:refresh()
         end
     end
+    --]]
 }
 
 _output.new = _input.new
