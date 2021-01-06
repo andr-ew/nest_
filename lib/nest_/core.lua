@@ -169,10 +169,6 @@ _input = _obj_:new {
             local hargs = self:filter(args)
             
             if hargs ~= nil and self.affordance then
-                for i,v in ipairs(self.affordance.zsort) do
-                    if v.devk and self.devs[v.devk] then self.devs[v.devk].dirty = true end
-                end
- 
                 if self.handler then 
                     local aargs = table.pack(self:handler(table.unpack(hargs)))
 
@@ -188,6 +184,17 @@ _input = _obj_:new {
                         end
                     end
                 end
+                
+                --[[
+                for i,v in ipairs(self.affordance.zsort) do
+                    if v.devk and self.devs[v.devk] then self.devs[v.devk].dirty = true end
+
+                    if v.is_output and v.handler then 
+                        v:handler(self.affordance.v, table.unpack(hargs)) 
+                    end
+                end
+                --]]
+                return true
             end
         --[[
         elseif devk == nil or args == nil then -- called w/o arguments
@@ -200,6 +207,7 @@ _input = _obj_:new {
         --]]
         end
     end,
+    --[[
     refresh = function(self, silent)
         if self.devs[self.devk] then self.devs[self.devk].dirty = true end
 
@@ -210,6 +218,7 @@ _input = _obj_:new {
             return self.affordance.v
         end
     end
+    --]]
 }
 
 function _input:new(o)
@@ -252,7 +261,12 @@ _output = _obj_:new {
     devk = nil,
     draw = function(self, devk, t)
         if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
-            if self.redraw then self.devs[devk].dirty = self:redraw(self.devs[devk].object, self.v, t) or self.devs[devk].dirty end
+            if self.redraw then self.devs[devk].dirty = self:redraw(self.devs[devk].object, self.v, t) or self.devs[devk].dirty end -- refactor dirty flag set
+        end
+    end,
+    draw_clean = function(self, f, ...)
+        if (self.enabled == nil or self.p_.enabled) then
+            f(self.devs[self.devk].object, self.v, ...)
         end
     end
 }
@@ -297,6 +311,7 @@ nest_ = _obj_:new {
             return ret
         --]] 
         if self.enabled == nil or self.p_.enabled == true then
+            local ret
 
             if self.observers_enabled then 
                 for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
@@ -304,16 +319,18 @@ nest_ = _obj_:new {
 
             for i,v in ipairs(self.zsort) do 
                 if v.update then
-                    v:update(devk, args, ob)
+                    ret = v:update(devk, args, ob) or ret
                 end
             end
+
+            return ret
         end
     end,
     refresh = function(self, silent)
-        local ret = nil
+        local ret
         for i,v in ipairs(self.zsort) do 
             if v.refresh then
-                ret = v:refresh(silent)
+                ret = v:refresh(silent) or ret
             end
         end
 
@@ -436,6 +453,25 @@ _affordance = nest_:new {
                 self.output:draw(devk)
             end
         end
+    end,
+    update = function(self, ...)
+        local dirty = nest_.update(self, ...)
+        if dirty then return self:refresh(true) end
+    end,
+    refresh = function(self, silent)
+        if not silent then
+            local defaults = v.arg_defaults or {}
+            self.v = self.action and self:action(self.v, table.unpack(defaults)) or self.v
+        end
+
+        for i,v in ipairs(self.zsort) do 
+            if v.is_output and self.devs[v.devk] then 
+                self.devs[v.devk].dirty = true
+                if v.handler then v:handler(self.v)
+            end
+        end
+
+        return self.v
     end,
     get = function(self, silent, test)
         if test == nil or test(self) then

@@ -86,7 +86,7 @@ _grid.muxaffordance.output.muxredraw = _obj_:new {
     plane = function(s) end
 }
 
-_grid.muxaffordance.output.redraw = function(s, g, v)
+local function redrawfilter(s)
     local has_axis = { x = false, y = false }
 
     for i,v in ipairs{"x", "y"} do
@@ -97,18 +97,22 @@ _grid.muxaffordance.output.redraw = function(s, g, v)
             end
         end
     end
-
+    
     if has_axis.x == false and has_axis.y == false then
-        return s.muxredraw.point(s, g, v)
+        return 'point'
     elseif has_axis.x and has_axis.y then
-        return s.muxredraw.plane(s, g, v)
+        return 'plane'
     else
         if has_axis.x then
-            return s.muxredraw.line_x(s, g, v)
+            return 'line_x'
         elseif has_axis.y then
-            return s.muxredraw.line_y(s, g, v)
+            return 'line_y'
         end
     end
+end
+
+_grid.muxaffordance.output.redraw = function(s, g, v)
+    return s.muxredraw[redrawfilter(s)](s, g, v)
 end
 
 _grid.binary = _grid.muxaffordance:new({ count = nil, fingers = nil }) -- local supertype for binary, toggle, trigger
@@ -270,21 +274,30 @@ lvl = {
 --]]
 
 local lclock = function(s, g, x, y, lvl)
-    return clock.run(function()
-        lvl(s, function(l)
-            
-        end)
-    end)
-end
+    return end
 
 _grid.binary.output.muxhandler = _obj_:new {
-    point = function(s, z) end,
-    line = function(s, v, z) end,
-    plane = function(s, x, y, z) end
+    point = function(s, v) 
+    --[[
+        local lvl = lvl(s, v)
+
+        if type(lvl) == 'function' then
+            s.clock = clock.run(function()
+                lvl(s, function(l)
+                    
+                end)
+            end)
+        else
+            clock.cancel(s.clock)
+        end
+    --]]
+    end,
+    line = function(s, v) end,
+    plane = function(s, v) end
 }
 
-_grid.binary.output.handler = function(s, k, ...)
-    return s.muxhandler[k](s, ...)
+_grid.binary.output.handler = function(s, v)
+    return s.muxhandler[redrawfilter(s)](s, v)
 end
 
 _grid.binary.output.muxredraw = _obj_:new {
