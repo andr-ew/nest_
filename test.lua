@@ -15,6 +15,12 @@ n = nest_ {
         y = 1,
         lvl = { 
             0, 
+            4,
+            function(self, draw)
+                draw(15)
+                clock.sleep(0.5)
+                draw(0)
+            end,
             function(self, draw)
                 while true do
                     draw(15)

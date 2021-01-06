@@ -289,7 +289,7 @@ _grid.binary.output.muxhandler = _obj_:new {
                     d.dirty = true
                 end)
             end)
-        else
+        elseif s.clock then
             clock.cancel(s.clock)
         end
     end,
