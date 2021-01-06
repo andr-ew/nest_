@@ -135,39 +135,6 @@ local function minit(axis)
     return v
 end
 
--- accept clock function entry in lvl table as animation
---[[
-
-blinking toggle
-lvl = { 
-    0,
-    4,
-    function(self, draw)
-        while true do
-            draw(5)
-            clock.sleep(0.1)
-            draw(0)
-            clock.sleep(0.1)
-            draw(5)
-            clock.sleep(0.1)
-            draw(0)
-            clock.sleep(0.6)
-        end
-    end
-}
-
-trigger
-lvl = {
-    0,
-    function(self, draw)
-        draw(15)
-        clock.sleep(0.1)
-        draw(0)
-    end
-}
-
---]]
-
 _grid.binary.new = function(self, o) 
     o = _grid.muxaffordance.new(self, o)
 
@@ -269,10 +236,65 @@ local lvl = function(s, i)
     return (type(x) ~= 'table') and ((i > 0) and x or 0) or x[i + 1] or 15
 end
 
+-- accept clock function entry in lvl table as animation
+--[[
+
+blinking toggle
+lvl = { 
+    0,
+    4,
+    function(self, draw)
+        while true do
+            draw(5)
+            clock.sleep(0.1)
+            draw(0)
+            clock.sleep(0.1)
+            draw(5)
+            clock.sleep(0.1)
+            draw(0)
+            clock.sleep(0.6)
+        end
+    end
+}
+
+trigger
+lvl = {
+    0,
+    function(self, draw)
+        draw(15)
+        clock.sleep(0.1)
+        draw(0)
+    end
+}
+
+--]]
+
+local lclock = function(s, g, x, y, lvl)
+    return clock.run(function()
+        lvl(s, function(l)
+            
+        end)
+    end)
+end
+
+_grid.binary.output.muxhandler = _obj_:new {
+    point = function(s, z) end,
+    line = function(s, v, z) end,
+    plane = function(s, x, y, z) end
+}
+
+_grid.binary.output.handler = function(s, k, ...)
+    return s.muxhandler[k](s, ...)
+end
+
 _grid.binary.output.muxredraw = _obj_:new {
     point = function(s, g, v)
         local lvl = lvl(s, v)
-        if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
+
+        if type(lvl) == 'function' then
+        else
+            if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
+        end
     end,
     line_x = function(s, g, v)
         for x,l in ipairs(v) do 
