@@ -154,6 +154,7 @@ _grid.binary.new = function(self, o)
     o.theld = minit(axis)
     o.vinit = minit(axis)
     o.frame = minit(axis)
+    o.clock = minit(axis)
     o.blank = {}
 
     o.arg_defaults = {
@@ -282,6 +283,8 @@ _grid.binary.output.muxhandler = _obj_:new {
         local lvl = lvl(s, v)
         local d = s.devs.g
 
+        if s.clock then clock.cancel(s.clock) end
+
         if type(lvl) == 'function' then
             s.clock = clock.run(function()
                 lvl(s, function(l)
@@ -289,14 +292,45 @@ _grid.binary.output.muxhandler = _obj_:new {
                     d.dirty = true
                 end)
             end)
-        elseif s.clock then
-            clock.cancel(s.clock)
         end
     end,
-    line_x = function(s, v) end,
-    line_y = function(s, v) end,
-    plane = function(s, v) end
+    line_x = function(s, v) 
+        local d = s.devs.g
+        for x,w in ipairs(v) do 
+            local lvl = lvl(s, w)
+            if s.clock[x] then clock.cancel(s.clock[x]) end
+
+            if type(lvl) == 'function' then
+                s.clock[x] = clock.run(function()
+                    lvl(s, function(l)
+                        s.frame[x] = l
+                        d.dirty = true
+                    end)
+                end)
+            end
+        end
+    end,
+    plane = function(s, v) 
+        local d = s.devs.g
+        for x,r in ipairs(v) do 
+            for y,w in ipairs(r) do 
+                local lvl = lvl(s, w)
+                if s.clock[x][y] then clock.cancel(s.clock[x][y]) end
+
+                if type(lvl) == 'function' then
+                    s.clock[x][y] = clock.run(function()
+                        lvl(s, function(l)
+                            s.frame[x][y] = l
+                            d.dirty = true
+                        end)
+                    end)
+                end
+            end
+        end
+    end
 }
+
+_grid.binary.output.muxhandler.line_y = _grid.binary.output.muxhandler.line_x
 
 _grid.binary.output.handler = function(s, v)
     return s.muxhandler[redrawfilter(s)](s, v)
@@ -312,12 +346,14 @@ _grid.binary.output.muxredraw = _obj_:new {
     line_x = function(s, g, v)
         for x,l in ipairs(v) do 
             local lvl = lvl(s, l)
+            if type(lvl) == 'function' then lvl = s.frame[x] end
             if lvl > 0 then g:led(x + s.p_.x[1] - 1, s.p_.y, lvl) end
         end
     end,
     line_y = function(s, g, v)
         for y,l in ipairs(v) do 
             local lvl = lvl(s, l)
+            if type(lvl) == 'function' then lvl = s.frame[y] end
             if lvl > 0 then g:led(s.p_.x, y + s.p_.y[1] - 1, lvl) end
         end
     end,
@@ -325,6 +361,7 @@ _grid.binary.output.muxredraw = _obj_:new {
         for x,r in ipairs(v) do 
             for y,l in ipairs(r) do 
                 local lvl = lvl(s, l)
+                if type(lvl) == 'function' then lvl = s.frame[x][y] end
                 if lvl > 0 then g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl) end
             end
         end
@@ -558,7 +595,17 @@ _grid.toggle.input.muxhandler = _obj_:new {
     end
 }
 
-_grid.trigger = _grid.binary:new { edge = 1, blinktime = 0.1 }
+_grid.trigger = _grid.binary:new { 
+    edge = 1, 
+    lvl = {
+        0,
+        function(s, draw)
+            draw(15)
+            clock.sleep(0.1)
+            draw(0)
+        end
+    }
+}
 
 _grid.trigger.new = function(self, o) 
     o = _grid.binary.new(self, o)
@@ -682,77 +729,29 @@ _grid.trigger.input.muxhandler = _obj_:new {
     end
 }
 
--- refactor to use animation clock method
-_grid.trigger.output.muxredraw = _obj_:new {
-    point = function(s, g, v)
-        local l = lvl(s, 0)
-        if v > 0 then
-            s.v = v - 1/30/s.blinktime
-            l = lvl(s, s.v > 0 and 1 or 0)
-        else
-            s.v = 0
+_grid.trigger.output.muxhandler = _obj_:new {
+    point = function(s, v) 
+        local lvl = lvl(s, v)
+        local d = s.devs.g
+
+        if s.clock then clock.cancel(s.clock) end
+
+        if type(lvl) == 'function' then
+            s.clock = clock.run(function()
+                lvl(s, function(l)
+                    s.frame = l
+                    d.dirty = true
+                    
+                    if s.v > 0 and l <= 0 then
+                        s.v = 0
+                    end
+                end)
+            end)
         end
-        
-        if l > 0 then g:led(s.p_.x, s.p_.y, l) end
-        
-        return s.v > 0
     end,
-    line_x = function(s, g, v)
-        local ret = false
-
-        for x,w in ipairs(v) do 
-            local l = lvl(s, 0)
-            if w > 0 then 
-                s.v[x] = w - 1/30/s.blinktime
-                l = lvl(s, s.v[x] > 0 and 1 or 0)
-            else
-                s.v[x] = 0
-            end
-            
-            if l > 0 then g:led(x + s.p_.x[1] - 1, s.p_.y, l) end
-            ret = true
-        end
-
-        return ret
-    end,
-    line_y = function(s, g, v)
-        local ret = false
-
-        for x,w in ipairs(v) do 
-            local l = lvl(s, 0)
-            if w > 0 then 
-                s.v[x] = w - 1/30/s.blinktime
-                l = lvl(s, s.v[x] > 0 and 1 or 0)
-            else
-                s.v[x] = 0
-            end
-            
-            if l > 0 then g:led(s.p_.x, y + s.p_.y[1] - 1, l) end
-            ret = true
-        end
-
-        return ret
-    end,
-    plane = function(s, g, v)
-        local ret = false
-
-        for x,r in ipairs(v) do 
-            for y,w in ipairs(r) do 
-                local l = lvl(s, 0)
-                if w > 0 then 
-                    s.v[x][y] = w - 1/30/s.blinktime
-                    l = lvl(s, s.v[x][y] > 0 and 1 or 0)
-                else
-                    s.v[x][y] = 0
-                end
-                
-                if l > 0 then g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, l) end
-                ret = true
-            end
-        end
-
-        return ret
-    end
+    line_x = function(s, v) end,
+    line_y = function(s, v) end,
+    plane = function(s, v) end
 }
 
 _grid.fill = _grid.muxaffordance:new()
