@@ -31,6 +31,7 @@ local function apage(self) return math.floor(a.tab.value) == self.k end
 
 -------------------------------------------------grid
 
+-- print more action args
 g = nest_ {
     tab = _grid.number {
         x = { 1, 7 },
@@ -231,7 +232,10 @@ g = nest_ {
                 end
             },
             enabled = gpage
-        }
+        },
+        -----------------------------------------binary modalities 
+        -- (fingers, count, lvl clocks)
+        -----------------------------------------pattern/presets
     }
 } :connect {
     g = grid.connect()

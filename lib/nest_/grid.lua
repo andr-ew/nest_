@@ -86,7 +86,7 @@ _grid.muxaffordance.output.muxredraw = _obj_:new {
     plane = function(s) end
 }
 
-_grid.muxaffordance.output.redraw = function(s, g, v)
+local function redrawfilter(s)
     local has_axis = { x = false, y = false }
 
     for i,v in ipairs{"x", "y"} do
@@ -97,18 +97,22 @@ _grid.muxaffordance.output.redraw = function(s, g, v)
             end
         end
     end
-
+    
     if has_axis.x == false and has_axis.y == false then
-        return s.muxredraw.point(s, g, v)
+        return 'point'
     elseif has_axis.x and has_axis.y then
-        return s.muxredraw.plane(s, g, v)
+        return 'plane'
     else
         if has_axis.x then
-            return s.muxredraw.line_x(s, g, v)
+            return 'line_x'
         elseif has_axis.y then
-            return s.muxredraw.line_y(s, g, v)
+            return 'line_y'
         end
     end
+end
+
+_grid.muxaffordance.output.redraw = function(s, g, v)
+    return s.muxredraw[redrawfilter(s)](s, g, v)
 end
 
 _grid.binary = _grid.muxaffordance:new({ count = nil, fingers = nil }) -- local supertype for binary, toggle, trigger
@@ -135,39 +139,6 @@ local function minit(axis)
     return v
 end
 
--- accept clock function entry in lvl table as animation
---[[
-
-blinking toggle
-lvl = { 
-    0,
-    4,
-    function(self, draw)
-        while true do
-            draw(5)
-            clock.sleep(0.1)
-            draw(0)
-            clock.sleep(0.1)
-            draw(5)
-            clock.sleep(0.1)
-            draw(0)
-            clock.sleep(0.6)
-        end
-    end
-}
-
-trigger
-lvl = {
-    0,
-    function(self, draw)
-        draw(15)
-        clock.sleep(0.1)
-        draw(0)
-    end
-}
-
---]]
-
 _grid.binary.new = function(self, o) 
     o = _grid.muxaffordance.new(self, o)
 
@@ -182,6 +153,8 @@ _grid.binary.new = function(self, o)
     o.tlast = minit(axis)
     o.theld = minit(axis)
     o.vinit = minit(axis)
+    o.frame = minit(axis)
+    o.clock = minit(axis)
     o.blank = {}
 
     o.arg_defaults = {
@@ -269,20 +242,118 @@ local lvl = function(s, i)
     return (type(x) ~= 'table') and ((i > 0) and x or 0) or x[i + 1] or 15
 end
 
+-- accept clock function entry in lvl table as animation
+--[[
+
+blinking toggle
+lvl = { 
+    0,
+    4,
+    function(self, draw)
+        while true do
+            draw(5)
+            clock.sleep(0.1)
+            draw(0)
+            clock.sleep(0.1)
+            draw(5)
+            clock.sleep(0.1)
+            draw(0)
+            clock.sleep(0.6)
+        end
+    end
+}
+
+trigger
+lvl = {
+    0,
+    function(self, draw)
+        draw(15)
+        clock.sleep(0.1)
+        draw(0)
+    end
+}
+
+--]]
+
+local lclock = function(s, g, x, y, lvl)
+    return end
+
+_grid.binary.output.muxhandler = _obj_:new {
+    point = function(s, v) 
+        local lvl = lvl(s, v)
+        local d = s.devs.g
+
+        if s.clock then clock.cancel(s.clock) end
+
+        if type(lvl) == 'function' then
+            s.clock = clock.run(function()
+                lvl(s, function(l)
+                    s.frame = l
+                    d.dirty = true
+                end)
+            end)
+        end
+    end,
+    line_x = function(s, v) 
+        local d = s.devs.g
+        for x,w in ipairs(v) do 
+            local lvl = lvl(s, w)
+            if s.clock[x] then clock.cancel(s.clock[x]) end
+
+            if type(lvl) == 'function' then
+                s.clock[x] = clock.run(function()
+                    lvl(s, function(l)
+                        s.frame[x] = l
+                        d.dirty = true
+                    end)
+                end)
+            end
+        end
+    end,
+    plane = function(s, v) 
+        local d = s.devs.g
+        for x,r in ipairs(v) do 
+            for y,w in ipairs(r) do 
+                local lvl = lvl(s, w)
+                if s.clock[x][y] then clock.cancel(s.clock[x][y]) end
+
+                if type(lvl) == 'function' then
+                    s.clock[x][y] = clock.run(function()
+                        lvl(s, function(l)
+                            s.frame[x][y] = l
+                            d.dirty = true
+                        end)
+                    end)
+                end
+            end
+        end
+    end
+}
+
+_grid.binary.output.muxhandler.line_y = _grid.binary.output.muxhandler.line_x
+
+_grid.binary.output.handler = function(s, v)
+    return s.muxhandler[redrawfilter(s)](s, v)
+end
+
 _grid.binary.output.muxredraw = _obj_:new {
     point = function(s, g, v)
         local lvl = lvl(s, v)
+
+        if type(lvl) == 'function' then lvl = s.frame end
         if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
     end,
     line_x = function(s, g, v)
         for x,l in ipairs(v) do 
             local lvl = lvl(s, l)
+            if type(lvl) == 'function' then lvl = s.frame[x] end
             if lvl > 0 then g:led(x + s.p_.x[1] - 1, s.p_.y, lvl) end
         end
     end,
     line_y = function(s, g, v)
         for y,l in ipairs(v) do 
             local lvl = lvl(s, l)
+            if type(lvl) == 'function' then lvl = s.frame[y] end
             if lvl > 0 then g:led(s.p_.x, y + s.p_.y[1] - 1, lvl) end
         end
     end,
@@ -290,6 +361,7 @@ _grid.binary.output.muxredraw = _obj_:new {
         for x,r in ipairs(v) do 
             for y,l in ipairs(r) do 
                 local lvl = lvl(s, l)
+                if type(lvl) == 'function' then lvl = s.frame[x][y] end
                 if lvl > 0 then g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl) end
             end
         end
@@ -523,7 +595,17 @@ _grid.toggle.input.muxhandler = _obj_:new {
     end
 }
 
-_grid.trigger = _grid.binary:new { edge = 1, blinktime = 0.1 }
+_grid.trigger = _grid.binary:new { 
+    edge = 1, 
+    lvl = {
+        0,
+        function(s, draw)
+            draw(15)
+            clock.sleep(0.1)
+            draw(0)
+        end
+    }
+}
 
 _grid.trigger.new = function(self, o) 
     o = _grid.binary.new(self, o)
@@ -647,77 +729,29 @@ _grid.trigger.input.muxhandler = _obj_:new {
     end
 }
 
--- refactor to use animation clock method
-_grid.trigger.output.muxredraw = _obj_:new {
-    point = function(s, g, v)
-        local l = lvl(s, 0)
-        if v > 0 then
-            s.v = v - 1/30/s.blinktime
-            l = lvl(s, s.v > 0 and 1 or 0)
-        else
-            s.v = 0
+_grid.trigger.output.muxhandler = _obj_:new {
+    point = function(s, v) 
+        local lvl = lvl(s, v)
+        local d = s.devs.g
+
+        if s.clock then clock.cancel(s.clock) end
+
+        if type(lvl) == 'function' then
+            s.clock = clock.run(function()
+                lvl(s, function(l)
+                    s.frame = l
+                    d.dirty = true
+                    
+                    if s.v > 0 and l <= 0 then
+                        s.v = 0
+                    end
+                end)
+            end)
         end
-        
-        if l > 0 then g:led(s.p_.x, s.p_.y, l) end
-        
-        return s.v > 0
     end,
-    line_x = function(s, g, v)
-        local ret = false
-
-        for x,w in ipairs(v) do 
-            local l = lvl(s, 0)
-            if w > 0 then 
-                s.v[x] = w - 1/30/s.blinktime
-                l = lvl(s, s.v[x] > 0 and 1 or 0)
-            else
-                s.v[x] = 0
-            end
-            
-            if l > 0 then g:led(x + s.p_.x[1] - 1, s.p_.y, l) end
-            ret = true
-        end
-
-        return ret
-    end,
-    line_y = function(s, g, v)
-        local ret = false
-
-        for x,w in ipairs(v) do 
-            local l = lvl(s, 0)
-            if w > 0 then 
-                s.v[x] = w - 1/30/s.blinktime
-                l = lvl(s, s.v[x] > 0 and 1 or 0)
-            else
-                s.v[x] = 0
-            end
-            
-            if l > 0 then g:led(s.p_.x, y + s.p_.y[1] - 1, l) end
-            ret = true
-        end
-
-        return ret
-    end,
-    plane = function(s, g, v)
-        local ret = false
-
-        for x,r in ipairs(v) do 
-            for y,w in ipairs(r) do 
-                local l = lvl(s, 0)
-                if w > 0 then 
-                    s.v[x][y] = w - 1/30/s.blinktime
-                    l = lvl(s, s.v[x][y] > 0 and 1 or 0)
-                else
-                    s.v[x][y] = 0
-                end
-                
-                if l > 0 then g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, l) end
-                ret = true
-            end
-        end
-
-        return ret
-    end
+    line_x = function(s, v) end,
+    line_y = function(s, v) end,
+    plane = function(s, v) end
 }
 
 _grid.fill = _grid.muxaffordance:new()
