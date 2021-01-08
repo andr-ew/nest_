@@ -242,42 +242,6 @@ local lvl = function(s, i)
     return (type(x) ~= 'table') and ((i > 0) and x or 0) or x[i + 1] or 15
 end
 
--- accept clock function entry in lvl table as animation
---[[
-
-blinking toggle
-lvl = { 
-    0,
-    4,
-    function(self, draw)
-        while true do
-            draw(5)
-            clock.sleep(0.1)
-            draw(0)
-            clock.sleep(0.1)
-            draw(5)
-            clock.sleep(0.1)
-            draw(0)
-            clock.sleep(0.6)
-        end
-    end
-}
-
-trigger
-lvl = {
-    0,
-    function(self, draw)
-        draw(15)
-        clock.sleep(0.1)
-        draw(0)
-    end
-}
-
---]]
-
-local lclock = function(s, g, x, y, lvl)
-    return end
-
 _grid.binary.output.muxhandler = _obj_:new {
     point = function(s, v) 
         local lvl = lvl(s, v)
@@ -1180,6 +1144,6 @@ _grid.range.output.muxredraw = _obj_:new {
     end
 }
 
--- grid.preset.number, grid.pattern.toggle, grid.patern.numbertoggle
+-- grid.pattern, grid.preset ------------------------------------------------------------------------
 
 return _grid

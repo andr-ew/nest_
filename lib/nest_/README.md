@@ -119,9 +119,6 @@ _etc.filebrowser
 
 ADD
 
-_grid.toggle.include -- (same as _arc.option.include)
-include/rage: table entry per grid key
-
 _grid.pattern (toggle)
 _grid.preset (number)
 
