@@ -452,46 +452,48 @@ _grid.toggle.new = function(self, o)
     return o
 end
 
--- include (same as _arc.option.include) --------------------------------------------
--- include/range: table entry per grid key
-local function toggle(s, v)
-    local vv = (v + 1) % (((type(s.lvl) == 'table') and #s.lvl > 1) and (#s.lvl) or 2)
+local function toggle(s, value, range, include)
+    local lvl = s.p_.lvl
 
-    if s.range then
-        while v > s.range[2] do
-            v = v - (s.range[2] - s.range[1]) - 1
+    local function delta(vvv)
+        local v = (vvv + 1) % (((type(lvl) == 'table') and #lvl > 1) and (#lvl) or 2)
+
+        if range then
+            while v > range[2] do
+                v = v - (range[2] - range[1]) - 1
+            end
+            while v < range[1] do
+                v = v + (range[2] - range[1]) + 1
+            end
         end
-        while v < s.range[1] do
-            v = v + (s.range[2] - s.range[1]) + 1
+
+        print(v)
+        return v
+    end
+
+    local vv = delta(value)
+
+    if include then
+        local i = 0
+        while not tab.contains(include, vv + 1) do
+            vv = delta(vv)
+            print(vv)
+            i = i + 1
+            if i > 64 then break end -- seat belt
         end
     end
 
     return vv
 end
-
---[[
-local function togglehigh(s, v)
-    local vv = ((type(s.lvl) == 'table') and #s.lvl > 1) and (#s.lvl - 1) or 1
-
-    if s.range then
-        while v > s.range[2] do
-            v = v - (s.range[2] - s.range[1]) - 1
-        end
-        while v < s.range[1] do
-            v = v + (s.range[2] - s.range[1]) + 1
-        end
-    end
-
-    return vv
-end
---]]
 
 _grid.toggle.input.muxhandler = _obj_:new {
     point = function(s, x, y, z)
         local held = _grid.binary.input.muxhandler.point(s, x, y, z)
 
         if s.edge == held then
-            return toggle(s, s.v), util.time() - s.tlast, s.theld
+            return toggle(s, s.v, s.p_.range, s.p_.include),
+                util.time() - s.tlast, 
+                s.theld
         end
     end,
     line = function(s, x, y, z)
@@ -506,12 +508,19 @@ _grid.toggle.input.muxhandler = _obj_:new {
  
         if i then   
             if #s.toglist >= min then
-                local v = toggle(s, s.v[i])
+                local r = s.p_.range
+                local inc = s.p_.include
+                local v = toggle(
+                    s, 
+                    s.v[i], 
+                    (type(r) == 'table' and type(r[1]) == 'table') and r[i] or r,
+                    (type(inc) == 'table' and type(inc[1]) == 'table') and inc[i] or inc
+                )
                 
                 if v > 0 then
                     add = i
                     
-                    if v == 1 then table.insert(s.toglist, i) end
+                    if not tab.contains(s.toglist, i) then table.insert(s.toglist, i) end
                     if max and #s.toglist > max then rem = table.remove(s.toglist, 1) end
                 else 
                     local k = tab.key(s.toglist, i)
@@ -553,12 +562,26 @@ _grid.toggle.input.muxhandler = _obj_:new {
         
         if i and held then   
             if #s.toglist >= min then
-                local v = toggle(s, s.v[i.x][i.y])
+                local r = s.p_.range
+                local inc = s.p_.include
+                local v = toggle(
+                    s, 
+                    s.v[i.x][i.y], 
+                    (type(r) == 'table' and type(r[1]) == 'table') and r[i.x][i.y] or r,
+                    (type(inc) == 'table' and type(inc[1]) == 'table') and inc[i.x][i.y] or inc
+                )
                 
                 if v > 0 then
                     add = i
                     
-                    if v == 1 then table.insert(s.toglist, i) end
+                    local contains = false
+                    for j,w in ipairs(s.toglist) do
+                        if w.x == i.x and w.y == i.y then 
+                            contains = true
+                            break
+                        end
+                    end
+                    if not contains then table.insert(s.toglist, i) end
                     if max and #s.toglist > max then rem = table.remove(s.toglist, 1) end
                 else 
                     for j,w in ipairs(s.toglist) do

@@ -13,9 +13,20 @@ n = nest_ {
     t = _grid.toggle {
         x = { 1, 16 },
         y = { 1, 8 },
+        --x = 1, 
+        --y = 1,
+        include = { 1, 4 },
         lvl = { 
             0, 
-            --4,
+            4,
+            function(self, draw)
+                while true do
+                    draw(15)
+                    clock.sleep(0.5)
+                    draw(4)
+                    clock.sleep(0.5)
+                end
+            end,
             function(self, draw)
                 while true do
                     draw(15)
