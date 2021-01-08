@@ -60,6 +60,8 @@ preset
 ```
 ADD 
 
+_grid.binary.lvl -- accept clock funtion entry in table as animation
+
 trigger & toggle t argument: restrict to range of held time when edge == 0
 
 _enc.delta
@@ -117,7 +119,6 @@ _etc.filebrowser
 
 ADD
 
-_grid.binary.lvl -- accept clock funtion entry in table as animation
 _grid.toggle.include -- (same as _arc.option.include)
 include/rage: table entry per grid key
 

@@ -452,7 +452,7 @@ _grid.toggle.new = function(self, o)
     return o
 end
 
--- include (same as _arc.option.include)
+-- include (same as _arc.option.include) --------------------------------------------
 -- include/range: table entry per grid key
 local function toggle(s, v)
     local vv = (v + 1) % (((type(s.lvl) == 'table') and #s.lvl > 1) and (#s.lvl) or 2)

@@ -233,21 +233,22 @@ g = nest_ {
             },
             enabled = gpage
         },
-        -----------------------------------------binary modalities 
+        -----------------------------------------TODO: binary modalities 
         -- (fingers, count, lvl clocks)
-        -----------------------------------------pattern/presets
+        -----------------------------------------TODO: pattern/presets
     }
 } :connect {
     g = grid.connect()
 }
 
--------------------------------------------------txt
+-------------------------------------------------txt/screen
 
 t = nest_ {
     page = nest_ {
         -------------------------------------numerical
         numerical = nest_ {
             --[[
+            TODO: bugfix
             trigger = _txt.key.trigger {
                 x = 2, y = 14,
                 n = 1,
@@ -393,6 +394,8 @@ t = nest_ {
     enc = enc,
     screen = screen
 }
+
+---------------------------------------------TODO: nest_.redraw: animated screen drawing example
 
 ---------------------------------------------arc
 
