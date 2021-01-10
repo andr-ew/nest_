@@ -439,7 +439,7 @@ local function toggle(s, value, range, include)
 
     if include then
         local i = 0
-        while not tab.contains(include, vv + 1) do
+        while not tab.contains(include, vv) do
             vv = delta(vv)
             print(vv)
             i = i + 1
@@ -472,13 +472,11 @@ _grid.toggle.input.muxhandler = _obj_:new {
  
         if i then   
             if #s.toglist >= min then
-                local r = s.p_.range
-                local inc = s.p_.include
                 local v = toggle(
                     s, 
                     s.v[i], 
-                    (type(r) == 'table' and type(r[1]) == 'table') and r[i] or r,
-                    (type(inc) == 'table' and type(inc[1]) == 'table') and inc[i] or inc
+                    s.p_('range', i),
+                    s.p_('include', i)
                 )
                 
                 if v > 0 then
@@ -526,13 +524,11 @@ _grid.toggle.input.muxhandler = _obj_:new {
         
         if i and held then   
             if #s.toglist >= min then
-                local r = s.p_.range
-                local inc = s.p_.include
                 local v = toggle(
                     s, 
                     s.v[i.x][i.y], 
-                    (type(r) == 'table' and type(r[1]) == 'table') and r[i.x][i.y] or r,
-                    (type(inc) == 'table' and type(inc[1]) == 'table') and inc[i.x][i.y] or inc
+                    s.p_('range', i.x, i.y),
+                    s.p_('include', i.x, i.y)
                 )
                 
                 if v > 0 then
@@ -1146,7 +1142,41 @@ _grid.range.output.muxredraw = _obj_:new {
 
 -- grid.pattern, grid.preset ------------------------------------------------------------------------
 
-_grid.pattern = _grid.toggle:new()
+_grid.pattern = _grid.toggle:new {
+    lvl = {
+        0, ------------------ 0 empty
+        function(s, d) ------ 1 empty, recording, no playback
+            d(4)
+            clock.sleep(0.1)
+            d(0)
+            clock.sleep(0.1)
+        end,
+        15, ----------------- 2 filled, playback
+        4, ------------------ 3 filled, paused
+        function(s, d) ------ 4 filled, recording, playback
+            d(15)
+            clock.sleep(0.1)
+            d(0)
+            clock.sleep(0.1)
+        end,
+    },
+    include = function(s, x, y)
+        local p
+        if x and y then p = s[x][y]
+        elseif x then p = s[x]
+        else p = s[1] end
+
+        if p.count > 0 then
+            if p.overdub then return { 2, 4 }
+            else return { 2, 3 } end
+        else
+            return { 0, 1, 2 }
+        end
+    end,
+    action = function(s, v, time, delta, add, rem, list)
+        --------------------------------------------------------
+    end
+}
 
 _grid.pattern.new = function(self, o) 
     o = _grid.toggle.new(self, o)
@@ -1155,19 +1185,25 @@ _grid.pattern.new = function(self, o)
 
     if axis.x and axis.y then 
         for x = 1, axis.x do 
+            o[x] = nest_ {
+                target = function(s)
+                    return s.p.target
+                end
+            }
+
             for y = 1, axis.y do
+                o[x][y] = _pattern:new()
             end
         end
     elseif axis.x or axis.y then
         for x = 1, (axis.x or axis.y) do 
+            o[x] = _pattern:new()
         end
     else 
+        o[1] = _pattern:new()
     end
     
     return o
-end
-
-_grid.pattern.action = function(s, v, time, delta, add, rem, list)
 end
 
 return _grid

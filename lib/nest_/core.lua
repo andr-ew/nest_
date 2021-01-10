@@ -295,7 +295,7 @@ nest_ = _obj_:new {
 
         for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.do_init then v:do_init() end end end
     end,
-    init = function(self) return self end,
+    --init = function(self) return self end,
     each = function(self, f) 
         for k,v in pairs(self) do 
             local r = f(k, v)
@@ -552,10 +552,21 @@ _observer = _obj_:new {
 function _observer:new(o)
     o = _input.new(self, o)
 
+    local _ = o._    
     local mt = getmetatable(o)
     local mtn = mt.__newindex
     
     --mt.__tostring = function() return '_observer' end
+    
+    --[[
+    mt.__index = function(t, k) 
+        if k == "_" then return _
+        elseif _[k] ~= nil then return _[k]
+        elseif _.p and _.p[k] ~= nil then return _.p[k]
+        elseif _.p and _.p.p and _.p.p[k] ~= nil then return _.p.p[k] --hackk
+        end
+    end
+    --]]
 
     mt.__newindex = function(t, k, v)
         if k == 'target' then 
@@ -572,15 +583,12 @@ function _observer:new(o)
     return o
 end
 
------ this should happen at init time, not create time !! use :init() once it's implimented
-function _observer:copy(o)
-    o = _input.copy(self, o)
-
-    if o.target then
-        vv = o.p_.target
+function _observer:pre_init()
+    if self.target then
+        vv = self.p_.target
 
         if type(vv) == 'table' and vv.is_nest then 
-            table.insert(vv._.ob_links, o)
+            table.insert(vv._.ob_links, self)
         end
     end
 
@@ -626,20 +634,20 @@ local pattern_time = require 'pattern_time'
 
 _pattern = _observer:new {
     pass = function(self, sender, v, in_v, handler_args) 
-            local package
-            if self.capture == 'value' then
-                package = type(v) == 'table' and v:new() or v
-            else
-                package = _obj_()
-                for i,w in ipairs(handler_args) do
-                    package[i] = type(w) == 'table' and w:new() or w
-                end
+        local package
+        if self.capture == 'value' then
+            package = type(v) == 'table' and v:new() or v
+        else
+            package = _obj_()
+            for i,w in ipairs(handler_args) do
+                package[i] = type(w) == 'table' and w:new() or w
             end
+        end
 
-            self:watch(_obj_:new {
-                path = sender:path(self.target),
-                package = package 
-            })
+        self:watch(_obj_:new {
+            path = sender:path(self.target),
+            package = package 
+        })
     end,
     process = function(self, e)
         local o = self.target:find(e.path)
