@@ -168,17 +168,17 @@ _input = _obj_:new {
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
-            if hargs ~= nil and self.affordance then
+            if hargs ~= nil and self.p then
                 if self.handler then 
                     local aargs = table.pack(self:handler(table.unpack(hargs)))
 
                     if aargs[1] then 
-                        self.affordance.v = self.action and self.action(self.affordance or self, table.unpack(aargs)) or aargs[1]
+                        self.p.v = self.action and self.action(self.p or self, table.unpack(aargs)) or aargs[1]
 
                         if self.observers_enabled then
                             for i,w in ipairs(ob) do
-                                if w.affordance.id ~= self.affordance.id then 
-                                    w:pass(self.affordance, self.affordance.v, aargs)
+                                if w.p.id ~= self.p.id then 
+                                    w:pass(self.p, self.p.v, aargs)
                                 end
                             end
                         end
@@ -188,11 +188,11 @@ _input = _obj_:new {
                 end
                 
                 --[[
-                for i,v in ipairs(self.affordance.zsort) do
+                for i,v in ipairs(self.p.zsort) do
                     if v.devk and self.devs[v.devk] then self.devs[v.devk].dirty = true end
 
                     if v.is_output and v.handler then 
-                        v:handler(self.affordance.v, table.unpack(hargs)) 
+                        v:handler(self.p.v, table.unpack(hargs)) 
                     end
                 end
                 --]]
@@ -201,11 +201,11 @@ _input = _obj_:new {
         --[[
         elseif devk == nil or args == nil then -- called w/o arguments
             local defaults = self.arg_defaults or {}
-            self.affordance.v = self.action and self.action(self.affordance or self, self.affordance.v, table.unpack(defaults)) or self.affordance.v
+            self.p.v = self.action and self.action(self.p or self, self.p.v, table.unpack(defaults)) or self.p.v
             
             if self.devs[self.devk] then self.devs[self.devk].dirty = true end
 
-            return self.affordance.v
+            return self.p.v
         --]]
         end
     end,
@@ -215,9 +215,9 @@ _input = _obj_:new {
 
         if not silent then
             local defaults = self.arg_defaults or {}
-            self.affordance.v = self.affordance.action and self.affordance:action(self.affordance.v, table.unpack(defaults)) or self.affordance.v
+            self.p.v = self.p.action and self.p:action(self.p.v, table.unpack(defaults)) or self.p.v
 
-            return self.affordance.v
+            return self.p.v
         end
     end
     --]]
@@ -227,7 +227,7 @@ function _input:new(o)
     o = _obj_.new(self, o, _obj_)
     local _ = o._
 
-    _.affordance = nil
+    --_.p = nil
     _.devs = {}
     
     local mt = getmetatable(o)
@@ -236,9 +236,9 @@ function _input:new(o)
     mt.__index = function(t, k) 
         if k == "_" then return _
         elseif _[k] ~= nil then return _[k]
-        else return _.affordance and _.affordance[k]
+        else return _.p and _.p[k]
             --[[
-            local c = _.affordance and _.affordance[k]
+            local c = _.p and _.p[k]
             
             -- catch shared keys, otherwise privilege affordance keys
             if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' then return self[k]
@@ -248,9 +248,9 @@ function _input:new(o)
     end
 
     mt.__newindex = function(t, k, v)
-        local c = _.affordance and _.affordance[k]
+        local c = _.p and _.p[k]
     
-        if c then _.affordance[k] = v
+        if c then _.p[k] = v
         else mtn(t, k, v) end
     end
 
@@ -534,7 +534,7 @@ function _affordance:copy(o)
 
     for k,v in pairs(o) do
         if type(v) == 'table' then if v.is_input or v.is_output or v.is_observer then
-            rawset(v._, 'affordance', o)
+            --rawset(v._, 'affordance', o)
             v.devk = v.devk or o.devk
         end end
     end

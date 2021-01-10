@@ -1146,4 +1146,28 @@ _grid.range.output.muxredraw = _obj_:new {
 
 -- grid.pattern, grid.preset ------------------------------------------------------------------------
 
+_grid.pattern = _grid.toggle:new()
+
+_grid.pattern.new = function(self, o) 
+    o = _grid.toggle.new(self, o)
+
+    local _, axis = input_contained(o, { -1, -1 })
+
+    if axis.x and axis.y then 
+        for x = 1, axis.x do 
+            for y = 1, axis.y do
+            end
+        end
+    elseif axis.x or axis.y then
+        for x = 1, (axis.x or axis.y) do 
+        end
+    else 
+    end
+    
+    return o
+end
+
+_grid.pattern.action = function(s, v, time, delta, add, rem, list)
+end
+
 return _grid
