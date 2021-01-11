@@ -153,8 +153,8 @@ _grid.binary.new = function(self, o)
     o.tlast = minit(axis)
     o.theld = minit(axis)
     o.vinit = minit(axis)
-    o.frame = minit(axis)
-    o.clock = minit(axis)
+    o.lvl_frame = minit(axis)
+    o.lvl_clock = minit(axis)
     o.blank = {}
 
     o.arg_defaults = {
@@ -247,12 +247,12 @@ _grid.binary.output.muxhandler = _obj_:new {
         local lvl = lvl(s, v)
         local d = s.devs.g
 
-        if s.clock then clock.cancel(s.clock) end
+        if s.lvl_clock then clock.cancel(s.lvl_clock) end
 
         if type(lvl) == 'function' then
-            s.clock = clock.run(function()
+            s.lvl_clock = clock.run(function()
                 lvl(s, function(l)
-                    s.frame = l
+                    s.lvl_frame = l
                     d.dirty = true
                 end)
             end)
@@ -262,12 +262,12 @@ _grid.binary.output.muxhandler = _obj_:new {
         local d = s.devs.g
         for x,w in ipairs(v) do 
             local lvl = lvl(s, w)
-            if s.clock[x] then clock.cancel(s.clock[x]) end
+            if s.lvl_clock[x] then clock.cancel(s.lvl_clock[x]) end
 
             if type(lvl) == 'function' then
-                s.clock[x] = clock.run(function()
+                s.lvl_clock[x] = clock.run(function()
                     lvl(s, function(l)
-                        s.frame[x] = l
+                        s.lvl_frame[x] = l
                         d.dirty = true
                     end)
                 end)
@@ -279,12 +279,12 @@ _grid.binary.output.muxhandler = _obj_:new {
         for x,r in ipairs(v) do 
             for y,w in ipairs(r) do 
                 local lvl = lvl(s, w)
-                if s.clock[x][y] then clock.cancel(s.clock[x][y]) end
+                if s.lvl_clock[x][y] then clock.cancel(s.lvl_clock[x][y]) end
 
                 if type(lvl) == 'function' then
-                    s.clock[x][y] = clock.run(function()
+                    s.lvl_clock[x][y] = clock.run(function()
                         lvl(s, function(l)
-                            s.frame[x][y] = l
+                            s.lvl_frame[x][y] = l
                             d.dirty = true
                         end)
                     end)
@@ -304,20 +304,20 @@ _grid.binary.output.muxredraw = _obj_:new {
     point = function(s, g, v)
         local lvl = lvl(s, v)
 
-        if type(lvl) == 'function' then lvl = s.frame end
+        if type(lvl) == 'function' then lvl = s.lvl_frame end
         if lvl > 0 then g:led(s.p_.x, s.p_.y, lvl) end
     end,
     line_x = function(s, g, v)
         for x,l in ipairs(v) do 
             local lvl = lvl(s, l)
-            if type(lvl) == 'function' then lvl = s.frame[x] end
+            if type(lvl) == 'function' then lvl = s.lvl_frame[x] end
             if lvl > 0 then g:led(x + s.p_.x[1] - 1, s.p_.y, lvl) end
         end
     end,
     line_y = function(s, g, v)
         for y,l in ipairs(v) do 
             local lvl = lvl(s, l)
-            if type(lvl) == 'function' then lvl = s.frame[y] end
+            if type(lvl) == 'function' then lvl = s.lvl_frame[y] end
             if lvl > 0 then g:led(s.p_.x, y + s.p_.y[1] - 1, lvl) end
         end
     end,
@@ -325,7 +325,7 @@ _grid.binary.output.muxredraw = _obj_:new {
         for x,r in ipairs(v) do 
             for y,l in ipairs(r) do 
                 local lvl = lvl(s, l)
-                if type(lvl) == 'function' then lvl = s.frame[x][y] end
+                if type(lvl) == 'function' then lvl = s.lvl_frame[x][y] end
                 if lvl > 0 then g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl) end
             end
         end
@@ -431,7 +431,6 @@ local function toggle(s, value, range, include)
             end
         end
 
-        print(v)
         return v
     end
 
@@ -441,7 +440,6 @@ local function toggle(s, value, range, include)
         local i = 0
         while not tab.contains(include, vv) do
             vv = delta(vv)
-            print(vv)
             i = i + 1
             if i > 64 then break end -- seat belt
         end
@@ -456,8 +454,8 @@ _grid.toggle.input.muxhandler = _obj_:new {
 
         if s.edge == held then
             return toggle(s, s.v, s.p_.range, s.p_.include),
-                util.time() - s.tlast, 
-                s.theld
+                s.theld,
+                util.time() - s.tlast
         end
     end,
     line = function(s, x, y, z)
@@ -509,7 +507,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
                 s:replace('toglist', {})
             end
 
-            return s.v, s.ttog, theld, add, rem, s.toglist
+            return s.v, theld, s.ttog, add, rem, s.toglist
         end
     end,
     plane = function(s, x, y, z)
@@ -573,7 +571,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
                 s:replace('toglist', {})
             end
 
-            return s.v, s.ttog, theld, add, rem, s.toglist
+            return s.v, theld, s.ttog, add, rem, s.toglist
         end
     end
 }
@@ -717,12 +715,12 @@ _grid.trigger.output.muxhandler = _obj_:new {
         local lvl = lvl(s, v)
         local d = s.devs.g
 
-        if s.clock then clock.cancel(s.clock) end
+        if s.lvl_clock then clock.cancel(s.lvl_clock) end
 
         if type(lvl) == 'function' then
-            s.clock = clock.run(function()
+            s.lvl_clock = clock.run(function()
                 lvl(s, function(l)
-                    s.frame = l
+                    s.lvl_frame = l
                     d.dirty = true
                     
                     if s.v > 0 and l <= 0 then
@@ -1146,20 +1144,25 @@ _grid.pattern = _grid.toggle:new {
     lvl = {
         0, ------------------ 0 empty
         function(s, d) ------ 1 empty, recording, no playback
-            d(4)
-            clock.sleep(0.1)
-            d(0)
-            clock.sleep(0.1)
+            while true do
+                d(4)
+                clock.sleep(0.25)
+                d(0)
+                clock.sleep(0.25)
+            end
         end,
         15, ----------------- 2 filled, playback
         4, ------------------ 3 filled, paused
         function(s, d) ------ 4 filled, recording, playback
-            d(15)
-            clock.sleep(0.1)
-            d(0)
-            clock.sleep(0.1)
+            while true do
+                d(15)
+                clock.sleep(0.2)
+                d(0)
+                clock.sleep(0.2)
+            end
         end,
     },
+    edge = 0,
     include = function(s, x, y)
         local p
         if x and y then p = s[x][y]
@@ -1173,8 +1176,22 @@ _grid.pattern = _grid.toggle:new {
             return { 0, 1, 2 }
         end
     end,
-    action = function(s, v, time, delta, add, rem, list)
+    action = function(s, v, time, delta, add, rem, list, last)
         --------------------------------------------------------
+        if time > 0.5 then
+            print('clear')
+            return 0
+        elseif delta < 0.3 then
+            if s.clock then clock.cancel(s.clock) end
+            print('overdub')
+            return 4
+        else
+            s.clock = clock.run(function()
+                clock.sleep(0.3)
+                print('toggle')
+            end)
+            return v
+        end
     end
 }
 
