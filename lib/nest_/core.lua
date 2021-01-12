@@ -170,21 +170,7 @@ _input = _obj_:new {
             
             if hargs ~= nil and self.p then
                 if self.handler then 
-                    local aargs = table.pack(self:handler(table.unpack(hargs)))
-
-                    if aargs[1] then 
-                        self.p.v = self.action and self.action(self.p or self, table.unpack(aargs)) or aargs[1]
-
-                        if self.observers_enabled then
-                            for i,w in ipairs(ob) do
-                                if w.p.id ~= self.p.id then 
-                                    w:pass(self.p, self.p.v, aargs)
-                                end
-                            end
-                        end
-
-                        return true
-                    end
+                    return table.pack(self:handler(table.unpack(hargs)))
                 end
                 
                 --[[
@@ -320,7 +306,7 @@ nest_ = _obj_:new {
         if self.enabled == nil or self.p_.enabled == true then
             local ret
 
-            if self.observers_enabled then 
+            if self.observable then 
                 for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
             end 
 
@@ -379,7 +365,6 @@ nest_ = _obj_:new {
 
         return p
     end,
-    observers_enabled = true,
     set = function(self, t, silent) 
         for k,v in pairs(t) do
             if self[k] and type(self[k]) == 'table' and self[k].is_obj and self[k].set then
@@ -396,6 +381,7 @@ nest_ = _obj_:new {
             return t
         end
     end,
+    observable = true,
     persistent = true,
     write = function(self) end,
     read = function(self) end
@@ -436,7 +422,7 @@ function nest_:new(o, ...)
     _.id = nextid()
     _.enabled = true
     _.devs = {}
-    _.observers_enabled = true
+    _.observable = true
     _.ob_links = {}
 
     local mt = getmetatable(o)
@@ -445,10 +431,22 @@ function nest_:new(o, ...)
     return o
 end
 
+local function runaction(self, aargs)
+    self.v = self.action and self.action(self, table.unpack(aargs)) or aargs[1]
+    self:refresh(true)
+end
+
+local function clockaction(self, aargs)
+    if self.clock then
+        if type(self.clock) == 'number' then clock.cancel(self.clock) end
+        self.clock = clock.run(runaction, self, aargs)
+    else runaction(self, aargs) end
+end
+
 _affordance = nest_:new {
     value = 0,
     devk = nil,
-    action = function(s, v) end,
+    action = nil,
     init = function(s) end,
     do_init = function(self)
         self:init()
@@ -461,24 +459,33 @@ _affordance = nest_:new {
             end
         end
     end,
-    update = function(self, ...)
-        local dirty = nest_.update(self, ...)
-        if dirty then return self:refresh(true) end
-    end,
-    refresh = function(self, silent)
-        if not silent then
-            local defaults = self.arg_defaults or {}
-            self.v = self.action and self:action(self.v, table.unpack(defaults)) or self.v
-        end
+    update = function(self, devk, args, ob)
+        local aargs = nest_.update(self, devk, args, ob)
 
-        for i,v in ipairs(self.zsort) do 
-            if v.is_output and self.devs[v.devk] then 
-                self.devs[v.devk].dirty = true
-                if v.handler then v:handler(self.v) end
+        if aargs and aargs[1] then 
+            clockaction(self, aargs)
+            
+            if self.observable then
+                for i,w in ipairs(ob) do
+                    if w.p.id ~= self.id then 
+                        w:pass(self, self.v, aargs)
+                    end
+                end
             end
         end
-
-        return self.v
+    end,
+    refresh = function(self, silent)
+        if not silent and self.action then
+            local defaults = self.arg_defaults or {}
+            clockaction(self, { self.v, table.unpack(defaults) })
+        else
+            for i,v in ipairs(self.zsort) do 
+                if v.is_output and self.devs[v.devk] then 
+                    self.devs[v.devk].dirty = true
+                    if v.handler then v:handler(self.v) end
+                end
+            end
+        end
     end,
     get = function(self, silent, test)
         if test == nil or test(self) then
@@ -653,8 +660,12 @@ _pattern = _observer:new {
         local o = self.target:find(e.path)
         local p = e.package
 
-        o.value = self.capture == 'value' and (type(p) == 'table' and p:new() or p) or (o.action and o:action(table.unpack(p)) or p[1])
-        o:refresh(self.capture ~= 'value')
+        if self.capture == 'value' then
+            o.value = type(p) == 'table' and p:new() or p
+            o:refresh(false)
+        else
+            clockaction(o, p)
+        end
     end,
     get = function(self, silent, test) 
         if test == nil or test(self) then
