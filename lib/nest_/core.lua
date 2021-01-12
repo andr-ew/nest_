@@ -437,7 +437,7 @@ local function runaction(self, aargs)
 end
 
 local function clockaction(self, aargs)
-    if self.clock then
+    if self.p_.clock then
         if type(self.clock) == 'number' then clock.cancel(self.clock) end
         self.clock = clock.run(runaction, self, aargs)
     else runaction(self, aargs) end
