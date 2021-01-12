@@ -475,7 +475,7 @@ _affordance = nest_:new {
         end
     end,
     refresh = function(self, silent)
-        if not silent and self.action then
+        if (not silent) and self.action then
             local defaults = self.arg_defaults or {}
             clockaction(self, { self.v, table.unpack(defaults) })
         else

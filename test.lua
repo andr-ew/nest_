@@ -10,8 +10,18 @@ include 'lib/nest_/grid'
 tab = require 'tabutil'
 
 n = nest_ {
+    --[[
     t = _grid.pattern {
         x = 2, y = 2,
+    }
+    --]]
+    t = _grid.toggle {
+        x = 2, y = 2,
+        clock = true,
+        action = function(self, value)
+            clock.sleep(0.5)
+            print(value)
+        end
     }
 } :connect { g = grid.connect() }
 
