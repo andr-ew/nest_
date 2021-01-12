@@ -1170,28 +1170,27 @@ _grid.pattern = _grid.toggle:new {
         else p = s[1] end
 
         if p.count > 0 then
-            if p.overdub then return { 2, 4 }
-            else return { 2, 3 } end
+            --if p.overdub then return { 2, 4 }
+            --else return { 2, 3 } end
+            return { 2, 3 }
         else
             return { 0, 1, 2 }
         end
     end,
+    clock = true,
     action = function(s, v, time, delta, add, rem, list, last)
-        --------------------------------------------------------
+        --[[
         if time > 0.5 then
             print('clear')
             return 0
         elseif delta < 0.3 then
-            if s.clock then clock.cancel(s.clock) end
             print('overdub')
             return 4
         else
-            s.clock = clock.run(function()
-                clock.sleep(0.3)
-                print('toggle')
-            end)
+            clock.sleep(0.3)
             return v
         end
+        ]]--
     end
 }
 
