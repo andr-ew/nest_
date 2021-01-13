@@ -168,7 +168,7 @@ _input = _obj_:new {
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
-            if hargs ~= nil and self.p then
+            if hargs ~= nil then
                 if self.handler then 
                     return table.pack(self:handler(table.unpack(hargs)))
                 end
@@ -274,12 +274,8 @@ local function nextid()
 end
 
 nest_ = _obj_:new {
-    do_init = function(self)
-        if self.pre_init then self:pre_init() end
-        if self.init then self:init() end
-        self:refresh()
-
-        for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.do_init then v:do_init() end end end
+    init = function(self)
+        for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.init then v:init() end end end
     end,
     --init = function(self) return self end,
     each = function(self, f) 
@@ -316,7 +312,7 @@ nest_ = _obj_:new {
                 end
             end
 
-            return ret
+            return ret, ob
         end
     end,
     refresh = function(self, silent)
@@ -342,7 +338,7 @@ nest_ = _obj_:new {
         local p = {}
 
         local function look(o)
-            if (not o.p) or (pathto and pathto.id == o.p.id) then
+            if (not o.p) or (pathto and pathto.id == o.id) then
                 return p
             else
                 table.insert(p, 1, o.k)
@@ -447,11 +443,12 @@ _affordance = nest_:new {
     value = 0,
     devk = nil,
     action = nil,
-    init = function(s) end,
-    do_init = function(self)
-        self:init()
-    end,
     print = function(self) end,
+    init = function(self)
+        self:refresh()
+
+        nest_.init(self)
+    end,
     draw = function(self, devk)
         if self.enabled == nil or self.p_.enabled == true then
             if self.output then
@@ -460,7 +457,7 @@ _affordance = nest_:new {
         end
     end,
     update = function(self, devk, args, ob)
-        local aargs = nest_.update(self, devk, args, ob)
+        local aargs, ob = nest_.update(self, devk, args, ob)
 
         if aargs and aargs[1] then 
             clockaction(self, aargs)
@@ -575,6 +572,7 @@ function _observer:new(o)
     end
     --]]
 
+    --[[
     mt.__newindex = function(t, k, v)
         if k == 'target' then 
             vv = t._p[k]
@@ -586,11 +584,12 @@ function _observer:new(o)
             mtn(t, k, v)
         end
     end
+    --]]
     
     return o
 end
 
-function _observer:pre_init()
+function _observer:init()
     if self.target then
         vv = self.p_.target
 
@@ -639,33 +638,46 @@ _preset = _observer:new {
 
 local pattern_time = require 'pattern_time'
 
+function pattern_time:resume()
+    if self.count > 0 then
+          --print("start pattern ")
+        self.prev_time = util.time()
+        self.process(self.event[self.step])
+        self.play = 1
+        self.metro.time = self.time[self.step] * self.time_factor
+        self.metro:start()
+    end
+end
+
 _pattern = _observer:new {
-    pass = function(self, sender, v, in_v, handler_args) 
+    pass = function(self, sender, v, handler_args) 
         local package
         if self.capture == 'value' then
             package = type(v) == 'table' and v:new() or v
         else
-            package = _obj_()
+            package = _obj_:new()
             for i,w in ipairs(handler_args) do
                 package[i] = type(w) == 'table' and w:new() or w
             end
         end
 
         self:watch(_obj_:new {
-            path = sender:path(self.target),
+            path = sender:path(self.p_.target),
             package = package 
         })
     end,
-    process = function(self, e)
-        local o = self.target:find(e.path)
+    proc = function(self, e)
+        local o = self.p_.target:find(e.path)
         local p = e.package
 
-        if self.capture == 'value' then
-            o.value = type(p) == 'table' and p:new() or p
-            o:refresh(false)
-        else
-            clockaction(o, p)
-        end
+        if o then
+            if self.capture == 'value' then
+                o.value = type(p) == 'table' and p:new() or p
+                o:refresh(false)
+            else
+                clockaction(o, p)
+            end
+        else print('_pattern: path error') end
     end,
     get = function(self, silent, test) 
         if test == nil or test(self) then
@@ -693,16 +705,25 @@ function _pattern:new(o)
     o = _observer.new(self, o)
 
     local pt = pattern_time.new()
-    pt.process = function(e) o:process(e) end
+    pt.process = function(e) 
+        o:proc(e) 
+    end
 
     local mt = getmetatable(o)
     local mti = mt.__index
+    local mtn = mt.__newindex
 
     --alias _pattern to pattern_time instance
     mt.__index = function(t, k)
         if k == 'new' then return mti(t, k)
-        elseif pt[k] then return pt[k]
+        elseif pt[k] ~= nil then return pt[k]
         else return mti(t, k) end
+    end
+    
+    mt.__newindex = function(t, k, v)
+        if k == 'new' then mtn(t, k, v)
+        elseif pt[k] ~= nil then pt[k] = v
+        else mtn(t, k, v) end
     end
 
     return o

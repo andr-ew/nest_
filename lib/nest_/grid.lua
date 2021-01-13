@@ -120,15 +120,15 @@ _grid.binary = _grid.muxaffordance:new({ count = nil, fingers = nil }) -- local 
 local function minit(axis) 
     local v
     if axis.x and axis.y then 
-        v = {}
+        v = _obj_:new()
         for x = 1, axis.x do 
-            v[x] = {}
+            v[x] = _obj_:new()
             for y = 1, axis.y do
                 v[x][y] = 0
             end
         end
     elseif axis.x or axis.y then
-        v = {}
+        v = _obj_:new()
         for x = 1, (axis.x or axis.y) do 
             v[x] = 0
         end
@@ -143,7 +143,7 @@ _grid.binary.new = function(self, o)
     o = _grid.muxaffordance.new(self, o)
 
     --rawset(o, 'list', {})
-    o.list = {}
+    o.list = _obj_:new()
 
     local _, axis = input_contained(o, { -1, -1 })
 
@@ -155,7 +155,7 @@ _grid.binary.new = function(self, o)
     o.vinit = minit(axis)
     o.lvl_frame = minit(axis)
     o.lvl_clock = minit(axis)
-    o.blank = {}
+    o.blank = _obj_:new()
 
     o.arg_defaults = {
         minit(axis),
@@ -398,7 +398,7 @@ _grid.toggle.new = function(self, o)
     o = _grid.binary.new(self, o)
 
     --rawset(o, 'toglist', {})
-    o.toglist = {}
+    o.toglist = _obj_:new()
 
     local _, axis = input_contained(o, { -1, -1 })
 
@@ -592,7 +592,7 @@ _grid.trigger.new = function(self, o)
     o = _grid.binary.new(self, o)
 
     --rawset(o, 'triglist', {})
-    o.triglist = {}
+    o.triglist = _obj_:new()
 
     local _, axis = input_contained(o, { -1, -1 })
     o.tdelta = minit(axis)
@@ -745,15 +745,15 @@ _grid.fill.new = function(self, o)
     local v
 
     if axis.x and axis.y then 
-        v = {}
+        v = _obj_:new()
         for x = 1, axis.x do 
-            v[x] = {}
+            v[x] = _obj_:new()
             for y = 1, axis.y do
                 v[x][y] = 1
             end
         end
     elseif axis.x or axis.y then
-        v = {}
+        v = _obj_:new()
         for x = 1, (axis.x or axis.y) do 
             v[x] = 1
         end
@@ -780,7 +780,7 @@ _grid.number.new = function(self, o)
     o = _grid.muxaffordance.new(self, o)
 
     --rawset(o, 'hlist', {})
-    o.hlist = {}
+    o.hlist = _obj_:new()
     o.count = { 1, 1 }
 
     local _, axis = input_contained(o, { -1, -1 })
@@ -1012,7 +1012,7 @@ _grid.range.new = function(self, o)
     o = _grid.muxaffordance.new(self, o)
 
     --rawset(o, 'hlist', {})
-    o.hlist = {}
+    o.hlist = _obj_:new()
     o.count = { 1, 1 }
     o.fingers = { 1, 1 }
     
@@ -1163,7 +1163,7 @@ _grid.pattern = _grid.toggle:new {
         end,
     },
     edge = 0,
-    include = function(s, x, y)
+    include = function(s, x, y) --limit range based on pattern clear state
         local p
         if x and y then p = s[x][y]
         elseif x then p = s[x]
@@ -1179,18 +1179,61 @@ _grid.pattern = _grid.toggle:new {
     end,
     clock = true,
     action = function(s, v, time, delta, add, rem, list, last)
-        --[[
-        if time > 0.5 then
-            print('clear')
-            return 0
-        elseif delta < 0.3 then
-            print('overdub')
-            return 4
-        else
-            clock.sleep(0.3)
-            return v
+        -- assign p to the pattern to edit + assign set to a value setter function based on affordance dimentions
+        local p
+        local set
+        if type(v) == 'table' then
+            if add then
+                if type(v)[1] == 'table' then
+                    p = s[add.x][add.y]
+                    set = function(val)
+                        v[add.x][add.y] = val
+                        return v
+                    end
+                else
+                    p = s[add]
+                    set = function(val)
+                        v[add] = val
+                        return v
+                    end
+                end
+            end
+        else 
+            p = s[1] 
+            set = function(val) return val end
         end
-        ]]--
+
+        if p then   
+            if time > 0.5 then -- hold to clear
+                p:clear()
+                return set(0)
+            else
+                if p.count > 0 then
+                    if delta < 0.3 then -- double-tap to overdub
+                        p:start()
+                        p:set_overdub(1)
+                        return set(4)
+                    else
+                        --clock.sleep(0.3)
+                        p:set_overdub(0)
+                        if v == 2 then --play pattern / stop recording
+                            if p.rec == 1 then
+                                p:rec_stop()
+                                p:start()
+                            else
+                                p:resume()
+                            end
+                        elseif v == 3 then --pause pattern
+                            p:stop() 
+                        end
+                    end
+                else
+                    if v == 1 then --start recording new pattern
+                        p:rec_start()
+                    end
+                end
+            end
+        end
     end
 }
 
@@ -1199,6 +1242,7 @@ _grid.pattern.new = function(self, o)
 
     local _, axis = input_contained(o, { -1, -1 })
 
+    -- create pattern per grid key
     if axis.x and axis.y then 
         for x = 1, axis.x do 
             o[x] = nest_ {

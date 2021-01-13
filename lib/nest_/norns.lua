@@ -1,8 +1,6 @@
 tab = require 'tabutil'
 
 nest_.connect = function(self, objects, fps)
-    self:do_init()
-
     local devs = {}
 
     local fps = fps or 30

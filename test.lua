@@ -20,8 +20,11 @@ n = nest_ {
     },
     t = _grid.pattern {
         x = 2, y = 6,
+        target = function() return n.m end
     }
 } :connect { g = grid.connect() }
+
+function init() n:init() end
 
 --[[
 
