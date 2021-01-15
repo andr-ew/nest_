@@ -22,11 +22,34 @@ n = nest_ {
         x = { 2, 6 }, y = 6,
         target = function() return n.m end
     }
+    --[[
+    t = _grid.toggle {
+        x = { 2, 6 }, y = 6,
+        lvl = {
+        0, ------------------ 0 empty
+        function(s, d) ------ 1 empty, recording, no playback
+            while true do
+                d(4)
+                clock.sleep(0.25)
+                d(0)
+                clock.sleep(0.25)
+            end
+        end,
+        15, ----------------- 2 filled, playback
+        },
+        count = 1
+        --target = function() return n.m end
+    }
+    --]]
 } :connect { g = grid.connect() }
 
 function init() n:init() end
 
 --[[
+    t = _grid.pattern {
+        x = { 2, 6 }, y = 6,
+        target = function() return n.m end
+    }
 
     t = _grid.toggle {
         x = 1,

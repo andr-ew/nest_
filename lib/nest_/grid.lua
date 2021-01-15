@@ -448,6 +448,36 @@ local function toggle(s, value, range, include)
     return vv
 end
 
+local function togglelow(s, range, include)
+    if range and include then
+        return math.max(range[1], include[1])
+    elseif range or include then
+        return range and range[1] or include[1]
+    else return 0 end
+end
+
+local function toggleset(s, v, range, include)      
+    if range then
+        while v > range[2] do
+            v = v - (range[2] - range[1]) - 1
+        end
+        while v < range[1] do
+            v = v + (range[2] - range[1]) + 1
+        end
+    end
+
+    if include then
+        local i = 0
+        while not tab.contains(include, v) do
+            v = toggle(s, v, range, include)
+            i = i + 1
+            if i > 64 then break end -- seat belt
+        end
+    end
+
+    return v
+end
+
 _grid.toggle.input.muxhandler = _obj_:new {
     point = function(s, x, y, z)
         local held = _grid.binary.input.muxhandler.point(s, x, y, z)
@@ -470,19 +500,23 @@ _grid.toggle.input.muxhandler = _obj_:new {
  
         if i then   
             if #s.toglist >= min then
+                local range = s.p_('range', i)
+                local include = s.p_('include', i)
                 local v = toggle(
                     s, 
                     s.v[i], 
-                    s.p_('range', i),
-                    s.p_('include', i)
+                    range,
+                    include
                 )
+                local low = togglelow(s, range, include)
                 
-                if v > 0 then
+                if v > low then
                     add = i
                     
                     if not tab.contains(s.toglist, i) then table.insert(s.toglist, i) end
                     if max and #s.toglist > max then rem = table.remove(s.toglist, 1) end
                 else 
+                    rem = i
                     local k = tab.key(s.toglist, i)
                     if k then
                         rem = table.remove(s.toglist, k)
@@ -492,17 +526,17 @@ _grid.toggle.input.muxhandler = _obj_:new {
                 s.ttog[i] = util.time() - s.tlast[i]
 
                 if add then s.v[add] = v end
-                if rem then s.v[rem] = 0 end
+                if rem then s.v[rem] = low end
 
             elseif #hlist >= min then
                 for j,w in ipairs(hlist) do
                     s.toglist[j] = w
-                    s.v[w] = 1
+                    s.v[w] = toggleset(s, 1, range, include)
                 end
             end
             
             if #s.toglist < min then
-                for j,w in ipairs(s.v) do s.v[j] = 0 end
+                for j,w in ipairs(s.v) do s.v[j] = low end
                 --s.toglist = {}
                 s:replace('toglist', {})
             end
@@ -522,14 +556,17 @@ _grid.toggle.input.muxhandler = _obj_:new {
         
         if i and held then   
             if #s.toglist >= min then
+                local range = s.p_('range', i.x, i.y)
+                local include = s.p_('include', i.x, i.y)
                 local v = toggle(
                     s, 
                     s.v[i.x][i.y], 
-                    s.p_('range', i.x, i.y),
-                    s.p_('include', i.x, i.y)
+                    range,
+                    include
                 )
+                local low = togglelow(s, range, include)
                 
-                if v > 0 then
+                if v > low then
                     add = i
                     
                     local contains = false
@@ -542,6 +579,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
                     if not contains then table.insert(s.toglist, i) end
                     if max and #s.toglist > max then rem = table.remove(s.toglist, 1) end
                 else 
+                    rem = i
                     for j,w in ipairs(s.toglist) do
                         if w.x == i.x and w.y == i.y then 
                             rem = table.remove(s.toglist, j)
@@ -552,19 +590,19 @@ _grid.toggle.input.muxhandler = _obj_:new {
                 s.ttog[i.x][i.y] = util.time() - s.tlast[i.x][i.y]
 
                 if add then s.v[add.x][add.y] = v end
-                if rem then s.v[rem.x][rem.y] = 0 end
+                if rem then s.v[rem.x][rem.y] = low end
 
             elseif #hlist >= min then
                 for j,w in ipairs(hlist) do
                     s.toglist[j] = w
-                    s.v[w.x][w.y] = 1
+                    s.v[w.x][w.y] = toggleset(s, 1, range, include)
                 end
             end
 
             if #s.toglist < min then
                 for x,w in ipairs(s.v) do 
                     for y,_ in ipairs(w) do
-                        s.v[x][y] = 0
+                        s.v[x][y] = low
                     end
                 end
                 --s.toglist = {}
@@ -1153,8 +1191,8 @@ _grid.pattern = _grid.toggle:new {
                 clock.sleep(0.25)
             end
         end,
-        15, ----------------- 2 filled, playback
-        4, ------------------ 3 filled, paused
+        4, ------------------ 2 filled, paused
+        15, ----------------- 3 filled, playback
         function(s, d) ------ 4 filled, recording, playback
             while true do
                 d(15)
@@ -1176,7 +1214,7 @@ _grid.pattern = _grid.toggle:new {
             --else return { 2, 3 } end
             return { 2, 3 }
         else
-            return { 0, 1, 2 }
+            return { 0, 1 }
         end
     end,
     clock = true,
@@ -1185,23 +1223,24 @@ _grid.pattern = _grid.toggle:new {
         -- assign variables, setter function based on affordance dimentions
         local set, p, v, t, d
         if type(value) == 'table' then
-            if add then
+            local i = add or rem
+            if i then
                 if type(value)[1] == 'table' then
-                    p = s[add.x][add.y]
-                    t = time[add.x][add.y]
-                    d = delta[add.x][add.y]
-                    v = value[add.x][add.y]
+                    p = s[i.x][i.y]
+                    t = time[i.x][i.y]
+                    d = delta[i.x][i.y]
+                    v = value[i.x][i.y]
                     set = function(val)
-                        value[add.x][add.y] = val
+                        value[i.x][i.y] = val
                         return value
                     end
                 else
-                    p = s[add]
-                    t = time[add]
-                    d = delta[add]
-                    v = value[add]
+                    p = s[i]
+                    t = time[i]
+                    d = delta[i]
+                    v = value[i]
                     set = function(val)
-                        value[add] = val
+                        value[i] = val
                         return value
                     end
                 end
@@ -1214,32 +1253,45 @@ _grid.pattern = _grid.toggle:new {
             set = function(val) return value end
         end
 
-        if p then   
+        print('anything', add, rem)
+        if p then
+            print(p.count)
             if t > 0.5 then -- hold to clear
+                print 'clear'
                 p:clear()
                 return set(0)
             else
                 if p.count > 0 then
                     if d < 0.3 then -- double-tap to overdub
+                        print 'dub'
                         p:start()
                         p:set_overdub(1)
                         return set(4)
                     else
-                        --clock.sleep(0.3)
-                        p:set_overdub(0)
-                        if v == 2 then --play pattern / stop recording
-                            if p.rec == 1 then
-                                p:rec_stop()
-                                p:start()
-                            else
+                        print 'someting'
+                        if p.rec == 1 then --play pattern / stop recording
+                            print 'play'
+                            p:rec_stop()
+                            p:start()
+                            return set(3)
+                        elseif p.overdub == 1 then --stop overdub
+                            print 'end dub'
+                            p:set_overdub(0)
+                            return set(3)
+                        else
+                            --clock.sleep(0.3)
+                            if v == 3 then --resume pattern
+                                print 'resume'
                                 p:resume()
+                            elseif v == 2 then --pause pattern
+                                print 'pause'
+                                p:stop() 
                             end
-                        elseif v == 3 then --pause pattern
-                            p:stop() 
                         end
                     end
                 else
                     if v == 1 then --start recording new pattern
+                        print 'rec'
                         p:rec_start()
                     end
                 end
