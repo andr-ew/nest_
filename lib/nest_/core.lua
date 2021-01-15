@@ -423,7 +423,7 @@ _affordance = nest_:new {
                     if self.observable then
                         for i,w in ipairs(ob) do
                             if w.p.id ~= self.id then 
-                                w:pass(self, self.v, hargs)
+                                w:pass(self, self.v, hargs, aargs)
                             end
                         end
                     end
@@ -508,7 +508,7 @@ end
 
 _observer = _obj_:new {
     is_observer = true,
-    pass = function(self, sender, v, handler_args) end,
+    pass = function(self, sender, v, hargs, aargs) end,
     target = nil,
     capture = nil
 }
@@ -610,12 +610,17 @@ function pattern_time:resume()
 end
 
 _pattern = _observer:new {
-    pass = function(self, sender, v, handler_args) 
+    pass = function(self, sender, v, hargs, aargs) 
         local package
         if self.capture == 'value' then
             package = type(v) == 'table' and v:new() or v
+        elseif self.capture == 'action' then
+            package = _obj_:new()
+            for i,w in ipairs(aargs) do
+                package[i] = type(w) == 'table' and w:new() or w
+            end
         else
-            package = handler_args
+            package = hargs
         end
 
         self:watch(_obj_:new {
@@ -631,6 +636,8 @@ _pattern = _observer:new {
             if self.capture == 'value' then
                 o.value = type(p) == 'table' and p:new() or p
                 o:refresh(false)
+            elseif self.capture == 'action' then
+                clockaction(o, p)
             else
                 clockaction(o, table.pack(o.input:handler(table.unpack(p))))
             end

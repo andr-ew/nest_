@@ -1180,6 +1180,7 @@ _grid.pattern = _grid.toggle:new {
         end
     end,
     clock = true,
+    capture = 'input',
     action = function(s, value, time, delta, add, rem, list, last)
         -- assign variables, setter function based on affordance dimentions
         local set, p, v, t, d
