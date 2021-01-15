@@ -119,7 +119,6 @@ _etc.filebrowser
 
 ADD
 
-_grid.pattern (toggle)
 _grid.preset (number)
 
 trigger & toggle t argument: restrict to range of held time when edge == 0 

@@ -1278,14 +1278,12 @@ _grid.pattern = _grid.toggle:new {
         end
 
         local function stop_all()
-            ---[[
             if switch then
                 for j,w in ipairs(s) do
                     if w.rec == 1 then w:rec_stop() end
                     w:stop()
                 end
             end
-            --]]
         end
 
         if p then
