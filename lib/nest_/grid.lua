@@ -526,12 +526,12 @@ _grid.toggle.input.muxhandler = _obj_:new {
                 s.ttog[i] = util.time() - s.tlast[i]
 
                 if add then s.v[add] = v end
-                if rem then s.v[rem] = low end
+                if rem then s.v[rem] = togglelow(s, s.p_('range', rem), s.p_('include', rem)) end
 
             elseif #hlist >= min then
                 for j,w in ipairs(hlist) do
                     s.toglist[j] = w
-                    s.v[w] = toggleset(s, 1, range, include)
+                    s.v[w] = toggleset(s, 1, s.p_('range', w), s.p_('include', w))
                 end
             end
             
@@ -590,12 +590,12 @@ _grid.toggle.input.muxhandler = _obj_:new {
                 s.ttog[i.x][i.y] = util.time() - s.tlast[i.x][i.y]
 
                 if add then s.v[add.x][add.y] = v end
-                if rem then s.v[rem.x][rem.y] = low end
+                if rem then s.v[rem.x][rem.y] = togglelow(s, s.p_('range', rem.x, rem.y), s.p_('include', rem.x, rem.y)) end
 
             elseif #hlist >= min then
                 for j,w in ipairs(hlist) do
                     s.toglist[j] = w
-                    s.v[w.x][w.y] = toggleset(s, 1, range, include)
+                    s.v[w.x][w.y] = toggleset(s, 1, s.p_('range', w.x, w.y), s.p_('include', w.x, w.y))
                 end
             end
 
@@ -1222,6 +1222,8 @@ _grid.pattern = _grid.toggle:new {
     action = function(s, value, time, delta, add, rem, list, last)
         -- assign variables, setter function based on affordance dimentions
         local set, p, v, t, d
+        local switch = s.count == 1
+
         if type(value) == 'table' then
             local i = add or rem
             if i then
@@ -1231,6 +1233,17 @@ _grid.pattern = _grid.toggle:new {
                     d = delta[i.x][i.y]
                     v = value[i.x][i.y]
                     set = function(val)
+                        ----- hacks
+                        if val == 0 then
+                            for j,w in ipairs(s.toglist) do
+                                if w.x == i.x and w.y == i.y then 
+                                    rem = table.remove(s.toglist, j)
+                                end
+                            end
+                        else
+                            if not tab.contains(s.toglist, i) then table.insert(s.toglist, i) end
+                            if switch and #s.toglist > 1 then table.remove(s.toglist, 1) end
+                        end
                         value[i.x][i.y] = val
                         return value
                     end
@@ -1240,6 +1253,17 @@ _grid.pattern = _grid.toggle:new {
                     d = delta[i]
                     v = value[i]
                     set = function(val)
+                        ----- hacks
+                        if val == 0 then
+                            local k = tab.key(s.toglist, i)
+                            if k then
+                                table.remove(s.toglist, k)
+                            end
+                        else
+                            if not tab.contains(s.toglist, i) then table.insert(s.toglist, i) end
+                            if switch and #s.toglist > 1 then table.remove(s.toglist, 1) end
+                        end
+
                         value[i] = val
                         return value
                     end

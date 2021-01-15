@@ -18,10 +18,21 @@ n = nest_ {
             print('momentary')
         end
     },
+    ---[[
     t = _grid.pattern {
         x = { 2, 6 }, y = 6,
+        count = 1,
         target = function() return n.m end
     }
+    --]]
+    --[[
+    t = _grid.toggle {
+        x = { 2, 6 }, y = 6,
+        lvl = { 0, 4, 15 },
+        include = { 1, 2 },
+        count = 1
+    }
+    --]]
     --[[
     t = _grid.toggle {
         x = { 2, 6 }, y = 6,
