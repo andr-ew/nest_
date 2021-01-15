@@ -1277,45 +1277,54 @@ _grid.pattern = _grid.toggle:new {
             set = function(val) return value end
         end
 
-        print('anything', add, rem)
+        local function stop_all()
+            ---[[
+            if switch then
+                for j,w in ipairs(s) do
+                    if w.rec == 1 then w:rec_stop() end
+                    w:stop()
+                end
+            end
+            --]]
+        end
+
         if p then
             print(p.count)
             if t > 0.5 then -- hold to clear
-                print 'clear'
                 p:clear()
                 return set(0)
             else
                 if p.count > 0 then
                     if d < 0.3 then -- double-tap to overdub
-                        print 'dub'
-                        p:start()
+                        p:resume()
                         p:set_overdub(1)
                         return set(4)
                     else
-                        print 'someting'
                         if p.rec == 1 then --play pattern / stop recording
-                            print 'play'
                             p:rec_stop()
                             p:start()
                             return set(3)
                         elseif p.overdub == 1 then --stop overdub
-                            print 'end dub'
                             p:set_overdub(0)
                             return set(3)
                         else
                             --clock.sleep(0.3)
+
                             if v == 3 then --resume pattern
-                                print 'resume'
+                                -- if count == 1 then stop all patterns
+                                stop_all()
+
                                 p:resume()
                             elseif v == 2 then --pause pattern
-                                print 'pause'
                                 p:stop() 
                             end
                         end
                     end
                 else
                     if v == 1 then --start recording new pattern
-                        print 'rec'
+                        -- if count == 1 then stop all patterns
+                        stop_all()
+
                         p:rec_start()
                     end
                 end
