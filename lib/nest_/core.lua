@@ -170,43 +170,11 @@ _input = _obj_:new {
             
             if hargs ~= nil then
                 if self.handler then 
-                    return table.pack(self:handler(table.unpack(hargs)))
+                    return hargs, table.pack(self:handler(table.unpack(hargs)))
                 end
-                
-                --[[
-                for i,v in ipairs(self.p.zsort) do
-                    if v.devk and self.devs[v.devk] then self.devs[v.devk].dirty = true end
-
-                    if v.is_output and v.handler then 
-                        v:handler(self.p.v, table.unpack(hargs)) 
-                    end
-                end
-                --]]
-                --return true
             end
-        --[[
-        elseif devk == nil or args == nil then -- called w/o arguments
-            local defaults = self.arg_defaults or {}
-            self.p.v = self.action and self.action(self.p or self, self.p.v, table.unpack(defaults)) or self.p.v
-            
-            if self.devs[self.devk] then self.devs[self.devk].dirty = true end
-
-            return self.p.v
-        --]]
-        end
-    end,
-    --[[
-    refresh = function(self, silent)
-        if self.devs[self.devk] then self.devs[self.devk].dirty = true end
-
-        if not silent then
-            local defaults = self.arg_defaults or {}
-            self.p.v = self.p.action and self.p:action(self.p.v, table.unpack(defaults)) or self.p.v
-
-            return self.p.v
         end
     end
-    --]]
 }
 
 function _input:new(o)
@@ -287,32 +255,16 @@ nest_ = _obj_:new {
         return self 
     end,
     update = function(self, devk, args, ob)
-        --[[
-        if devk == nil or args == nil then -- called w/o arguments
-
-            local ret = nil
-            for i,w in ipairs(self.zsort) do 
-                if w.update then 
-                    ret = w:update()
-                end
-            end
-            
-            return ret
-        --]] 
         if self.enabled == nil or self.p_.enabled == true then
-            local ret
-
             if self.observable then 
                 for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
             end 
 
             for i,v in ipairs(self.zsort) do 
                 if v.update then
-                    ret = v:update(devk, args, ob) or ret
+                    v:update(devk, args, ob)
                 end
             end
-
-            return ret, ob
         end
     end,
     refresh = function(self, silent)
@@ -457,15 +409,23 @@ _affordance = nest_:new {
         end
     end,
     update = function(self, devk, args, ob)
-        local aargs, ob = nest_.update(self, devk, args, ob)
+        if self.enabled == nil or self.p_.enabled == true then
+            if self.observable then 
+                for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
+            end 
 
-        if aargs and aargs[1] then 
-            clockaction(self, aargs)
-            
-            if self.observable then
-                for i,w in ipairs(ob) do
-                    if w.p.id ~= self.id then 
-                        w:pass(self, self.v, aargs)
+            if self.input then
+                local hargs, aargs = self.input:update(devk, args, ob)
+
+                if aargs and aargs[1] then 
+                    clockaction(self, aargs)
+                    
+                    if self.observable then
+                        for i,w in ipairs(ob) do
+                            if w.p.id ~= self.id then 
+                                w:pass(self, self.v, hargs)
+                            end
+                        end
                     end
                 end
             end
@@ -655,10 +615,7 @@ _pattern = _observer:new {
         if self.capture == 'value' then
             package = type(v) == 'table' and v:new() or v
         else
-            package = _obj_:new()
-            for i,w in ipairs(handler_args) do
-                package[i] = type(w) == 'table' and w:new() or w
-            end
+            package = handler_args
         end
 
         self:watch(_obj_:new {
@@ -675,7 +632,7 @@ _pattern = _observer:new {
                 o.value = type(p) == 'table' and p:new() or p
                 o:refresh(false)
             else
-                clockaction(o, p)
+                clockaction(o, table.pack(o.input:handler(table.unpack(p))))
             end
         else print('_pattern: path error') end
     end,

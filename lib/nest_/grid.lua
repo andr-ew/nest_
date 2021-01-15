@@ -1141,6 +1141,7 @@ _grid.range.output.muxredraw = _obj_:new {
 -- grid.pattern, grid.preset ------------------------------------------------------------------------
 
 -- TODO: switched pattern recorder when count == 1
+-- start action / stop action
 _grid.pattern = _grid.toggle:new {
     lvl = {
         0, ------------------ 0 empty
