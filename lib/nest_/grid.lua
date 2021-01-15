@@ -1140,6 +1140,7 @@ _grid.range.output.muxredraw = _obj_:new {
 
 -- grid.pattern, grid.preset ------------------------------------------------------------------------
 
+-- TODO: switched pattern recorder when count == 1
 _grid.pattern = _grid.toggle:new {
     lvl = {
         0, ------------------ 0 empty
@@ -1178,38 +1179,46 @@ _grid.pattern = _grid.toggle:new {
         end
     end,
     clock = true,
-    action = function(s, v, time, delta, add, rem, list, last)
-        -- assign p to the pattern to edit + assign set to a value setter function based on affordance dimentions
-        local p
-        local set
-        if type(v) == 'table' then
+    action = function(s, value, time, delta, add, rem, list, last)
+        -- assign variables, setter function based on affordance dimentions
+        local set, p, v, t, d
+        if type(value) == 'table' then
             if add then
-                if type(v)[1] == 'table' then
+                if type(value)[1] == 'table' then
                     p = s[add.x][add.y]
+                    t = time[add.x][add.y]
+                    d = delta[add.x][add.y]
+                    v = value[add.x][add.y]
                     set = function(val)
-                        v[add.x][add.y] = val
-                        return v
+                        value[add.x][add.y] = val
+                        return value
                     end
                 else
                     p = s[add]
+                    t = time[add]
+                    d = delta[add]
+                    v = value[add]
                     set = function(val)
-                        v[add] = val
-                        return v
+                        value[add] = val
+                        return value
                     end
                 end
             end
         else 
             p = s[1] 
-            set = function(val) return val end
+            t = time
+            d = delta
+            v = value
+            set = function(val) return value end
         end
 
         if p then   
-            if time > 0.5 then -- hold to clear
+            if t > 0.5 then -- hold to clear
                 p:clear()
                 return set(0)
             else
                 if p.count > 0 then
-                    if delta < 0.3 then -- double-tap to overdub
+                    if d < 0.3 then -- double-tap to overdub
                         p:start()
                         p:set_overdub(1)
                         return set(4)
