@@ -139,10 +139,7 @@ local function minit(axis)
     return v
 end
 
-_grid.binary.new = function(self, o) 
-    o = _grid.muxaffordance.new(self, o)
-
-    --rawset(o, 'list', {})
+local binaryvals = function(o)
     o.list = _obj_:new()
 
     local _, axis = input_contained(o, { -1, -1 })
@@ -164,10 +161,23 @@ _grid.binary.new = function(self, o)
         nil,
         o.list
     }
+    
+    return v
+end
+
+_grid.binary.new = function(self, o) 
+    o = _grid.muxaffordance.new(self, o)
+
+    --rawset(o, 'list', {})
+    local v = binaryvals(o)
 
     if type(o.v) ~= 'table' or type(o.v) == 'table' and #o.v ~= #v then o.v = v end
     
     return o
+end
+
+function _grid.binary:clear()
+    self.v = binaryvals(self)
 end
 
 _grid.binary.input.muxhandler = _obj_:new {
@@ -1178,7 +1188,6 @@ _grid.range.output.muxredraw = _obj_:new {
 
 -- grid.pattern, grid.preset ------------------------------------------------------------------------
 
--- start action / stop action
 _grid.pattern = _grid.toggle:new {
     lvl = {
         0, ------------------ 0 empty
@@ -1282,12 +1291,15 @@ _grid.pattern = _grid.toggle:new {
                     if w.rec == 1 then w:rec_stop() end
                     w:stop()
                 end
+                
+                if s.stop then s:stop() end
             end
         end
 
         if p then
             print(p.count)
             if t > 0.5 then -- hold to clear
+                if s.stop then s:stop() end
                 p:clear()
                 return set(0)
             else
@@ -1314,6 +1326,7 @@ _grid.pattern = _grid.toggle:new {
                                 p:resume()
                             elseif v == 2 then --pause pattern
                                 p:stop() 
+                                if s.stop then s:stop() end
                             end
                         end
                     end
