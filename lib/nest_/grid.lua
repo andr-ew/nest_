@@ -246,8 +246,8 @@ _grid.binary.input.muxhandler = _obj_:new {
     end
 }
 
-local lvl = function(s, i)
-    local x = s.p_.lvl
+local lvl = function(s, i, x, y)
+    local x = s.p_('lvl', x, y)
     -- come back later and understand or not understand ? :)
     return (type(x) ~= 'table') and ((i > 0) and x or 0) or x[i + 1] or 15
 end
@@ -271,7 +271,7 @@ _grid.binary.output.muxhandler = _obj_:new {
     line_x = function(s, v) 
         local d = s.devs.g
         for x,w in ipairs(v) do 
-            local lvl = lvl(s, w)
+            local lvl = lvl(s, w, x)
             if s.lvl_clock[x] then clock.cancel(s.lvl_clock[x]) end
 
             if type(lvl) == 'function' then
@@ -288,7 +288,7 @@ _grid.binary.output.muxhandler = _obj_:new {
         local d = s.devs.g
         for x,r in ipairs(v) do 
             for y,w in ipairs(r) do 
-                local lvl = lvl(s, w)
+                local lvl = lvl(s, w, x, y)
                 if s.lvl_clock[x][y] then clock.cancel(s.lvl_clock[x][y]) end
 
                 if type(lvl) == 'function' then
@@ -319,14 +319,14 @@ _grid.binary.output.muxredraw = _obj_:new {
     end,
     line_x = function(s, g, v)
         for x,l in ipairs(v) do 
-            local lvl = lvl(s, l)
+            local lvl = lvl(s, l, x)
             if type(lvl) == 'function' then lvl = s.lvl_frame[x] end
             if lvl > 0 then g:led(x + s.p_.x[1] - 1, s.p_.y, lvl) end
         end
     end,
     line_y = function(s, g, v)
         for y,l in ipairs(v) do 
-            local lvl = lvl(s, l)
+            local lvl = lvl(s, l, y)
             if type(lvl) == 'function' then lvl = s.lvl_frame[y] end
             if lvl > 0 then g:led(s.p_.x, y + s.p_.y[1] - 1, lvl) end
         end
@@ -334,7 +334,7 @@ _grid.binary.output.muxredraw = _obj_:new {
     plane = function(s, g, v)
         for x,r in ipairs(v) do 
             for y,l in ipairs(r) do 
-                local lvl = lvl(s, l)
+                local lvl = lvl(s, l, x, y)
                 if type(lvl) == 'function' then lvl = s.lvl_frame[x][y] end
                 if lvl > 0 then g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl) end
             end
@@ -426,9 +426,7 @@ _grid.toggle.new = function(self, o)
     return o
 end
 
-local function toggle(s, value, range, include)
-    local lvl = s.p_.lvl
-
+local function toggle(s, value, lvl, range, include)
     local function delta(vvv)
         local v = (vvv + 1) % (((type(lvl) == 'table') and #lvl > 1) and (#lvl) or 2)
 
@@ -466,7 +464,7 @@ local function togglelow(s, range, include)
     else return 0 end
 end
 
-local function toggleset(s, v, range, include)      
+local function toggleset(s, v, lvl, range, include)      
     if range then
         while v > range[2] do
             v = v - (range[2] - range[1]) - 1
@@ -479,7 +477,7 @@ local function toggleset(s, v, range, include)
     if include then
         local i = 0
         while not tab.contains(include, v) do
-            v = toggle(s, v, range, include)
+            v = toggle(s, v, lvl, range, include)
             i = i + 1
             if i > 64 then break end -- seat belt
         end
@@ -493,7 +491,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
         local held = _grid.binary.input.muxhandler.point(s, x, y, z)
 
         if s.edge == held then
-            return toggle(s, s.v, s.p_.range, s.p_.include),
+            return toggle(s, s.v, s.p_.lvl, s.p_.range, s.p_.include),
                 s.theld,
                 util.time() - s.tlast
         end
@@ -510,11 +508,13 @@ _grid.toggle.input.muxhandler = _obj_:new {
  
         if i then   
             if #s.toglist >= min then
+                local lvl = s.p_('lvl', i)
                 local range = s.p_('range', i)
                 local include = s.p_('include', i)
                 local v = toggle(
                     s, 
                     s.v[i], 
+                    lvl,
                     range,
                     include
                 )
@@ -541,7 +541,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
             elseif #hlist >= min then
                 for j,w in ipairs(hlist) do
                     s.toglist[j] = w
-                    s.v[w] = toggleset(s, 1, s.p_('range', w), s.p_('include', w))
+                    s.v[w] = toggleset(s, 1, s.p_('lvl', w), s.p_('range', w), s.p_('include', w))
                 end
             end
             
@@ -566,11 +566,13 @@ _grid.toggle.input.muxhandler = _obj_:new {
         
         if i and held then   
             if #s.toglist >= min then
+                local lvl = s.p_('lvl', i.x, i.y)
                 local range = s.p_('range', i.x, i.y)
                 local include = s.p_('include', i.x, i.y)
                 local v = toggle(
                     s, 
                     s.v[i.x][i.y], 
+                    lvl,
                     range,
                     include
                 )
@@ -605,7 +607,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
             elseif #hlist >= min then
                 for j,w in ipairs(hlist) do
                     s.toglist[j] = w
-                    s.v[w.x][w.y] = toggleset(s, 1, s.p_('range', w.x, w.y), s.p_('include', w.x, w.y))
+                    s.v[w.x][w.y] = toggleset(s, 1, s.p_('lvl', w.x, w.y), s.p_('range', w.x, w.y), s.p_('include', w.x, w.y))
                 end
             end
 
@@ -758,6 +760,7 @@ _grid.trigger.input.muxhandler = _obj_:new {
     end
 }
 
+----------------------------------------------------
 _grid.trigger.output.muxhandler = _obj_:new {
     point = function(s, v) 
         local lvl = lvl(s, v)
@@ -951,20 +954,21 @@ _grid.number.output.muxredraw = _obj_:new {
     end,
     line_x = function(s, g, v)
         for i = s.p_.x[1], s.p_.x[2] do
-            local lvl = lvl(s, (s.v == i - s.p_.x[1]) and 1 or 0)
+            local lvl = lvl(s, (s.v == i - s.p_.x[1]) and 1 or 0, i - s.p_.x[1])
             if lvl > 0 then g:led(i, s.p_.y, lvl) end
         end
     end,
     line_y = function(s, g, v)
         for i = s.p_.y[1], s.p_.y[2] do
-            local lvl = lvl(s, (s.v == i - s.p_.y[1]) and 1 or 0)
+            local lvl = lvl(s, (s.v == i - s.p_.y[1]) and 1 or 0, i - s.p_.x[1])
             if lvl > 0 then g:led(s.p_.x, i, lvl) end
         end
     end,
     plane = function(s, g, v)
         for i = s.p_.x[1], s.p_.x[2] do
             for j = s.p_.y[1], s.p_.y[2] do
-                local l = lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 0)
+                local li, lj = i - s.p_.x[1], j - s.p_.y[1]
+                local l = lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 0, li, lj)
                 if l > 0 then g:led(i, j, l) end
             end
         end
@@ -1372,28 +1376,54 @@ _grid.pattern.new = function(self, o)
     return o
 end
 
+--------------------------------------- ? not doing anything ?
 _grid.preset = _grid.number:new {
     lvl = function(s, x, y)
-        local p
-        if x and y then p = s[x][y]
-        elseif x then p = s[x]
-        else p = s[1] end
+        local st
+        if x and y then st = s[1].state[x][y]
+        elseif x then st = s[1].state[x]
+        else return { 4, 15 } end
 
+        if st then return { 4, 15 }
+        else return { 0, 15 } end
     end,
     action = function(s, v, t, delta)
-        --local last = v - delta
-
-        if self[1].state[v] then
-        else
-            self[1].store[v]
+        if type(s.v) == 'table' then 
+            if s[1].state[s.v.x][s.v.y] then s[1]:recall(s.v.x, s.v.y)
+            else s[1]:store(s.v.x, s.v.y) end
+        else 
+            if s[1].state[s.v] then s[1]:recall(s.v)
+            else s[1]:store(s.v) end
         end
     end
 }
 
 function _grid.preset:init()
-    self[1]:store(self.v)
+    local _, axis = input_contained(self, { -1, -1 })
+
+    if axis.x and axis.y then 
+        for x = 1, axis.x do 
+            self[1].state[x] = nest_:new()
+        end
+
+        self[1]:store(self.v.x, self.v.y)
+    else
+        self[1]:store(self.v)
+    end
 end
 
-_grid.preset[1] = _preset:new()
+_grid.preset[1] = _preset:new {
+    pass = function(self, sender, v)
+        print 'pass'
+        local st
+        if type(self.v) == 'table' then st = self.state[self.v.x][self.v.y]
+        else st = self.state[self.v] end
 
+        local o = st:find(sender:path(self.target))
+        if o then
+            o.value = type(v) == 'table' and v:new() or v
+        end
+    end
+}
+    
 return _grid

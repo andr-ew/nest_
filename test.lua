@@ -25,12 +25,16 @@ n = nest_ {
         target = function() return n.m end
     },
     t = _grid.toggle {
-        x = { 9, 14 },
+        x = { 9, 13 },
         y = { 3, 5 },
         lvl = { 4, 15 },
         action = function()
             print('toggle')
         end
+    },
+    tp = _grid.preset {
+        x = { 9, 13 }, y = 6,
+        target = function() return n.t end
     }
 } :connect { g = grid.connect() }
 

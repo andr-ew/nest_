@@ -508,7 +508,7 @@ end
 
 _observer = _obj_:new {
     is_observer = true,
-    pass = function(self, sender, v, hargs, aargs) end,
+    --pass = function(self, sender, v, hargs, aargs) end,
     target = nil,
     capture = nil
 }
@@ -557,33 +557,45 @@ function _observer:init()
             table.insert(vv._.ob_links, self)
         end
     end
-
-    return o
 end
 
 _preset = _observer:new { 
     capture = 'value',
-    state = nest_:new(),
+    state = nest_:new(), -- may be one or two levels deep
+    --[[
     pass = function(self, sender, v)
         local o = state[self.v]:find(sender:path(self.target))
         if o then
             o.value = type(v) == 'table' and v:new() or v
         end
     end,
-    store = function(self, n) 
-        self.state:replace(n, self.target:get(true, function(o) 
+    --]]
+    store = function(self, x, y) 
+        local test = function(o) 
             return o.p_.observers_enabed and o.id ~= self.id
-        end))
+        end
+        
+        if y then
+            self.state[x]:replace(y, self.p_.target:get(true, test))
+        else
+            self.state:replace(x, self.p_.target:get(true, test))
+        end
     end,
-    recall = function(self, n)
-        self.target:set(self.state[n], false)
+    recall = function(self, x, y)
+        if y then
+            self.p_.target:set(self.state[x][y], false)
+        else
+            self.p_.target:set(self.state[x], false)
+        end
     end,
+    --[[
     clear = function(self, n)
         self.state:remove(n) --- meh, i wish zsort wasn't so annoying :/
     end,
     copy = function(self, n_src, n_dest)
         self.state:replace(n_src, self.state[n_dest]:new())
     end,
+    --]]
     get = function(self, silent, test) 
         if test == nil or test(self) then
             return _obj_:new { state = self.state:new() }
