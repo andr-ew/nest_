@@ -60,7 +60,7 @@ preset
 ```
 ADD 
 
-_grid.binary.lvl -- accept clock funtion entry in table as animation
+_key.binary.lvl -- accept clock funtion entry in table as animation
 
 trigger & toggle t argument: restrict to range of held time when edge == 0
 
@@ -118,8 +118,6 @@ _etc.filebrowser
 ```
 
 ADD
-
-_grid.preset (number)
 
 trigger & toggle t argument: restrict to range of held time when edge == 0 
 

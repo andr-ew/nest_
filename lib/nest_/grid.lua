@@ -1376,7 +1376,6 @@ _grid.pattern.new = function(self, o)
     return o
 end
 
---------------------------------------- ? not doing anything ?
 _grid.preset = _grid.number:new {
     lvl = function(s, x, y)
         local st
@@ -1389,16 +1388,22 @@ _grid.preset = _grid.number:new {
     end,
     action = function(s, v, t, delta)
         if type(s.v) == 'table' then 
-            if s[1].state[s.v.x][s.v.y] then s[1]:recall(s.v.x, s.v.y)
-            else s[1]:store(s.v.x, s.v.y) end
+            if s[1].state[v.x][v.y] then s[1]:recall(v.x, v.y)
+            else s[1]:store(v.x, v.y) end
         else 
-            if s[1].state[s.v] then s[1]:recall(s.v)
-            else s[1]:store(s.v) end
+            if s[1].state[v] then 
+                s[1]:recall(v)
+            else 
+                s[1]:store(v) 
+            end
         end
     end
 }
 
+--[[
 function _grid.preset:init()
+    _grid.toggle.init(self)
+
     local _, axis = input_contained(self, { -1, -1 })
 
     if axis.x and axis.y then 
@@ -1408,20 +1413,23 @@ function _grid.preset:init()
 
         self[1]:store(self.v.x, self.v.y)
     else
+        print 'store init'
         self[1]:store(self.v)
     end
 end
+--]]
 
 _grid.preset[1] = _preset:new {
     pass = function(self, sender, v)
-        print 'pass'
         local st
         if type(self.v) == 'table' then st = self.state[self.v.x][self.v.y]
         else st = self.state[self.v] end
 
-        local o = st:find(sender:path(self.target))
-        if o then
-            o.value = type(v) == 'table' and v:new() or v
+        if st then
+            local o = st:find(sender:path(self.p_.target))
+            if o then
+                o.value = type(v) == 'table' and v:new() or v
+            end
         end
     end
 }

@@ -322,7 +322,7 @@ nest_ = _obj_:new {
     end,
     get = function(self, silent, test)
         if test == nil or test(self) then
-            local t = _obj_:new()
+            local t = nest_:new()
             for i,v in ipairs(self.zsort) do
                 if v.is_obj and rawget(v, 'get') then t[v.k] = v:get(silent, test) end
             end
@@ -510,7 +510,16 @@ _observer = _obj_:new {
     is_observer = true,
     --pass = function(self, sender, v, hargs, aargs) end,
     target = nil,
-    capture = nil
+    capture = nil,
+    init = function(self)
+        if self.target then
+            vv = self.p_.target
+
+            if type(vv) == 'table' and vv.is_nest then 
+                table.insert(vv._.ob_links, self)
+            end
+        end
+    end
 }
 
 function _observer:new(o)
@@ -549,16 +558,6 @@ function _observer:new(o)
     return o
 end
 
-function _observer:init()
-    if self.target then
-        vv = self.p_.target
-
-        if type(vv) == 'table' and vv.is_nest then 
-            table.insert(vv._.ob_links, self)
-        end
-    end
-end
-
 _preset = _observer:new { 
     capture = 'value',
     state = nest_:new(), -- may be one or two levels deep
@@ -572,7 +571,7 @@ _preset = _observer:new {
     --]]
     store = function(self, x, y) 
         local test = function(o) 
-            return o.p_.observers_enabed and o.id ~= self.id
+            return o.p_.observable and o.id ~= self.id
         end
         
         if y then
@@ -612,7 +611,6 @@ local pattern_time = require 'pattern_time'
 
 function pattern_time:resume()
     if self.count > 0 then
-          --print("start pattern ")
         self.prev_time = util.time()
         self.process(self.event[self.step])
         self.play = 1
