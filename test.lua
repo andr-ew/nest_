@@ -18,11 +18,19 @@ n = nest_ {
             print('momentary')
         end
     },
-    t = _grid.pattern {
+    mp = _grid.pattern {
         x = { 2, 6 }, y = 6,
         count = 1,
         stop = function() n.m:clear() end,
         target = function() return n.m end
+    },
+    t = _grid.toggle {
+        x = { 9, 14 },
+        y = { 3, 5 },
+        lvl = { 4, 15 },
+        action = function()
+            print('toggle')
+        end
     }
 } :connect { g = grid.connect() }
 

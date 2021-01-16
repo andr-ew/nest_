@@ -1225,7 +1225,7 @@ _grid.pattern = _grid.toggle:new {
             return { 0, 1 }
         end
     end,
-    clock = true,
+    --clock = true,
     capture = 'input',
     action = function(s, value, time, delta, add, rem, list, last)
         -- assign variables, setter function based on affordance dimentions
@@ -1371,5 +1371,29 @@ _grid.pattern.new = function(self, o)
     
     return o
 end
+
+_grid.preset = _grid.number:new {
+    lvl = function(s, x, y)
+        local p
+        if x and y then p = s[x][y]
+        elseif x then p = s[x]
+        else p = s[1] end
+
+    end,
+    action = function(s, v, t, delta)
+        --local last = v - delta
+
+        if self[1].state[v] then
+        else
+            self[1].store[v]
+        end
+    end
+}
+
+function _grid.preset:init()
+    self[1]:store(self.v)
+end
+
+_grid.preset[1] = _preset:new()
 
 return _grid

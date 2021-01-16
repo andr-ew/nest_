@@ -123,6 +123,8 @@ _grid.preset (number)
 
 trigger & toggle t argument: restrict to range of held time when edge == 0 
 
+? _grid.simplepattern (reference)
+
 REFACTOR
 
 grid.fader -> grid.control
