@@ -57,7 +57,7 @@ the various types and interface buidling blocks of nestworld are split up into a
 
 ## Including
 
-run `norns.fetch("https://github.com/andr-ew/nest_")` in the madien [repl](https://monome.org/docs/norns/maiden/#repl) to download this repo to your code folder
+run `;install "https://github.com/andr-ew/nest_"` in the madien [repl](https://monome.org/docs/norns/maiden/#repl) to download this repo to your code folder
 
 typically, it will make the most sense to include nest_ by copying the required module files into your script's `/lib/nest_` folder, including them like so:
 
