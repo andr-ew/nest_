@@ -27,7 +27,7 @@ start here !
 - [`demo`](demo.lua): demos of library affordances per device
 - `twigs`: a musical demonstration, ditonic keyboard + pitched delays
 
-run `norns.fetch("https://github.com/andr-ew/nest_")` in maiden to download
+run `;install "https://github.com/andr-ew/nest_"` in maiden to download
 
 # Studies
 
