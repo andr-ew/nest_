@@ -49,7 +49,6 @@ local function format_nickname(t, k, v)
 end
 
 _obj_ = {
-    print = function(self) print(tostring(self)) end,
     replace = function(self, k, v)
         rawset(self, k, formattype(self, k, v, self._.clone_type))
     end,
@@ -78,6 +77,46 @@ _obj_ = {
         return o
     end
 }
+
+local itab = '    '
+local function serialize(o, f, dof, i)
+    i = i or ""
+
+    if type(o) == "number" then
+        f(o)
+    elseif type(o) == "string" then
+        f(string.format("%q", o))
+    elseif type(o) == "table" then
+        f("{\n")
+        for i,v in ipairs(o) do
+            if type(v) ~= 'function' then
+                f(itab)
+                serialize(v, f, dof, i .. itab)
+                f(",\n")
+            end
+        end
+
+        for k,v in pairs(o) do
+            if type(k) == 'string' and type(v) ~= 'function' then
+                f(itab  .. k ..  " = ")
+                serialize(v, f, dof, i .. itab)
+                f(",\n")
+            end
+        end
+        
+        if dof then
+            f("\n")
+            for k,v in pairs(o) do
+                if type(v) == 'function' then
+                    f(itab .. k ..  "()")
+                    f(",\n")
+                end
+            end
+        end
+        
+        f("}\n")
+    end
+end
 
 function _obj_:new(o, clone_type)
     local _ = { -- the "instance table" - useful as it is ignored by the inheritance rules, and also hidden in subtables
@@ -119,7 +158,14 @@ function _obj_:new(o, clone_type)
         __call = function(idk, ...) -- dunno what's going on w/ the first arg to this metatmethod
             return o:new(...)
         end,
-        --__tostring = function(t) return tostring(t.k) end
+        __tostring = function(t)
+            local st = o.k and o.k .. " = " or ""
+            serialize(o, function(ss)
+                st = st .. ss
+            end, true)
+
+            return st
+        end
     })
 
     --[[
