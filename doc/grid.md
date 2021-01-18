@@ -34,7 +34,7 @@
 
 [_grid.pattern](#pattern) { 
   - ... 
-  - [target](#../core.md/target)
+  - [target](../core.md/#target)
   - [stop](#stop)
  
 }
