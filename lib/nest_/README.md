@@ -6,6 +6,9 @@ RENAME
 
 lvl -> level. add a lvl as a nickname
 add en as a nickname for enabled
+
+-------------------------------------------------
+
 zsort -> children. require children to be nest_'s
 
 REFACTOR
@@ -22,7 +25,7 @@ support _affordance { input = false } properly when input already exists. use bo
 
 nest_.redraw
 
-nest_.focus - focus on a single nest & children for a device & effectively disable otherelatives. will need it's own variable in the _dev. great for popup interfaces
+-----------------------------
 
 add actions{} list of action functions
 add inits{} list of init functions
@@ -33,11 +36,15 @@ add :link(_control or function() return control end) to _control, link two contr
 
 nest:disconnect() : for disconnecting and reconnecting nests to devices
 
+nest_.focus - focus on a single nest & children for a device & effectively disable otherelatives. will need it's own variable in the _dev. great for popup interfaces
+
 ```
 # readme
 
 ```
 build personalized interfaces as a waypoint into existing musical processes (a sampler, a synth voice, a sequence)
+
+
 
 ```
 
@@ -46,8 +53,10 @@ build personalized interfaces as a waypoint into existing musical processes (a s
 ```
 REFACTOR
 
-remove v from fill
 arc.option: store v as an int & store the float remainder from delta values as a seperate float
+
+--------------------------------
+remove v from fill
 
 ADD
 
@@ -56,24 +65,51 @@ preset
 
 ```
 
+# grid
+```
+
+ADD
+
+number.include (same as arc.option.include)
+
+REFACTOR
+
+grid.fader -> grid.control
+embed controlspec in grid.fader, align properties with argument names
+
+add range to number, default to 1-based
+
+---------------------------------------------
+
+trigger & toggle t argument: restrict to range of held time when edge == 0 
+
+? _grid.simplepattern (reference)
+
+
+```
+
 # norns
 ```
-ADD 
+ADD
+
+? _screen.affordance.animate
 
 _key.binary.lvl -- accept clock funtion entry in table as animation
-
-trigger & toggle t argument: restrict to range of held time when edge == 0
 
 _enc.delta
 _enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range delta stuff for option as in _arc.option
 
 *.option: remove the option string action argument, encourage indexing options instead
 
+-----------------------------------------
+
+trigger & toggle t argument: restrict to range of held time when edge == 0
+
 ```
 
 # txt
 ```
-
+---------------------------------------------
 RENAME
 
 left, right, top, bottom -> start, end
@@ -111,26 +147,6 @@ display strings inside list.itmes like headers in the params menu
 _etc.et12
 _etc.et24
 _etc.filebrowser
-
-```
-
-# grid
-```
-
-ADD
-
-number.include (same as arc.option.include)
-
-trigger & toggle t argument: restrict to range of held time when edge == 0 
-
-? _grid.simplepattern (reference)
-
-REFACTOR
-
-grid.fader -> grid.control
-embed controlspec in grid.fader, align properties with argument names
-
-add range to number, default to 1-based
 
 ```
 
