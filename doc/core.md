@@ -1,5 +1,3 @@
-# core types
-
 [nest_](#nest_) {
   - [p](#p)
   - [k](#k)
@@ -80,6 +78,8 @@
    - [set_time_factor](#set_time_factor)
 
 }
+
+# core types
 
 ### nest_
 
