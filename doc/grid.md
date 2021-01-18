@@ -28,7 +28,12 @@
   - [clear](#clear)
 }
 
-[_grid.toggle](#toggle) { ... }
+[_grid.toggle](#toggle) { 
+  - ... 
+  - include
+  - range
+  
+ }
 
 [_grid.range](#range) { ... }
 
