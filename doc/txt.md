@@ -1,5 +1,3 @@
-# types
-
 [_txt.affordance](#affordance) {
   - [font_face](#font_face)
   - [font_size](#font_size)
@@ -117,6 +115,8 @@
   - [fingers](../doc/grid.md#fingers)
   
 }
+
+# affordances
 
 ### affordance
 
