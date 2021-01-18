@@ -1,5 +1,3 @@
-# types
-
 [_grid.affordance](#affordance) {
   - [x](#x)
   - [y](#y)
@@ -23,22 +21,36 @@
   
 }
 
-[_grid.trigger](#trigger) { 
+[_grid.trigger](#trigger) { ... }
+
+[_grid.momentary](#momentary) { 
   - ... 
-  - blinktime
-  
+  - [clear](#clear)
 }
 
-[_grid.momentary](#momentary) { ... }
-
-[_grid.toggle](#toggle) { ... }
+[_grid.toggle](#toggle) { 
+  - ... 
+  - include
+  - range
+  
+ }
 
 [_grid.range](#range) { ... }
 
-_grid.pattern { ... }
+[_grid.pattern](#pattern) { 
+  - ... 
+  - [target](../doc/core.md#target)
+  - [stop](#stop)
+ 
+}
 
-_grid.preset { ... }
+[_grid.preset](#preset) { 
+  - ... 
+  - [target](../doc/core.md#target)
+ 
+ }
 
+# affordances
 
 ### affordance
 
@@ -89,6 +101,21 @@ a button where `value` toggles between high and low on a keypress. `x` and `y` d
 
 responds only to a two-finger press and fills a range of keys, setting `value = { finger1, finger2 } `
 
+# meta-affordances
+
+### pattern
+
+a pattern recorder, loops any input recieved by the [`target`(s)](../doc/core.md#target). `x` and `y` dimentions set up a bank of pattern recorders. setting the property `count = 1` creates a "choke group" bank, with only one pattern slot playing back at a time. 
+
+unlike regular affordances, meta-affordances have thier [`action`](#action) functions & behaviors pre-defined ([`lvl`](#lvl) is also predefined). a single press toggles between recoding, playback & pause. double-tap a recorded pattern to overdub, and hold for `> 0.5s` to clear the pattern slot. reference source code if you wish to redefine behavior & appearence.
+
+### preset
+
+a preset switch, stores and recalls values of the [`target`(s)](../doc/core.md#target). `x` and `y` dimentions set the size of the switch & the number of preset slots.
+
+unlike regular affordances, meta-affordances have thier [`action`](#action) functions & behaviors pre-defined ([`lvl`](#lvl) is also predefined). by default only the first slot will have a value stored. pressing a blank slot key will store the current settings in that slot, and switching back to an earlier slot will recall the previous setting. reference source code if you wish to redefine behavior & appearence.
+
+
 # properties
 
 ### x
@@ -105,7 +132,7 @@ the affordance value. the format of value depends on the affordance type and the
 
 ### lvl
 
-sets the brightness levels for the affordance. for most types, assigning a single integer sets the "on" level and assigning a table of two sets the "off" and "on" levels
+sets the brightness levels for the affordance. for most types, assigning a single integer sets the "on" level and assigning a table of two sets the "off" and "on" levels. a member of the lvl table may be a clock function, and a pointer function assigned to lvl will receive additional `x` and/or `y` arguments for relative offset being filled. 
 
 ### edge
 
@@ -137,3 +164,11 @@ end
 4. `add`: when `value` is a table of numbers, `add` is passed the index that has turned from 0 to 1 if it exists
 5. `rem`: when `value` is a table of numbers, `rem` is passed the index that has turned from 1 to 0 if it exists
 6. `list`: when `value` is a table of numbers, list is a table of indicies in `value` which are > 0
+
+### stop
+
+if provided, `stop(self)` is called when any `_pattern` slots are paused or cleared. useful for [`clear`](#clear)ing hung values from `momentary` affordances.
+
+### clear
+
+resets `momentary` to a clear state, useful for dealing with hung states.

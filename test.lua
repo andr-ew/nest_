@@ -5,103 +5,68 @@ end
 
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
-include 'lib/nest_/arc'
+include 'lib/nest_/grid'
 
 tab = require 'tabutil'
 
 n = nest_ {
-    gl = _arc.option {
-        n = 4,
-        sens = 1/16,
-        options = 2,
-        glyph = function(s, v, c)
-            local r = {}
-            for i = 1, c do
-                r[i] = v == 1 and math.floor(i * 15 / c) or 15 - math.ceil(i * 15 / c)
-            end
-            return r
-        end,
-        action = function(s, v) print(v) end
+    m = _grid.momentary {
+        x = { 2, 6 },
+        y = { 3, 5 },
+        lvl = { 4, 15 },
+        action = function(self, value)
+            print('momentary')
+        end
     },
-    f = _arc.option {
-        x = { 42, 24 },
-        n = 3,
-        sens = 1/16,
-        --size = { 1, 2, 4, 8 },
-        include = { 1, 2, 4 },
-        size = 4,
-        margin = 0,
-        lvl = { 0, 4, 15 },
-        action = function(s, v) print(v) end
+    mp = _grid.pattern {
+        x = { 2, 6 }, y = 6,
+        count = 1,
+        stop = function() n.m:clear() end,
+        target = function() return n.m end
     },
-    b = _arc.key.trigger {
-        n = 3,
-        action = function(s, v) print(v) end
+    t = _grid.toggle {
+        x = { 9, 13 },
+        y = { 3, 5 },
+        lvl = { 4, 15 },
+        action = function(self, value)
+            print('toggle', value)
+        end
+    },
+    tp = _grid.preset {
+        x = { 9, 13 }, y = 6,
+        target = function() return n.t end
     }
-} :connect({ a = arc.connect() }, 120)
+} :connect { g = grid.connect() }
 
-
+function init() n:init() end
 
 --[[
-    f = _arc.option {
-        x = { 42, 24 },
-        n = 4,
-        sens = 1/16,
-        size = { 1, 2, 4, 8 },
-        margin = 0,
-        lvl = { 0, 4, 15 },
-        action = function(s, v) print(v) end
+    t = _grid.pattern {
+        x = { 2, 6 }, y = 6,
+        target = function() return n.m end
     }
 
-    gl = _arc.option {
-        n = 4,
-        sens = 1/16,
-        options = 2,
-        glyph = function(s, v, c)
-            local r = {}
-            for i = 1, c do
-                r[i] = v == 1 and math.floor(i * 15 / c) or 15 - math.ceil(i * 15 / c)
+    t = _grid.toggle {
+        x = 1,
+        y = 1,
+        lvl = { 
+            0, 
+            function(self, draw)
+                while true do
+                    draw(15)
+                    clock.sleep(0.1)
+                    draw(4)
+                    clock.sleep(0.1)
+                    draw(15)
+                    clock.sleep(0.1)
+                    draw(4)
+                    clock.sleep(0.6)
+                end
             end
-            return r
-        end,
-        action = function(s, v) print(v) end
-    },
-    f = _arc.option {
-        x = { 42, 24 },
-        n = 3,
-        sens = 1/16,
-        --size = { 1, 2, 4, 8 },
-        size = 4,
-        margin = 0,
-        lvl = { 0, 4, 15 },
-        action = function(s, v) print(v) end
+        },
+        action = function(self, value) 
+            print(self.k, value)
+        end
     }
-    gl = _arc.option {
-        n = 4,
-        sens = 1/16,
-        options = 2,
-        glyph = function(s, v, c)
-            local r = {}
-            for i = 1, c do
-                r[i] = v == 1 and math.floor(i * 15 / c) or 15 - math.ceil(i * 15 / c)
-            end
-            return r
-        end,
-        action = function(s, v) print(v) end
-    },
-    f = _arc.option {
-        x = { 42, 24 },
-        n = 3,
-        sens = 1/16,
-        --size = { 1, 2, 4, 8 },
-        include = { 1, 2, 4 },
-        size = 4,
-        margin = 0,
-        lvl = { 0, 4, 15 },
-        action = function(s, v) print(v) end
-    },
-    b = _arc.key.trigger {
-        n = 3,
-        action = function(s, v) print(v) end
-    }
+
 --]]

@@ -53,6 +53,13 @@ _obj_ = {
     replace = function(self, k, v)
         rawset(self, k, formattype(self, k, v, self._.clone_type))
     end,
+    remove = function(self, k)
+        self[k] = nil
+
+        for i,w in ipairs(self._.zsort) do 
+            if w.k == k then table.remove(self._.zsort, i) end
+        end
+    end,
     copy = function(self, o) 
         for k,v in pairs(self) do 
             if rawget(o, k) == nil then
@@ -157,36 +164,15 @@ _input = _obj_:new {
     handler = nil,
     devk = nil,
     filter = function(self, devk, args) return args end,
-    update = function(self, devk, args, mc)
+    update = function(self, devk, args, ob)
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
-            if hargs ~= nil and self.affordance then
-                for i,v in ipairs(self.affordance.zsort) do
-                    if v.devk and self.devs[v.devk] then self.devs[v.devk].dirty = true end
-                end
- 
+            if hargs ~= nil then
                 if self.handler then 
-                    local aargs = table.pack(self:handler(table.unpack(hargs)))
-
-                    if aargs[1] then 
-                        self.affordance.v = self.action and self.action(self.affordance or self, table.unpack(aargs)) or aargs[1]
-
-                        if self.metaaffordances_enabled then
-                            for i,w in ipairs(mc) do
-                                w:pass(self.affordance, self.affordance.v, aargs)
-                            end
-                        end
-                    end
+                    return hargs, table.pack(self:handler(table.unpack(hargs)))
                 end
             end
-        elseif devk == nil or args == nil then -- called w/o arguments
-            local defaults = self.arg_defaults or {}
-            self.affordance.v = self.action and self.action(self.affordance or self, self.affordance.v, table.unpack(defaults)) or self.affordance.v
-            
-            if self.devs[self.devk] then self.devs[self.devk].dirty = true end
-
-            return self.affordance.v
         end
     end
 }
@@ -195,7 +181,7 @@ function _input:new(o)
     o = _obj_.new(self, o, _obj_)
     local _ = o._
 
-    _.affordance = nil
+    --_.p = nil
     _.devs = {}
     
     local mt = getmetatable(o)
@@ -204,9 +190,9 @@ function _input:new(o)
     mt.__index = function(t, k) 
         if k == "_" then return _
         elseif _[k] ~= nil then return _[k]
-        else return _.affordance and _.affordance[k]
+        else return _.p and _.p[k]
             --[[
-            local c = _.affordance and _.affordance[k]
+            local c = _.p and _.p[k]
             
             -- catch shared keys, otherwise privilege affordance keys
             if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' then return self[k]
@@ -216,9 +202,9 @@ function _input:new(o)
     end
 
     mt.__newindex = function(t, k, v)
-        local c = _.affordance and _.affordance[k]
+        local c = _.p and _.p[k]
     
-        if c then _.affordance[k] = v
+        if c then _.p[k] = v
         else mtn(t, k, v) end
     end
 
@@ -231,22 +217,35 @@ _output = _obj_:new {
     devk = nil,
     draw = function(self, devk, t)
         if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
-            if self.redraw then self.devs[devk].dirty = self:redraw(self.devs[devk].object, self.v, t) or self.devs[devk].dirty end
+            if self.redraw then self.devs[devk].dirty = self:redraw(self.devs[devk].object, self.v, t) or self.devs[devk].dirty end -- refactor dirty flag set
+        end
+    end,
+    --[[
+    -- this is a tiny bit of a gotcha since it breaks layering, but for now it feels worth saving the cycles -- maybe I'll factor this out later
+    draw_clean = function(self, f, ...)
+        if (self.enabled == nil or self.p_.enabled) then
+            local d = self.devs[self.devk]
+            f(d.object, self.v, ...)
+            d:refresh()
         end
     end
+    --]]
 }
 
 _output.new = _input.new
 
-nest_ = _obj_:new {
-    do_init = function(self)
-        if self.pre_init then self:pre_init() end
-        if self.init then self:init() end
-        self:update()
+local nest_id = 0 -- incrimenting numeric ID assigned to every nest_ instantiated
 
-        for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.do_init then v:do_init() end end end
+local function nextid()
+    nest_id =  nest_id + 1
+    return nest_id
+end
+
+nest_ = _obj_:new {
+    init = function(self)
+        for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.init then v:init() end end end
     end,
-    init = function(self) return self end,
+    --init = function(self) return self end,
     each = function(self, f) 
         for k,v in pairs(self) do 
             local r = f(k, v)
@@ -255,29 +254,28 @@ nest_ = _obj_:new {
 
         return self 
     end,
-    update = function(self, devk, args, mc)
-        if devk == nil or args == nil then -- called w/o arguments
-
-            local ret = nil
-            for i,w in ipairs(self.zsort) do 
-                if w.update then 
-                    ret = w:update()
-                end
-            end
-            
-            return ret
-        
-        elseif self.enabled == nil or self.p_.enabled == true then
-            if self.metaaffordances_enabled then 
-                for i,v in ipairs(self.mc_links) do table.insert(mc, v) end
+    update = function(self, devk, args, ob)
+        if self.enabled == nil or self.p_.enabled == true then
+            if self.observable then 
+                for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
             end 
 
             for i,v in ipairs(self.zsort) do 
                 if v.update then
-                    v:update(devk, args, mc)
+                    v:update(devk, args, ob)
                 end
             end
         end
+    end,
+    refresh = function(self, silent)
+        local ret
+        for i,v in ipairs(self.zsort) do 
+            if v.refresh then
+                ret = v:refresh(silent) or ret
+            end
+        end
+
+        return ret
     end,
     draw = function(self, devk)
         for i,v in ipairs(self.zsort) do
@@ -288,8 +286,51 @@ nest_ = _obj_:new {
             end
         end
     end,
-    set = function(self, t) end,
-    get = function(self) end,
+    path = function(self, pathto)
+        local p = {}
+
+        local function look(o)
+            if (not o.p) or (pathto and pathto.id == o.id) then
+                return p
+            else
+                table.insert(p, 1, o.k)
+                return look(o.p)
+            end
+        end
+
+        return look(self)
+    end,
+    find = function(self, path)
+        local p = self
+        for i,k in ipairs(path) do
+            if p[k] then p = p[k] 
+            else 
+                print(self.k or "global" .. ": can't find " .. k) 
+                p = nil
+                break
+            end
+        end
+
+        return p
+    end,
+    set = function(self, t, silent) 
+        for k,v in pairs(t) do
+            if self[k] and type(self[k]) == 'table' and self[k].is_obj and self[k].set then
+                self[k]:set(v, silent)
+            end
+        end
+    end,
+    get = function(self, silent, test)
+        if test == nil or test(self) then
+            local t = nest_:new()
+            for i,v in ipairs(self.zsort) do
+                if v.is_obj and rawget(v, 'get') then t[v.k] = v:get(silent, test) end
+            end
+            return t
+        end
+    end,
+    observable = true,
+    persistent = true,
     write = function(self) end,
     read = function(self) end
 }
@@ -326,10 +367,11 @@ function nest_:new(o, ...)
     local _ = o._ 
 
     _.is_nest = true
+    _.id = nextid()
     _.enabled = true
     _.devs = {}
-    _.metaaffordances_enabled = true
-    _.mc_links = {}
+    _.observable = true
+    _.ob_links = {}
 
     local mt = getmetatable(o)
     --mt.__tostring = function(t) return 'nest_' end
@@ -337,15 +379,28 @@ function nest_:new(o, ...)
     return o
 end
 
+local function runaction(self, aargs)
+    self.v = self.action and self.action(self, table.unpack(aargs)) or aargs[1] or self.v
+    self:refresh(true)
+end
+
+local function clockaction(self, aargs)
+    if self.p_.clock then
+        if type(self.clock) == 'number' then clock.cancel(self.clock) end
+        self.clock = clock.run(runaction, self, aargs)
+    else runaction(self, aargs) end
+end
+
 _affordance = nest_:new {
     value = 0,
     devk = nil,
-    action = function(s, v) end,
-    init = function(s) end,
-    do_init = function(self)
-        self:init()
-    end,
+    action = nil,
     print = function(self) end,
+    init = function(self)
+        self:refresh()
+
+        nest_.init(self)
+    end,
     draw = function(self, devk)
         if self.enabled == nil or self.p_.enabled == true then
             if self.output then
@@ -353,15 +408,73 @@ _affordance = nest_:new {
             end
         end
     end,
+    update = function(self, devk, args, ob)
+        if self.enabled == nil or self.p_.enabled == true then
+            if self.observable then 
+                for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
+            end 
+
+            if self.input then
+                local hargs, aargs = self.input:update(devk, args, ob)
+
+                if aargs and aargs[1] then 
+                    clockaction(self, aargs)
+                    
+                    if self.observable then
+                        for i,w in ipairs(ob) do
+                            if w.p.id ~= self.id then 
+                                w:pass(self, self.v, hargs, aargs)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end,
+    refresh = function(self, silent)
+        if (not silent) and self.action then
+            local defaults = self.arg_defaults or {}
+            clockaction(self, { self.v, table.unpack(defaults) })
+        else
+            for i,v in ipairs(self.zsort) do 
+                if v.is_output and self.devs[v.devk] then 
+                    self.devs[v.devk].dirty = true
+                    if v.handler then v:handler(self.v) end
+                end
+            end
+        end
+    end,
+    get = function(self, silent, test)
+        if test == nil or test(self) then
+            local t = nest_.get(self, silent)
+
+            t.value = type(self.value) == 'table' and self.value:new() or self.value -- watch out for value ~= _obj_ !
+            if silent == false then self:refresh(false) end
+
+            return t
+        end
+    end,
+    set = function(self, t, silent)
+        nest_.set(self, t, silence)
+
+        if t.value then 
+            if type(t.value) == 'table' then self.value = t.value:new()
+            else self.value = t.value end
+        end
+
+        self:refresh(silent)
+    end
+    --[[
     get = function(self, silent) 
         if not silent then
-            return self:update()
+            return self:refresh()
         else return self.v end
     end,
     set = function(self, v, silent)
         self:replace('v', v or self.v)
-        return self:get(silent)
+        if not self.silent then return self:refresh() end
     end
+    --]]
 }
 
 function _affordance:new(o)
@@ -384,8 +497,8 @@ function _affordance:copy(o)
     o = nest_.copy(self, o)
 
     for k,v in pairs(o) do
-        if type(v) == 'table' then if v.is_input or v.is_output then
-            rawset(v._, 'affordance', o)
+        if type(v) == 'table' then if v.is_input or v.is_output or v.is_observer then
+            --rawset(v._, 'affordance', o)
             v.devk = v.devk or o.devk
         end end
     end
@@ -393,77 +506,209 @@ function _affordance:copy(o)
     return o
 end
 
-_metaaffordance = _affordance:new {
-    pass = function(self, sender, v, handler_args) end,
+_observer = _obj_:new {
+    is_observer = true,
+    --pass = function(self, sender, v, hargs, aargs) end,
     target = nil,
-    mode = 'handler' -- or 'v'
+    capture = nil,
+    init = function(self)
+        if self.target then
+            vv = self.p.p_.target or self.p_.target
+
+            if type(vv) == 'table' and vv.is_nest then 
+                table.insert(vv._.ob_links, self)
+            end
+        end
+    end
 }
 
-function _metaaffordance:new(o)
-    o = _affordance.new(self, o)
+function _observer:new(o)
+    o = _input.new(self, o)
 
+    local _ = o._    
     local mt = getmetatable(o)
     local mtn = mt.__newindex
     
-    --mt.__tostring = function() return '_metaaffordance' end
+    --mt.__tostring = function() return '_observer' end
+    
+    --[[
+    mt.__index = function(t, k) 
+        if k == "_" then return _
+        elseif _[k] ~= nil then return _[k]
+        elseif _.p and _.p[k] ~= nil then return _.p[k]
+        elseif _.p and _.p.p and _.p.p[k] ~= nil then return _.p.p[k] --hackk
+        end
+    end
+    --]]
 
+    --[[
     mt.__newindex = function(t, k, v)
-        mtn(t, k, v)
-
         if k == 'target' then 
-            vv = v
-
-            if type(v) == 'functon' then 
-                vv = v()
-            end
+            vv = t._p[k]
 
             if type(vv) == 'table' and vv.is_nest then 
-                table.insert(vv._.mc_links, o)
+                table.insert(vv._.ob_links, o)
             end
+        else
+            mtn(t, k, v)
         end
     end
+    --]]
     
-    if o.target then
-        vv = o.target
-
-        if type(o.target) == 'functon' then 
-            vv = o.target()
-        end
-
-        if type(vv) == 'table' and vv.is_nest then 
-            table.insert(vv._.mc_links, o)
-        end
-    end
-
     return o
 end
 
---local pt = include 'lib/pattern_time'
+_preset = _observer:new { 
+    capture = 'value',
+    state = nest_:new(), -- may be one or two levels deep
+    --[[
+    pass = function(self, sender, v)
+        local o = state[self.v]:find(sender:path(self.target))
+        if o then
+            o.value = type(v) == 'table' and v:new() or v
+        end
+    end,
+    --]]
+    store = function(self, x, y) 
+        local test = function(o) 
+            return o.p_.observable and o.id ~= self.id
+        end
 
-_pattern = _metaaffordance:new {
-    event = _obj_:new {
-        path = nil,
-        package = nil
-    },
-    pass = function(self, sender, v, handler_args) 
-        self.pattern_time.watch(self.event:new {
-            path = sender:path(target),
-            package = self.mode == 'v' and v or handler_args
+        local target = self.p.p_.target or self.p_.target
+        
+        if y then
+            self.state[x]:replace(y, target:get(true, test))
+        else
+            self.state:replace(x, target:get(true, test))
+        end
+    end,
+    recall = function(self, x, y)
+        local target = self.p.p_.target or self.p_.target
+        if y then
+            target:set(self.state[x][y], false)
+        else
+            target:set(self.state[x], false)
+        end
+    end,
+    --[[
+    clear = function(self, n)
+        self.state:remove(n) --- meh, i wish zsort wasn't so annoying :/
+    end,
+    copy = function(self, n_src, n_dest)
+        self.state:replace(n_src, self.state[n_dest]:new())
+    end,
+    --]]
+    get = function(self, silent, test) 
+        if test == nil or test(self) then
+            return _obj_:new { state = self.state:new() }
+        end
+    end,
+    set = function(self, t)
+        if t.state then
+            self.state = t.state:new()
+        end
+    end
+}
+
+local pattern_time = require 'pattern_time'
+
+function pattern_time:resume()
+    if self.count > 0 then
+        self.prev_time = util.time()
+        self.process(self.event[self.step])
+        self.play = 1
+        self.metro.time = self.time[self.step] * self.time_factor
+        self.metro:start()
+    end
+end
+
+_pattern = _observer:new {
+    pass = function(self, sender, v, hargs, aargs) 
+        local package
+        if self.capture == 'value' then
+            package = type(v) == 'table' and v:new() or v
+        elseif self.capture == 'action' then
+            package = _obj_:new()
+            for i,w in ipairs(aargs) do
+                package[i] = type(w) == 'table' and w:new() or w
+            end
+        else
+            package = hargs
+        end
+
+        self:watch(_obj_:new {
+            path = sender:path(self.p.p_.target or self.p_.target),
+            package = package 
         })
     end,
-    process = function(self, event) end,
-    pass = function() end,
-    rec = function() end,
-    loop = function() end,
-    rate = function() end,
-    play = function() end,
-    quantize = function() end
+    proc = function(self, e)
+        local target = self.p.p_.target or self.p_.target
+        local o = target:find(e.path)
+        local p = e.package
+
+        if o then
+            if self.capture == 'value' then
+                o.value = type(p) == 'table' and p:new() or p
+                o:refresh(false)
+            elseif self.capture == 'action' then
+                clockaction(o, p)
+            elseif o.input then
+                local aargs = table.pack(o.input:handler(table.unpack(p)))
+                
+                if aargs and aargs[1] then 
+                    clockaction(o, aargs)
+                end
+            end
+        else print('_pattern: path error') end
+    end,
+    get = function(self, silent, test) 
+        if test == nil or test(self) then
+            local t = _obj_:new { event = {}, time = {}, count = self.count, step = self.step }
+
+            for i = 1, self.count do
+                t.time[i] = self.time[i]
+                t.event[i] = self.event[i]:new()
+            end
+        end
+    end,
+    set = function(self, t)
+        if t.event then
+            self.count = t.count
+            self.step = t.step
+            for i = 1, t.count do
+                self.time[i] = t.time[i]
+                self.event[i] = t.event[i]:new()
+            end
+        end
+    end
 }
 
 function _pattern:new(o) 
-    o = _obj_.new(self, o)
+    o = _observer.new(self, o)
 
-    --o.pattern_time = pt.new()
+    local pt = pattern_time.new()
+    pt.process = function(e) 
+        o:proc(e) 
+    end
+
+    local mt = getmetatable(o)
+    local mti = mt.__index
+    local mtn = mt.__newindex
+
+    --alias _pattern to pattern_time instance
+    mt.__index = function(t, k)
+        if k == 'new' then return mti(t, k)
+        elseif pt[k] ~= nil then return pt[k]
+        else return mti(t, k) end
+    end
+    
+    mt.__newindex = function(t, k, v)
+        if k == 'new' then mtn(t, k, v)
+        elseif pt[k] ~= nil then pt[k] = v
+        else mtn(t, k, v) end
+    end
+
+    return o
 end
 
 _group = _obj_:new {}

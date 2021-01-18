@@ -10,21 +10,19 @@ zsort -> children. require children to be nest_'s
 
 REFACTOR
 
-_affordance:refresh() instead of argumentless update, just to manually dirty the flag after any manual property change (value or otherwise)
+_metaaffordace.target: table of nests rather than single nest ?
+
+delegate most of the facilities of _obj_ into _input/_output/nest_. _obj_ should house only the copy & new behavior
 
 ADD
 
-_obj_:put() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
+_obj_:insert() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
 
 support _affordance { input = false } properly when input already exists. use booleans in the constructor to essentially nullify default values, even when they are _obj_ (i.e., members of zsort)
 
 nest_.redraw
 
 nest_.focus - focus on a single nest & children for a device & effectively disable otherelatives. will need it's own variable in the _dev. great for popup interfaces
-
-nest_ get/set: table macros nest = { nest = { control = value } } 
-
-add path functionality to _obj_: construct relative string path from parent to child and evalue string path to child
 
 add actions{} list of action functions
 add inits{} list of init functions
@@ -49,6 +47,7 @@ build personalized interfaces as a waypoint into existing musical processes (a s
 REFACTOR
 
 remove v from fill
+arc.option: store v as an int & store the float remainder from delta values as a seperate float
 
 ADD
 
@@ -61,10 +60,14 @@ preset
 ```
 ADD 
 
+_key.binary.lvl -- accept clock funtion entry in table as animation
+
 trigger & toggle t argument: restrict to range of held time when edge == 0
 
 _enc.delta
 _enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range delta stuff for option as in _arc.option
+
+*.option: remove the option string action argument, encourage indexing options instead
 
 ```
 
@@ -116,22 +119,13 @@ _etc.filebrowser
 
 ADD
 
+number.include (same as arc.option.include)
+
 trigger & toggle t argument: restrict to range of held time when edge == 0 
 
-_grid.affordance.wrap
-
-_grid.toggle: range argument
-
-_grid.numtog ?
-_grid.shape (eathsea) named combinations of normalized trigger presses for line & plane. add the naming feature to trigger ? (un-normalized)
-
-_grid.pattern
-_grid.switchpat --switch btw multiple patterns
-_grid.preset
+? _grid.simplepattern (reference)
 
 REFACTOR
-
-remove v from fill
 
 grid.fader -> grid.control
 embed controlspec in grid.fader, align properties with argument names
@@ -142,6 +136,11 @@ add range to number, default to 1-based
 
 ?????
 ```
+_grid.affordance.wrap ?
+_grid.shape (eathsea) named combinations of normalized trigger presses for line & plane. add the naming feature to trigger ? (un-normalized)
+
+remove v from fill ?
+
 ? _obj_.metatable - allow access to the metatable for e.g. reassigning the __call metamethod, which is both useful when pointed to new and set. ?? what if we defaulted it to set but overrode it for library objects? 
 simpler solution would just be adding a property called __call which the metatable references. the other things we probs don't want to expose
 

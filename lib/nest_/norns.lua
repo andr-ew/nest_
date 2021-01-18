@@ -1,8 +1,6 @@
 tab = require 'tabutil'
 
 nest_.connect = function(self, objects, fps)
-    self:do_init()
-
     local devs = {}
 
     local fps = fps or 30
@@ -17,6 +15,9 @@ nest_.connect = function(self, objects, fps)
                 redraw = function() 
                     vv:all(0)
                     self:draw(kk) 
+                    vv:refresh()
+                end,
+                refresh = function()
                     vv:refresh()
                 end,
                 handler = function(...)
@@ -65,6 +66,9 @@ nest_.connect = function(self, objects, fps)
 
             devs[kk] = _dev:new {
                 object = screen,
+                refresh = function()
+                    screen.update()
+                end,
                 redraw = function()
                     screen.clear()
                     self:draw('screen')
@@ -155,26 +159,6 @@ _enc.muxaffordance.input.muxhandler = _obj_:new {
 }
 
 _enc.muxaffordance.input.handler = function(s, k, ...)
-    return s.muxhandler[k](s, ...)
-end
-
-_enc.metaaffordance = _metaaffordance:new { 
-    n = 2,
-    input = _input:new()
-}
-
-_enc.metaaffordance.input.filter = _enc.affordance.input.filter
-
-_enc.muxmetaaffordance = _enc.metaaffordance:new()
-
-_enc.muxmetaaffordance.input.filter = _enc.muxaffordance.input.filter
-
-_enc.muxmetaaffordance.input.muxhandler = _obj_:new {
-    point = { function(s, z) end },
-    line = { function(s, v, z) end }
-}
-
-_enc.muxmetaaffordance.input.handler = function(s, k, ...)
     return s.muxhandler[k](s, ...)
 end
 
@@ -409,25 +393,6 @@ _key.muxaffordance.input.muxhandler = _obj_:new {
 }
 
 _key.muxaffordance.input.handler = _enc.muxaffordance.input.handler
-
-_key.metaaffordance = _metaaffordance:new { 
-    n = 2,
-    edge = 1,
-    input = _input:new()
-}
-
-_key.metaaffordance.input.filter = _key.affordance.input.filter
-
-_key.muxmetaaffordance = _key.metaaffordance:new()
-
-_key.muxmetaaffordance.input.filter = _key.muxaffordance.input.filter
-
-_key.muxmetaaffordance.input.muxhandler = _obj_:new {
-    point = { function(s, z) end },
-    line = { function(s, v, z) end }
-}
-
-_key.muxmetaaffordance.input.handler = _enc.muxmetaaffordance.input.handler
 
 _key.number = _key.muxaffordance:new {
     inc = 1,

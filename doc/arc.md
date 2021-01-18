@@ -1,5 +1,3 @@
-# types
-
 [_arc.affordance](#affordance) {
   - [n](#x)
   - [x](#x)
@@ -52,6 +50,7 @@ _arc.key.trigger { ... }
 
 _arc.key.toggle { ... }
 
+# affordances
 
 ### affordance
 

@@ -1,5 +1,3 @@
-# types
-
 [_enc.affordance](#affordance) {
   - [n](#n)
   
@@ -76,6 +74,8 @@
   - [fingers](../doc/grid.md#fingers)
   
 }
+
+# affordances
 
 ### affordance
 

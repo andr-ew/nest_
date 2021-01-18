@@ -1,10 +1,10 @@
-# types
-
 [nest_](#nest_) {
   - [p](#p)
   - [k](#k)
   - [z](#z)
   - [enabled](#enabled)
+  - [observable](#observable)
+  - [persistent](#persistent)
   - [print](#print)
   - [connect](#connect)
   - [init](#init)
@@ -53,6 +53,34 @@
 
 [_group](#_affordance) { }
 
+[_observer](#_observer) {
+   - [target](#target)
+   - [capture](#capture)
+   
+}
+
+[_preset](#_preset) {
+  - [target](#target)
+  - [capture](#capture)
+  - [store](#store)
+  - [recall](#recall)
+
+}
+
+[_pattern](#_pattern) {
+   - [target](#target)
+   - [capture](#capture)
+   - [rec_start](#rec_start)
+   - [rec_stop](#rec_start)
+   - [start](#start)
+   - [resume](#resume)
+   - [set_overdub](#set_overdub)
+   - [set_time_factor](#set_time_factor)
+
+}
+
+# core types
+
 ### nest_
 
 one of the two basic types in `nest_`. for introductory info, see [nests and affordances](../study/study1.md)
@@ -63,15 +91,27 @@ one of the two basic types in `nest_`. for introductory info, see [nests and aff
 
 ### _group
 
-a simple container type for grouping affordances by device or module. ex: `_grid.value`, `_enc.txt.number`
+a simple container type for grouping affordances by device or module. ex: `_grid.value`, `_txt.enc.number`
 
 ### _input
 
-stores input behaviors of a `_affordance`
+stores input behaviors of a `_affordance`, data is independent of `_output`
 
 ### _output
 
-stores output behaviors of a `_affordance`
+stores output behaviors of a `_affordance`, data is independent of `_input`
+
+### _observer
+
+stores observation behavior & data for meta-affordances
+
+###  _preset
+
+an observer subtype for preset meta-affordances
+
+###  _pattern
+
+an observer subtype for pattern meta-affordances
 
 # properties
 
@@ -94,6 +134,17 @@ boolean value, sets whether a given object and its children are drawn + updated.
 ### value
 
 the definitive datapoint of an affordance. this is the only property expected to change dynamically, though it can be initialized just like any other property. different affordances will expect different datatypes and range constraints. along with `p`, `k`, and `z`, a pointer function cannot be assigned to `value`.
+
+### target
+
+the `nest_`, `_affordance`, or table of nests/affordances that will pass data to the `_observer` whenever an affordance `value` is updated.
+
+### capture
+
+the data that is passed from the `target`s to the `_observer`. usually this is type-defined. possible values are:
+- `"input"`: arguments passed to the [`handler`](#handler) function
+- `"action"`: arguments passed to the [`action`](#action) function (the first argument is `value`)
+- `"value"`: the value of the affordance only
 
 # methods
 
@@ -177,3 +228,32 @@ end
 ### write
 
 ### read
+
+### store
+
+`_pattern:store(n)`
+
+store the target value(s) to the nth preset slot
+
+### recall
+
+`_pattern:store(n)`
+
+push the value(s) in the nth preset slot to the target(s)
+
+### rec_stop 
+see [http://norns.local/doc/classes/pattern.html](http://norns.local/doc/classes/pattern.html)
+### rec_start 
+see [http://norns.local/doc/classes/pattern.html](http://norns.local/doc/classes/pattern.html)
+### stop 
+see [http://norns.local/doc/classes/pattern.html](http://norns.local/doc/classes/pattern.html)
+### play 
+see [http://norns.local/doc/classes/pattern.html](http://norns.local/doc/classes/pattern.html)
+### set_overdub 
+see [http://norns.local/doc/classes/pattern.html](http://norns.local/doc/classes/pattern.html)
+### set_time_factor
+see [http://norns.local/doc/classes/pattern.html](http://norns.local/doc/classes/pattern.html)
+### resume
+play the pattern without restarting to the beginning
+
+
