@@ -25,6 +25,10 @@ support _affordance { input = false } properly when input already exists. use bo
 
 nest_.redraw
 
+FIX
+
+broken _txt.*.list (update issue probably)
+
 -----------------------------
 
 add actions{} list of action functions
