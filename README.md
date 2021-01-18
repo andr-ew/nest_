@@ -49,9 +49,9 @@ the various types and interface buidling blocks of nestworld are split up into a
 
 
 - [`nest_/grid`](./doc/grid.md)
+- [`nest_/arc`](./doc/arc.md)
 - [`nest_/norns`](./doc/norns.md)
 - [`nest_/txt`](./doc/txt.md)
-- [`nest_/arc`](./doc/arc.md)
 - [`nest_/core`](./doc/core.md)
 
 
