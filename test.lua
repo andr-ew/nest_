@@ -28,8 +28,8 @@ n = nest_ {
         x = { 9, 13 },
         y = { 3, 5 },
         lvl = { 4, 15 },
-        action = function()
-            --print('toggle')
+        action = function(self, value)
+            print('toggle', value)
         end
     },
     tp = _grid.preset {

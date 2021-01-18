@@ -715,18 +715,22 @@ _grid.trigger.input.muxhandler = _obj_:new {
         if ret then return s.v, s.tdelta, s.theld, nil, nil, lret end
     end,
     plane = function(s, x, y, z)
-        local held, hadd, hrem, theld, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z, fingers(s))
-        local min, max = count(s) ---------
+        local max
+        local min, wrap = count(s)
+        if s.fingers then
+            min, max = fingers(s)
+        end        
+        local held, theld, _, hadd, hrem, hlist = _grid.binary.input.muxhandler.plane(s, x, y, z, 0, nil)
         local ret = false
         local lret
 
-        if s.edge == 1 and hlist and #hlist > min and hadd then
+        if s.edge == 1 and #hlist > min and (max == nil or #hlist <= max) and hadd then
             s.v[hadd.x][hadd.y] = 1
             s.tdelta[hadd.x][hadd.y] = util.time() - s.tlast[hadd.x][hadd.y]
 
             ret = true
             lret = hlist
-        elseif s.edge == 1 and hlist and #hlist == min and hadd then
+        elseif s.edge == 1 and #hlist == min and hadd then
             for i,w in ipairs(hlist) do 
                 s.v[w.x][w.y] = 1
 
@@ -735,7 +739,7 @@ _grid.trigger.input.muxhandler = _obj_:new {
 
             ret = true
             lret = hlist
-        elseif s.edge == 0 and #hlist >= min - 1 and hrem and not hadd then
+        elseif s.edge == 0 and #hlist >= min - 1 and (max == nil or #hlist <= max - 1)and hrem and not hadd then
             --s.triglist = {}
             s:replace('triglist', {})
 
@@ -760,7 +764,6 @@ _grid.trigger.input.muxhandler = _obj_:new {
     end
 }
 
-----------------------------------------------------
 _grid.trigger.output.muxhandler = _obj_:new {
     point = function(s, v) 
         local lvl = lvl(s, v)
@@ -773,18 +776,53 @@ _grid.trigger.output.muxhandler = _obj_:new {
                 lvl(s, function(l)
                     s.lvl_frame = l
                     d.dirty = true
-                    
-                    if s.v > 0 and l <= 0 then
-                        s.v = 0
-                    end
                 end)
+
+                s.v = 0
             end)
         end
     end,
-    line_x = function(s, v) end,
-    line_y = function(s, v) end,
-    plane = function(s, v) end
+    line_x = function(s, v) 
+        local d = s.devs.g
+        for x,w in ipairs(v) do 
+            local lvl = lvl(s, w, x)
+            if s.lvl_clock[x] then clock.cancel(s.lvl_clock[x]) end
+
+            if type(lvl) == 'function' then
+                s.lvl_clock[x] = clock.run(function()
+                    lvl(s, function(l)
+                        s.lvl_frame[x] = l
+                        d.dirty = true
+                    end)
+                        
+                    s.v[x] = 0
+                end)
+            end
+        end
+    end,
+    plane = function(s, v) 
+        local d = s.devs.g
+        for x,r in ipairs(v) do 
+            for y,w in ipairs(r) do 
+                local lvl = lvl(s, w, x, y)
+                if s.lvl_clock[x][y] then clock.cancel(s.lvl_clock[x][y]) end
+
+                if type(lvl) == 'function' then
+                    s.lvl_clock[x][y] = clock.run(function()
+                        lvl(s, function(l)
+                            s.lvl_frame[x][y] = l
+                            d.dirty = true
+                        end)
+                                
+                        s.v[x][y] = 0
+                    end)
+                end
+            end
+        end
+    end
 }
+
+_grid.binary.output.muxhandler.line_y = _grid.binary.output.muxhandler.line_x
 
 _grid.fill = _grid.muxaffordance:new()
 _grid.fill.input = nil
@@ -1426,7 +1464,7 @@ _grid.preset[1] = _preset:new {
         else st = self.state[self.v] end
 
         if st then
-            local o = st:find(sender:path(self.p_.target))
+            local o = st:find(sender:path(self.p.p_.target or self.p_.target))
             if o then
                 o.value = type(v) == 'table' and v:new() or v
             end

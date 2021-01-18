@@ -380,7 +380,7 @@ function nest_:new(o, ...)
 end
 
 local function runaction(self, aargs)
-    self.v = self.action and self.action(self, table.unpack(aargs)) or aargs[1]
+    self.v = self.action and self.action(self, table.unpack(aargs)) or aargs[1] or self.v
     self:refresh(true)
 end
 
@@ -513,7 +513,7 @@ _observer = _obj_:new {
     capture = nil,
     init = function(self)
         if self.target then
-            vv = self.p_.target
+            vv = self.p.p_.target or self.p_.target
 
             if type(vv) == 'table' and vv.is_nest then 
                 table.insert(vv._.ob_links, self)
@@ -573,18 +573,21 @@ _preset = _observer:new {
         local test = function(o) 
             return o.p_.observable and o.id ~= self.id
         end
+
+        local target = self.p.p_.target or self.p_.target
         
         if y then
-            self.state[x]:replace(y, self.p_.target:get(true, test))
+            self.state[x]:replace(y, target:get(true, test))
         else
-            self.state:replace(x, self.p_.target:get(true, test))
+            self.state:replace(x, target:get(true, test))
         end
     end,
     recall = function(self, x, y)
+        local target = self.p.p_.target or self.p_.target
         if y then
-            self.p_.target:set(self.state[x][y], false)
+            target:set(self.state[x][y], false)
         else
-            self.p_.target:set(self.state[x], false)
+            target:set(self.state[x], false)
         end
     end,
     --[[
@@ -634,12 +637,13 @@ _pattern = _observer:new {
         end
 
         self:watch(_obj_:new {
-            path = sender:path(self.p_.target),
+            path = sender:path(self.p.p_.target or self.p_.target),
             package = package 
         })
     end,
     proc = function(self, e)
-        local o = self.p_.target:find(e.path)
+        local target = self.p.p_.target or self.p_.target
+        local o = target:find(e.path)
         local p = e.package
 
         if o then
@@ -648,8 +652,12 @@ _pattern = _observer:new {
                 o:refresh(false)
             elseif self.capture == 'action' then
                 clockaction(o, p)
-            else
-                clockaction(o, table.pack(o.input:handler(table.unpack(p))))
+            elseif o.input then
+                local aargs = table.pack(o.input:handler(table.unpack(p)))
+                
+                if aargs and aargs[1] then 
+                    clockaction(o, aargs)
+                end
             end
         else print('_pattern: path error') end
     end,

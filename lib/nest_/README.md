@@ -16,7 +16,7 @@ delegate most of the facilities of _obj_ into _input/_output/nest_. _obj_ should
 
 ADD
 
-_obj_:put() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
+_obj_:insert() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
 
 support _affordance { input = false } properly when input already exists. use booleans in the constructor to essentially nullify default values, even when they are _obj_ (i.e., members of zsort)
 
@@ -118,6 +118,8 @@ _etc.filebrowser
 ```
 
 ADD
+
+number.include (same as arc.option.include)
 
 trigger & toggle t argument: restrict to range of held time when edge == 0 
 

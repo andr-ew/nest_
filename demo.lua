@@ -29,15 +29,19 @@ local function gpage(self) return g.tab.value + 1 == self.k end
 local function tpage(self) return t.tab.options[t.tab.value] == self.k end
 local function apage(self) return math.floor(a.tab.value) == self.k end
 
+local grid_trigger_level = { 
+    4,
+    function(s, draw)
+        draw(15)
+        clock.sleep(0.1)
+        draw(4)
+    end
+}
+
 -------------------------------------------------grid
 
 -- print more action args
 g = nest_ {
-    tab = _grid.number {
-        x = { 1, 7 },
-        y = 1,
-        lvl = { 4, 15 }
-    },
     page = nest_ {
         -----------------------------------------fill
         nest_ { 
@@ -120,7 +124,7 @@ g = nest_ {
             trigger_0d = _grid.trigger {
                 x = 1,
                 y = 3,
-                lvl = { 4, 15 },
+                lvl = grid_trigger_level,
                 action = function(self, value) 
                     print(self.k, "1") 
                 end
@@ -128,7 +132,7 @@ g = nest_ {
             trigger_1d = _grid.trigger {
                 x = { 1, 7 },
                 y = 5,
-                lvl = { 4, 15 },
+                lvl = grid_trigger_level,
                 action = function(self, value) 
                     print(self.k)
                     print_matrix_1d(value)
@@ -137,7 +141,7 @@ g = nest_ {
             trigger_2d = _grid.trigger {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                lvl = { 4, 15 },
+                lvl = grid_trigger_level,
                 action = function(self, value) 
                     print(self.k) 
                     print_matrix_2d(value)
@@ -211,7 +215,7 @@ g = nest_ {
                 x = 1,
                 y = 3,
                 action = function(self, value) 
-                    print(self.k, v) 
+                    print(self.k, value)
                 end
             }, 
             range_1d = _grid.range {
@@ -233,9 +237,126 @@ g = nest_ {
             },
             enabled = gpage
         },
-        -----------------------------------------TODO: binary modalities 
-        -- (fingers, count, lvl clocks)
-        -----------------------------------------TODO: pattern/presets
+        -----------------------------------------pattern & preset
+        nest_ {
+            number = _grid.number {
+                x = { 2, 6 },
+                y = { 3, 5 },
+                lvl = { 4, 15 },
+                action = function(self, value)
+                    print(self.k, value.x, value.y)
+                end
+            },
+            pattern = _grid.pattern {
+                x = { 2, 6 }, y = 6,
+                count = 1,
+                target = function(self) return self.p.number end
+            },
+            toggle = _grid.toggle {
+                x = { 9, 13 },
+                y = { 3, 5 },
+                lvl = { 4, 15 },
+                action = function(self, value)
+                    print(self.k)
+                    print_matrix_2d(value)
+                end
+            },
+            preset = _grid.preset {
+                x = { 9, 13 }, y = 6,
+                target = function(self) return self.p.toggle end
+            },
+            enabled = gpage
+        },
+        -----------------------------------------advanced properties
+        nest_ {
+            modal_toggle = _grid.toggle {
+                x = 1, 
+                y = 3,
+                lvl = { 
+                    4, 
+                    15,
+                    function(self, draw)
+                        while true do
+                            draw(15)
+                            clock.sleep(0.2)
+                            draw(4)
+                            clock.sleep(0.2)
+                        end
+                    end,
+                    function(self, draw)
+                        while true do
+                            draw(15)
+                            clock.sleep(0.1)
+                            draw(0)
+                            clock.sleep(0.1)
+                            draw(15)
+                            clock.sleep(0.1)
+                            draw(0)
+                            clock.sleep(0.6)
+                        end
+                    end
+                },
+                action = function(self, value) 
+                    print(self.k, value)
+                end
+            },
+            fancy_trigger = _grid.trigger {
+                x = 3,
+                y = 3,
+                lvl = {
+                    1,
+                    function(self, draw)
+                        for i = 1, 15 do
+                            draw(i)
+                            clock.sleep(0.03)
+                        end
+                        for i = 15, 1, -1 do
+                            draw(i)
+                            clock.sleep(0.03)
+                        end
+                    end
+                },
+                action = function(self)
+                    print(self.k)
+                end
+            },
+            two_trigger = _grid.trigger {
+                x = { 1, 4 },
+                y = 5,
+                lvl = grid_trigger_level,
+                fingers = { 2, 2 },
+                action = function(self, value) 
+                    print(self.k)
+                    print_matrix_1d(value)
+                end
+            },
+            combo_trigger = _grid.trigger {
+                x = { 6, 9 },
+                y = 5,
+                lvl = grid_trigger_level,
+                edge = 0,
+                action = function(self, value) 
+                    print(self.k)
+                    print_matrix_1d(value)
+                end
+            },
+            limit_toggle = _grid.toggle {
+                x = { 1, 7 },
+                y = 7,
+                lvl = { 4, 15 },
+                count = 2,
+                action = function(self, value)
+                    print(self.k)
+                    print_matrix_1d(value)
+                end
+            },
+            enabled = gpage
+        }
+    },
+    tab = _grid.number {
+        x = { 1, 9 },
+        y = 1,
+        lvl = { 4, 15 }
     }
 } :connect {
     g = grid.connect()
@@ -515,3 +636,9 @@ a = nest_ {
         lvl = { 0, 4, 15 },
     }
 } :connect({ a = arc.connect() }, 120) -- refresh @ 120 fps instead of the default 30
+
+function init()
+    g:init()
+    t:init()
+    a:init()
+end
