@@ -34,14 +34,14 @@
 
 [_grid.pattern](#pattern) { 
   - ... 
-  - [target](../core.md#target)
+  - [target](../doc/core.md#target)
   - [stop](#stop)
  
 }
 
 [_grid.preset](#preset) { 
   - ... 
-  - [target](../core.md#target)
+  - [target](../doc/core.md#target)
  
  }
 
@@ -100,13 +100,13 @@ responds only to a two-finger press and fills a range of keys, setting `value = 
 
 ### pattern
 
-a pattern recorder, loops any input recieved by the [`target`(s)](../core.md#target). `x` and `y` dimentions set up a bank of pattern recorders. setting the property `count = 1` creates a "choke group" bank, with only one pattern slot playing back at a time. 
+a pattern recorder, loops any input recieved by the [`target`(s)](../doc/core.md#target). `x` and `y` dimentions set up a bank of pattern recorders. setting the property `count = 1` creates a "choke group" bank, with only one pattern slot playing back at a time. 
 
 unlike regular affordances, meta-affordances have thier [`action`](#action) functions & behaviors pre-defined ([`lvl`](#lvl) is also predefined). a single press toggles between recoding, playback & pause. double-tap a recorded pattern to overdub, and hold for `> 0.5s` to clear the pattern slot. reference source code if you wish to redefine behavior & appearence.
 
 ### preset
 
-a preset switch, stores and recalls values of the [`target`(s)](../core.md#target). `x` and `y` dimentions set the size of the switch & the number of preset slots.
+a preset switch, stores and recalls values of the [`target`(s)](../doc/core.md#target). `x` and `y` dimentions set the size of the switch & the number of preset slots.
 
 unlike regular affordances, meta-affordances have thier [`action`](#action) functions & behaviors pre-defined ([`lvl`](#lvl) is also predefined). by default only the first slot will have a value stored. pressing a blank slot key will store the current settings in that slot, and switching back to an earlier slot will recall the previous setting. reference source code if you wish to redefine behavior & appearence.
 
