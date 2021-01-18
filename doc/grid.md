@@ -1,5 +1,3 @@
-# types
-
 [_grid.affordance](#affordance) {
   - [x](#x)
   - [y](#y)
@@ -39,6 +37,7 @@ _grid.pattern { ... }
 
 _grid.preset { ... }
 
+# affordances
 
 ### affordance
 
@@ -88,6 +87,8 @@ a button where `value` toggles between high and low on a keypress. `x` and `y` d
 ### range
 
 responds only to a two-finger press and fills a range of keys, setting `value = { finger1, finger2 } `
+
+# meta-affordances
 
 # properties
 
