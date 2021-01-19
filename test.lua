@@ -10,7 +10,9 @@ o = _obj_:new {
     t = _obj_:new {
         'one',
         'two',
+        'three',
+        { 1, 2, 4 },
         a = 3,
-        b = "foo"
+        b = "foo",
     }
 }

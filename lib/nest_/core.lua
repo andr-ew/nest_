@@ -78,43 +78,64 @@ _obj_ = {
     end
 }
 
-local itab = '    '
-local function serialize(o, f, dof, i)
-    i = i or ""
+local function serialize(o, f, dof, itab)
+    local tab = "    "
+    itab = itab or ""
+    local ntab = tab .. itab
 
     if type(o) == "number" then
         f(o)
     elseif type(o) == "string" then
         f(string.format("%q", o))
     elseif type(o) == "table" then
-        f("{\n")
-        for i,v in ipairs(o) do
-            if type(v) ~= 'function' then
-                f(itab)
-                serialize(v, f, dof, i .. itab)
-                f(",\n")
+        f("{")
+        local first = true
+
+        if #o then
+            f(" ")
+            for i,v in ipairs(o) do
+                if type(v) == "string" or type(v) == "number" then
+                    serialize(v, f, dof, ntab)
+                    f(", ")
+                elseif type(v) == "table" then
+                    if first then
+                        f("\n")
+                        first = false
+                    end
+                    f(ntab)
+                    serialize(v, f, dof, ntab)
+                    f(",\n")
+                end
             end
         end
 
         for k,v in pairs(o) do
             if type(k) == 'string' and type(v) ~= 'function' then
-                f(itab  .. k ..  " = ")
-                serialize(v, f, dof, i .. itab)
+                if first then
+                    f("\n")
+                    first = false
+                end
+                f(ntab  .. k ..  " = ")
+                serialize(v, f, dof, ntab)
                 f(",\n")
             end
         end
         
         if dof then
-            f("\n")
+            first = true
             for k,v in pairs(o) do
                 if type(v) == 'function' then
-                    f(itab .. k ..  "()")
+                    if first then
+                        f("\n")
+                        first = false
+                    end
+                    f(ntab .. k ..  "()")
                     f(",\n")
                 end
             end
         end
         
-        f("}\n")
+        f(itab .. "}")
     end
 end
 
