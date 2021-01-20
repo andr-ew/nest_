@@ -1,14 +1,11 @@
 -- _obj_ is a base object for all the types on this page that impliments concatenative prototypical inheritance. all subtypes of _obj_ have proprer copies of the tables in the prototype rather than delegated pointers, so changes to subtype members will never propogate up the tree
 
--- GOTCHA: overwriting an existing table value will not format type. instead, use :replace()
-
 local tab = require 'tabutil'
 
 -- add ignored keys table argument
-local function serialize(o, f, dof, itab)
-    local tab = "    "
+local function serialize(o, f, skip, dof, itab)
     itab = itab or ""
-    local ntab = tab .. itab
+    local ntab = itab .. "    "
 
     if type(o) == "number" then
         f(o)
@@ -24,7 +21,7 @@ local function serialize(o, f, dof, itab)
             f(" ")
             for i,v in ipairs(o) do
                 if type(v) == "string" or type(v) == "number" then
-                    serialize(v, f, dof, ntab)
+                    serialize(v, f, skip, dof, ntab)
                     f(", ")
                 elseif type(v) == "table" then
                     if first then
@@ -32,7 +29,8 @@ local function serialize(o, f, dof, itab)
                         first = false
                     end
                     f(ntab)
-                    serialize(v, f, dof, ntab)
+                    if v.serialize then v:serialize(f, skip, dof, ntab)
+                    else serialize(v, f, skip, dof, ntab) end
                     f(",\n")
                 end
             end
@@ -40,27 +38,26 @@ local function serialize(o, f, dof, itab)
 
         first = true
         for k,v in pairs(o) do
-            if type(k) == 'string' and type(v) ~= 'function' then
-                if first then
-                    f("\n")
-                    first = false
-                end
-                f(ntab  .. k ..  " = ")
-                serialize(v, f, dof, ntab)
-                f(",\n")
-            end
-        end
-        
-        if dof then
-            --first = true
-            for k,v in pairs(o) do
+            if type(k) == 'string' and not tab.contains(skip, k) then
                 if type(v) == 'function' then
+                    if dof then
+                        if first then
+                            f("\n")
+                            first = false
+                        end
+                        f(ntab .. k .. " = function() end")
+                        f(",\n")
+                    end
+                else
                     if first then
                         f("\n")
                         first = false
                     end
-                    --f(ntab .. k ..  "()")
-                    f(ntab .. k .. " = function() end")
+                    f(ntab  .. k ..  " = ")
+
+                    if type(v) == "table" and v.serialize then v:serialize(f, skip, dof, ntab)
+                    else serialize(v, f, skip, dof, ntab) end
+
                     f(",\n")
                 end
             end
@@ -183,7 +180,7 @@ end
 nest_ = {
     is_obj = true,
     is_nest = true,
-    replace = function(self, k, v)
+    replace = function(self, k, v)  -- GOTCHA: overwriting an existing table value will not format type. instead, use :replace()
         rawset(self, k, formattype(self, k, v))
     end,
     remove = function(self, k)
@@ -192,6 +189,10 @@ nest_ = {
         for i,w in ipairs(self._.zsort) do 
             if w.k == k then table.remove(self.zsort, i) end
         end
+    end,
+    serialize = function(o, f, ...) 
+        f "nest_"
+        serialize(o, f, ...)
     end,
     copy = function(self, o) 
         copy(self, o, formattype)
@@ -354,7 +355,28 @@ function nest_:new(o, ...)
             local st = o.k and o.k .. " = " or ""
             serialize(o, function(ss)
                 st = st .. ss
-            end, true)
+            end, {
+                'new',
+                'remove',
+                'serialize',
+                'replace',
+                'find',
+                'update',
+                'copy',
+                'path',
+                'draw',
+                'each',
+                'init',
+                'connect',
+                'read',
+                'write',
+                'refresh',
+                'set',
+                'get',
+                'is_obj',
+                'is_nest',
+                'is_affordance'
+            }, true)
 
             return st
         end
@@ -401,6 +423,7 @@ setmetatable(nest_, {
 
 _input = nest_:new {
     is_input = true,
+    serialize = function(s, f) f "_input()" end,
     handler = nil,
     devk = nil,
     filter = function(self, devk, args) return args end,
@@ -449,6 +472,7 @@ end
 
 _output = nest_:new {
     is_output = true,
+    serialize = function(s, f) f "_output()" end,
     redraw = nil,
     devk = nil,
     draw = function(self, devk, t)
@@ -465,6 +489,7 @@ _observer = nest_:new {
     --pass = function(self, sender, v, hargs, aargs) end,
     target = nil,
     capture = nil,
+    serialize = function(s, f) f "_observer()" end,
     init = function(self)
         if self.target then
             vv = self.p.p_.target or self.p_.target
@@ -496,6 +521,10 @@ end
 
 _affordance = nest_:new {
     is_affordance = true,
+    serialize = function(o, f, ...) 
+        f("_affordance ")
+        serialize(o, f, ...)
+    end,
     value = 0,
     devk = nil,
     action = nil,

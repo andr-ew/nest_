@@ -12,7 +12,7 @@ tab = require 'tabutil'
 ---[[
 g = nest_ {
     n = _grid.number {
-        x = { 1, 8 }, y = 1,
+        x = { 1, 8 }, y = function() return 1 end,
         action = function(s, v)
             print(v)
         end
