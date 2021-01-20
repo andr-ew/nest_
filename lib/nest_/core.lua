@@ -110,8 +110,7 @@ function _obj_:new(o, clone_type)
             end)
 
             return st
-        end,
-        objmt = true
+        end
     })
     
     for k,v in pairs(o) do 
@@ -163,7 +162,7 @@ local function nickname(k)
 end
 
 local function index_nickname(t, k) 
-    if k == 'v' then return t.value end
+    if k == 'v' then return rawget(t, 'value') end
 end
 
 local function format_nickname(t, k, v) 
@@ -174,6 +173,8 @@ local function format_nickname(t, k, v)
     
     return v
 end
+
+iii = 0
 
 nest_ = {
     is_obj = true,
@@ -196,7 +197,7 @@ nest_ = {
         return o
     end,
     init = function(self)
-        for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.init then v:init() end end end
+        for i,v in ipairs(self._.zsort) do if type(v) == 'table' then if v.init then v:init() end end end
     end,
     --init = function(self) return self end,
     each = function(self, f) 
@@ -328,6 +329,8 @@ function nest_:new(o, ...)
 
     setmetatable(o, {
         __index = function(t, k)
+            iii = iii + 1
+            print("__index", iii)
             if k == "_" then return _
             elseif index_nickname(t,k) then return index_nickname(t,k)
             elseif _[k] ~= nil then return _[k] end
@@ -352,8 +355,7 @@ function nest_:new(o, ...)
             end, true)
 
             return st
-        end,
-        nestmt = true
+        end
     })
 
     local function resolve(s, f, ...) 
@@ -421,21 +423,22 @@ _input = nest_:new {
 function _input:new(o)
     o = nest_.new(self, o)
 
+    local _ = o._
     local mt = getmetatable(o)
     local mti = mt.__index
     local mtn = mt.__newindex
 
     -- alias calls to parent
-    mt.__index = function(t, k) 
-        local p = rawget(o, 'p')
-        return p and p[k] or mti(t, k)
+    mt.__index = function(t, k)
+        local om = mti(t,k)
+        if om ~= nil then return om
+        elseif _.p ~= nil and _.p[k] ~= nil then return _.p[k] end
     end
 
     mt.__newindex = function(t, k, v)
-        local p = rawget(o, 'p')
-        local c = p and p[k]
+        local c = _.p ~= nil and _.p[k] ~= nil
     
-        if c then rawset(p, k, v)
+        if c then rawset(_.p, k, v)
         else mtn(t, k, v) end
     end
 

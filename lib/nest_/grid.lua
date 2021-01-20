@@ -1339,7 +1339,6 @@ _grid.pattern = _grid.toggle:new {
         end
 
         if p then
-            print(p.count)
             if t > 0.5 then -- hold to clear
                 if s.stop then s:stop() end
                 p:clear()
