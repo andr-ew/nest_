@@ -4,80 +4,7 @@
 
 local tab = require 'tabutil'
 
-local function formattype(t, k, v, clone_type) 
-    if type(v) == "table" then
-        if v.is_obj then 
-            v._.p = t
-            v._.k = k
-        elseif not v.new then -- test !
-            v = clone_type:new(v)
-            v._.p = t
-            v._.k = k
-        end
-
-        for i,w in ipairs(t._.zsort) do 
-            if w.k == k then table.remove(t._.zsort, i) end
-        end
-        
-        t._.zsort[#t._.zsort + 1] = v
-    end
-
-    return v
-end
-
-local function zcomp(a, b) 
-    if type(a) == 'table' and type(b) == 'table' and a.z and b.z then
-        return a.z > b.z 
-    else return false end
-end
-
-local function nickname(k) 
-    if k == 'v' then return 'value' else return k end
-end
-
-local function index_nickname(t, k) 
-    if k == 'v' then return t.value end
-end
-
-local function format_nickname(t, k, v) 
-    if k == 'v' and not rawget(t, 'value') then
-        rawset(t, 'value', v)
-        t['v'] = nil
-    end
-    
-    return v
-end
-
-_obj_ = {
-    replace = function(self, k, v)
-        rawset(self, k, formattype(self, k, v, self._.clone_type))
-    end,
-    remove = function(self, k)
-        self[k] = nil
-
-        for i,w in ipairs(self._.zsort) do 
-            if w.k == k then table.remove(self._.zsort, i) end
-        end
-    end,
-    copy = function(self, o) 
-        for k,v in pairs(self) do 
-            if rawget(o, k) == nil then
-                --if type(v) == "function" then
-                    -- function pointers are not copied, instead they are referenced using metatables only when the objects are heierchachically related
-                --else
-                if type(v) == "table" and v.is_obj then
-                    local clone = self[k]:new()
-                    o[k] = formattype(o, k, clone, o._.clone_type) ----
-                else rawset(o,k,v) end 
-            end
-        end
-
-        table.sort(o._.zsort, zcomp)
-
-        return o
-    end
-}
-
+-- add ignored keys table argument
 local function serialize(o, f, dof, itab)
     local tab = "    "
     itab = itab or ""
@@ -85,6 +12,8 @@ local function serialize(o, f, dof, itab)
 
     if type(o) == "number" then
         f(o)
+    elseif type(o) == "boolean" then
+        f(o and "true" or "false")
     elseif type(o) == "string" then
         f(string.format("%q", o))
     elseif type(o) == "table" then
@@ -129,7 +58,8 @@ local function serialize(o, f, dof, itab)
                         f("\n")
                         first = false
                     end
-                    f(ntab .. k ..  "()")
+                    --f(ntab .. k ..  "()")
+                    f(ntab .. k .. " = " .. tostring(v))
                     f(",\n")
                 end
             end
@@ -139,167 +69,81 @@ local function serialize(o, f, dof, itab)
     end
 end
 
-function _obj_:new(o, clone_type)
-    local _ = { -- the "instance table" - useful as it is ignored by the inheritance rules, and also hidden in subtables
-        is_obj = true,
-        p = nil,
-        k = nil,
-        z = 0,
-        zsort = {}, -- list of obj children sorted by descending z value
-        clone_type = clone_type,
-    }
+local function copy(self, o, ft)
+    for k,v in pairs(self) do 
+        if rawget(o, k) == nil then
+            if type(v) == "table" and v.is_obj then
+                local clone = self[k]:new()
+                o[k] = ft(o, k, clone)
+            else rawset(o,k,v) end 
+        end
+    end
+end
 
+_obj_ = { is_obj = true }
+
+local function formatobj(t, k, v)
+    if type(v) == "table" then
+        if v.is_obj then 
+        elseif not v.new then
+            v = _obj_:new(v)
+        end
+    end
+
+    return v
+end
+
+function _obj_:new(o, clone_type)
     o = o or {}
-    _.clone_type = _.clone_type or _obj_
 
     setmetatable(o, {
-        __index = function(t, k)
-            if k == "_" then return _
-            elseif index_nickname(t,k) then return index_nickname(t,k)
-            elseif _[k] ~= nil then return _[k]
-            --elseif self[k] ~= nil then return self[k]
-            else return nil end
-        end,
         __newindex = function(t, k, v)
-            if _[k] ~= nil then rawset(_,k,v) 
-            elseif index_nickname(t, k) then
-                rawset(t, nickname(k), formattype(t, nickname(k), v, _.clone_type)) 
-            else
-                rawset(t, k, formattype(t, k, v, _.clone_type)) 
-                
-                table.sort(_.zsort, zcomp)
-            end
+            rawset(t, k, formatobj(t, k, v))
         end,
-        __concat = function (n1, n2)
-            for k, v in pairs(n2) do
-                n1[k] = v
-            end
-            return n1
-        end,
-        __call = function(idk, ...) -- dunno what's going on w/ the first arg to this metatmethod
+        __call = function(_, ...)
             return o:new(...)
         end,
         __tostring = function(t)
             local st = o.k and o.k .. " = " or ""
             serialize(o, function(ss)
                 st = st .. ss
-            end, true)
+            end)
 
             return st
-        end
-    })
-
-    --[[
-    
-    the parameter proxy table - when accesed this empty table aliases to the object, but if the accesed member is a function, the return value of the function is returned, rather than the function itself
-
-    ]]
-    _.p_ = {}
-
-    local function resolve(s, f, ...) 
-        if type(f) == 'function' then
-            return resolve(s, f(s, ...))
-        else return f end
-    end
-
-    setmetatable(_.p_, {
-        __index = function(t, k) 
-            if o[k] then
-                return resolve(o, o[k])
-            end
         end,
-        __call = function(idk, k, ...)
-            if o[k] then
-                return resolve(o, o[k], ...)
-            end
-        end,
-        __newindex = function(t, k, v) o[k] = v end
+        objmt = true
     })
     
     for k,v in pairs(o) do 
-        formattype(o, k, v, _.clone_type) 
-        format_nickname(o, k, v)
+        formatobj(o, k, v)
     end
 
-    o = self:copy(o)
+    copy(self, o, formatobj)
 
     return o
 end
 
-_input = _obj_:new {
-    is_input = true,
-    handler = nil,
-    devk = nil,
-    filter = function(self, devk, args) return args end,
-    update = function(self, devk, args, ob)
-        if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
-            local hargs = self:filter(args)
-            
-            if hargs ~= nil then
-                if self.handler then 
-                    return hargs, table.pack(self:handler(table.unpack(hargs)))
-                end
+local function formattype(t, k, v)
+    if type(v) == "table" then
+        if v.is_obj then 
+            if v.is_nest then
+                v._.p = t
+                v._.k = k
             end
+        elseif not v.new then -- test !
+            v = _obj_:new(v)
         end
-    end
-}
 
-function _input:new(o)
-    o = _obj_.new(self, o, _obj_)
-    local _ = o._
-
-    --_.p = nil
-    _.devs = {}
-    
-    local mt = getmetatable(o)
-    local mtn = mt.__newindex
-
-    mt.__index = function(t, k) 
-        if k == "_" then return _
-        elseif _[k] ~= nil then return _[k]
-        else return _.p and _.p[k]
-            --[[
-            local c = _.p and _.p[k]
-            
-            -- catch shared keys, otherwise privilege affordance keys
-            if k == 'new' or k == 'update' or k == 'draw' or k == 'devk' then return self[k]
-            else return c or self[k] end
-            ]]--
+        local zsort = t._.zsort
+        for i,w in ipairs(zsort) do 
+            if w.k == k then table.remove(zsort, i) end
         end
+        
+        zsort[#zsort + 1] = v
     end
 
-    mt.__newindex = function(t, k, v)
-        local c = _.p and _.p[k]
-    
-        if c then _.p[k] = v
-        else mtn(t, k, v) end
-    end
-
-    return o
+    return v
 end
-
-_output = _obj_:new {
-    is_output = true,
-    redraw = nil,
-    devk = nil,
-    draw = function(self, devk, t)
-        if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
-            if self.redraw then self.devs[devk].dirty = self:redraw(self.devs[devk].object, self.v, t) or self.devs[devk].dirty end -- refactor dirty flag set
-        end
-    end,
-    --[[
-    -- this is a tiny bit of a gotcha since it breaks layering, but for now it feels worth saving the cycles -- maybe I'll factor this out later
-    draw_clean = function(self, f, ...)
-        if (self.enabled == nil or self.p_.enabled) then
-            local d = self.devs[self.devk]
-            f(d.object, self.v, ...)
-            d:refresh()
-        end
-    end
-    --]]
-}
-
-_output.new = _input.new
 
 local nest_id = 0 -- incrimenting numeric ID assigned to every nest_ instantiated
 
@@ -308,7 +152,49 @@ local function nextid()
     return nest_id
 end
 
-nest_ = _obj_:new {
+local function zcomp(a, b) 
+    if type(a) == 'table' and type(b) == 'table' and a.z and b.z then
+        return a.z > b.z 
+    else return false end
+end
+
+local function nickname(k) 
+    if k == 'v' then return 'value' else return k end
+end
+
+local function index_nickname(t, k) 
+    if k == 'v' then return t.value end
+end
+
+local function format_nickname(t, k, v) 
+    if k == 'v' and not rawget(t, 'value') then
+        rawset(t, 'value', v)
+        t['v'] = nil
+    end
+    
+    return v
+end
+
+nest_ = {
+    is_obj = true,
+    is_nest = true,
+    replace = function(self, k, v)
+        rawset(self, k, formattype(self, k, v))
+    end,
+    remove = function(self, k)
+        self[k] = nil
+
+        for i,w in ipairs(self._.zsort) do 
+            if w.k == k then table.remove(self.zsort, i) end
+        end
+    end,
+    copy = function(self, o) 
+        copy(self, o, formattype)
+
+        table.sort(o.zsort, zcomp)
+
+        return o
+    end,
     init = function(self)
         for i,v in ipairs(self.zsort) do if type(v) == 'table' then if v.init then v:init() end end end
     end,
@@ -398,13 +284,12 @@ nest_ = _obj_:new {
     end,
     observable = true,
     persistent = true,
+    enabled = true,
     write = function(self) end,
     read = function(self) end
 }
 
 function nest_:new(o, ...)
-    local clone_type
-
     if o ~= nil and type(o) ~= 'table' then 
         local arg = { o, ... }
         o = {}
@@ -426,22 +311,168 @@ function nest_:new(o, ...)
         else
             for _,k in arg do o[k] = nest_:new() end
         end
-    else
-       clone_type = ...
     end
 
-    o = _obj_.new(self, o, clone_type or nest_)
-    local _ = o._ 
+    o = o or {}
 
-    _.is_nest = true
-    _.id = nextid()
-    _.enabled = true
-    _.devs = {}
-    _.observable = true
-    _.ob_links = {}
+    local _ = { -- the "instance table" - useful as it is ignored by the inheritance rules, and also hidden in subtables
+        p = nil,
+        k = nil,
+        z = 0,
+        zsort = {}, -- list of obj children sorted by descending z value
+        id = nextid(),
+        devs = {},
+        ob_links = {},
+        p_ = {}
+    }   
+
+    setmetatable(o, {
+        __index = function(t, k)
+            if k == "_" then return _
+            elseif index_nickname(t,k) then return index_nickname(t,k)
+            elseif _[k] ~= nil then return _[k] end
+        end,
+        __newindex = function(t, k, v)
+            if _[k] ~= nil then rawset(_,k,v) 
+            elseif index_nickname(t, k) then
+                rawset(t, nickname(k), formattype(t, nickname(k), v)) 
+            else
+                rawset(t, k, formattype(t, k, v))
+                
+                table.sort(_.zsort, zcomp)
+            end
+        end,
+        __call = function(_, ...)
+            return o:new(...)
+        end,
+        __tostring = function(t)
+            local st = o.k and o.k .. " = " or ""
+            serialize(o, function(ss)
+                st = st .. ss
+            end, true)
+
+            return st
+        end,
+        nestmt = true
+    })
+
+    local function resolve(s, f, ...) 
+        if type(f) == 'function' then
+            return resolve(s, f(s, ...))
+        else return f end
+    end
+
+    --[[
+    the parameter proxy table - when accesed this empty table aliases to the object, but if the accesed member is a function, the return value of the function is returned, rather than the function itself
+    ]]
+    setmetatable(_.p_, {
+        __index = function(t, k) 
+            if o[k] then
+                return resolve(o, o[k])
+            end
+        end,
+        __call = function(idk, k, ...)
+            if o[k] then
+                return resolve(o, o[k], ...)
+            end
+        end,
+        __newindex = function(t, k, v) o[k] = v end
+    })
+    
+    for k,v in pairs(o) do 
+        formattype(o, k, v)
+        format_nickname(o, k, v)
+    end
+
+    o = self:copy(o)
+    
+    return o
+end
+
+setmetatable(nest_, {
+    __call = function(_, ...)
+        return nest_:new(...)
+    end,
+})
+setmetatable(_obj_, {
+    __call = function(_, ...)
+        return _obj_:new(...)
+    end,
+})
+
+_input = nest_:new {
+    is_input = true,
+    handler = nil,
+    devk = nil,
+    filter = function(self, devk, args) return args end,
+    update = function(self, devk, args, ob)
+        if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
+            local hargs = self:filter(args)
+            
+            if hargs ~= nil then
+                if self.handler then 
+                    return hargs, table.pack(self:handler(table.unpack(hargs)))
+                end
+            end
+        end
+    end
+}
+
+function _input:new(o)
+    o = nest_.new(self, o)
 
     local mt = getmetatable(o)
-    --mt.__tostring = function(t) return 'nest_' end
+    local mti = mt.__index
+    local mtn = mt.__newindex
+
+    -- alias calls to parent
+    mt.__index = function(t, k) 
+        local p = rawget(o, 'p')
+        return p and p[k] or mti(t, k)
+    end
+
+    mt.__newindex = function(t, k, v)
+        local p = rawget(o, 'p')
+        local c = p and p[k]
+    
+        if c then rawset(p, k, v)
+        else mtn(t, k, v) end
+    end
+
+    return o
+end
+
+_output = nest_:new {
+    is_output = true,
+    redraw = nil,
+    devk = nil,
+    draw = function(self, devk, t)
+        if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
+            if self.redraw then self.devs[devk].dirty = self:redraw(self.devs[devk].object, self.v, t) or self.devs[devk].dirty end -- refactor dirty flag set
+        end
+    end
+}
+
+_output.new = _input.new
+
+_observer = nest_:new {
+    is_observer = true,
+    --pass = function(self, sender, v, hargs, aargs) end,
+    target = nil,
+    capture = nil,
+    init = function(self)
+        if self.target then
+            vv = self.p.p_.target or self.p_.target
+
+            if type(vv) == 'table' and vv.is_nest then 
+                table.insert(vv.ob_links, self)
+            end
+        end
+    end
+}
+
+function _observer:new(o)
+    o = _input.new(self, o)
     
     return o
 end
@@ -459,10 +490,10 @@ local function clockaction(self, aargs)
 end
 
 _affordance = nest_:new {
+    is_affordance = true,
     value = 0,
     devk = nil,
     action = nil,
-    print = function(self) end,
     init = function(self)
         self:refresh()
 
@@ -545,17 +576,7 @@ _affordance = nest_:new {
 }
 
 function _affordance:new(o)
-    o = nest_.new(self, o, _obj_)
-    local _ = o._    
-
-    _.devs = {}
-    _.is_affordance = true
-    --_.clone_type = _obj_
-
-    local mt = getmetatable(o)
-    local mtn = mt.__newindex
-
-    --mt.__tostring = function(t) return '_affordance' end
+    o = nest_.new(self, o)
 
     return o
 end
@@ -570,58 +591,6 @@ function _affordance:copy(o)
         end end
     end
 
-    return o
-end
-
-_observer = _obj_:new {
-    is_observer = true,
-    --pass = function(self, sender, v, hargs, aargs) end,
-    target = nil,
-    capture = nil,
-    init = function(self)
-        if self.target then
-            vv = self.p.p_.target or self.p_.target
-
-            if type(vv) == 'table' and vv.is_nest then 
-                table.insert(vv._.ob_links, self)
-            end
-        end
-    end
-}
-
-function _observer:new(o)
-    o = _input.new(self, o)
-
-    local _ = o._    
-    local mt = getmetatable(o)
-    local mtn = mt.__newindex
-    
-    --mt.__tostring = function() return '_observer' end
-    
-    --[[
-    mt.__index = function(t, k) 
-        if k == "_" then return _
-        elseif _[k] ~= nil then return _[k]
-        elseif _.p and _.p[k] ~= nil then return _.p[k]
-        elseif _.p and _.p.p and _.p.p[k] ~= nil then return _.p.p[k] --hackk
-        end
-    end
-    --]]
-
-    --[[
-    mt.__newindex = function(t, k, v)
-        if k == 'target' then 
-            vv = t._p[k]
-
-            if type(vv) == 'table' and vv.is_nest then 
-                table.insert(vv._.ob_links, o)
-            end
-        else
-            mtn(t, k, v)
-        end
-    end
-    --]]
-    
     return o
 end
 
@@ -778,14 +747,12 @@ function _pattern:new(o)
     return o
 end
 
-_group = _obj_:new {}
+_group = _obj_:new { is_group = true }
 
 function _group:new(o)
-    o = _obj_.new(self, o, _group)
-    local _ = o._ 
+    o = _obj_.new(self, o)
 
-    _.is_group = true
-    _.devk = ""
+    o.devk = ""
 
     local mt = getmetatable(o)
     local mtn = mt.__newindex
@@ -798,17 +765,18 @@ function _group:new(o)
                 for l,w in pairs(v) do
                     if type(w) == 'table' then
                         if w.is_input or w.is_output and not w.devk then 
-                            w.devk = _.devk 
+                            w.devk = o.devk 
                         end
                     end
                 end
 
-                v.devk = _.devk
+                v.devk = o.devk
             elseif v.is_group or v.is_input or v.is_output then
-                v.devk = _.devk
+                v.devk = o.devk
             end
         end 
     end
+
     return o
 end
 

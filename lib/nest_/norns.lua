@@ -96,7 +96,7 @@ nest_.connect = function(self, objects, fps)
     end)
 
     local function linkdevs(obj) 
-        if type(obj) == 'table' and obj.is_obj then
+        if type(obj) == 'table' and obj.is_nest then
             rawset(obj._, 'devs', devs)
             
             --might not be needed with _output.redraw args
