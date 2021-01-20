@@ -162,7 +162,7 @@ local function nickname(k)
 end
 
 local function index_nickname(t, k) 
-    if k == 'v' then return rawget(t, 'value') end
+    if k == 'v' then return t.value end
 end
 
 local function format_nickname(t, k, v) 
@@ -173,8 +173,6 @@ local function format_nickname(t, k, v)
     
     return v
 end
-
-iii = 0
 
 nest_ = {
     is_obj = true,
@@ -329,8 +327,6 @@ function nest_:new(o, ...)
 
     setmetatable(o, {
         __index = function(t, k)
-            iii = iii + 1
-            print("__index", iii)
             if k == "_" then return _
             elseif index_nickname(t,k) then return index_nickname(t,k)
             elseif _[k] ~= nil then return _[k] end
@@ -430,9 +426,14 @@ function _input:new(o)
 
     -- alias calls to parent
     mt.__index = function(t, k)
+        --[[
         local om = mti(t,k)
         if om ~= nil then return om
         elseif _.p ~= nil and _.p[k] ~= nil then return _.p[k] end
+        --]]
+        if k == "_" then return _
+        elseif _[k] ~= nil then return _[k]
+        else return _.p and _.p[k] end
     end
 
     mt.__newindex = function(t, k, v)
