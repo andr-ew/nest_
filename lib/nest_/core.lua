@@ -38,6 +38,7 @@ local function serialize(o, f, dof, itab)
             end
         end
 
+        first = true
         for k,v in pairs(o) do
             if type(k) == 'string' and type(v) ~= 'function' then
                 if first then
@@ -51,7 +52,7 @@ local function serialize(o, f, dof, itab)
         end
         
         if dof then
-            first = true
+            --first = true
             for k,v in pairs(o) do
                 if type(v) == 'function' then
                     if first then
@@ -59,13 +60,14 @@ local function serialize(o, f, dof, itab)
                         first = false
                     end
                     --f(ntab .. k ..  "()")
-                    f(ntab .. k .. " = " .. tostring(v))
+                    f(ntab .. k .. " = function() end")
                     f(",\n")
                 end
             end
         end
         
-        f(itab .. "}")
+        if not first then f(itab) end
+        f("}")
     end
 end
 
@@ -80,8 +82,6 @@ local function copy(self, o, ft)
     end
 end
 
-_obj_ = { is_obj = true }
-
 local function formatobj(t, k, v)
     if type(v) == "table" then
         if v.is_obj then 
@@ -93,15 +93,19 @@ local function formatobj(t, k, v)
     return v
 end
 
-function _obj_:new(o, clone_type)
+function obj_new(self, o)
     o = o or {}
 
     setmetatable(o, {
+        __index = function(t, k)
+            if k == 'is_obj' then return true
+            elseif k == 'new' then return obj_new end
+        end,
         __newindex = function(t, k, v)
             rawset(t, k, formatobj(t, k, v))
         end,
         __call = function(_, ...)
-            return o:new(...)
+            return obj_new(o, ...)
         end,
         __tostring = function(t)
             local st = o.k and o.k .. " = " or ""
@@ -121,6 +125,8 @@ function _obj_:new(o, clone_type)
 
     return o
 end
+
+_obj_ = obj_new({})
 
 local function formattype(t, k, v)
     if type(v) == "table" then
@@ -390,11 +396,6 @@ end
 setmetatable(nest_, {
     __call = function(_, ...)
         return nest_:new(...)
-    end,
-})
-setmetatable(_obj_, {
-    __call = function(_, ...)
-        return _obj_:new(...)
     end,
 })
 
