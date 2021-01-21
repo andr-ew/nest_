@@ -33,11 +33,13 @@ run `;install "https://github.com/andr-ew/nest_"` in maiden to download
 
 1. [nests of affordances](./study/study1.md)
 
-2. [the grid module](./study/study2.md)
+2. [multiplicity & the grid module](./study/study2.md)
 
-3. the norns interface
+3. all the affordances
 
-4. affordances controlling affordances
+4. interdependent interaction
+
+6. making a script
 
 5. customization
 
