@@ -17,8 +17,6 @@ _metaaffordace.target: table of nests rather than single nest ?
 
 ADD
 
-save()/load(): norns.state.data
-
 support _affordance { input = false } properly when input already exists. use booleans in the constructor to essentially nullify default values, even when they are _obj_ (i.e., members of zsort)
 
 nest_.redraw

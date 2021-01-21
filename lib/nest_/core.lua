@@ -336,7 +336,7 @@ nest_ = {
 
         n = n or 0
         name = name or norns.state.shortname
-        script_dir = script_dir or ""
+        script_dir = script_dir or "lib/"
         local fdata = norns.state.data .. name .. n .. ".lua"
         local fscript = norns.state.path .. script_dir .. name .. n .. ".lua"
 
@@ -820,6 +820,7 @@ _pattern = _observer:new {
             }
 
             for i = 1, self.count do
+                --print('save event', i)
                 t.time[i] = self.time[i]
                 t.event[i] = self.event[i]:new()
             end
@@ -835,7 +836,7 @@ _pattern = _observer:new {
 
             for i = 1, t.count do
                 self.time[i] = t.time[i]
-                self.event[i] = (t.event.is_obj and t.event.new) and t.event[i]:new() or t.event[i]
+                self.event[i] = (t.event.is_obj and t.event.new) and t.event[i]:new() or _obj_:new(t.event[i])
             end
 
             if t.play > 0 then self:resume() end
