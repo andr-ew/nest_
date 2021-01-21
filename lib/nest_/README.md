@@ -76,10 +76,12 @@ number.include (same as arc.option.include)
 
 REFACTOR
 
+.egde = 2: run action on both rising & falling edge, no other change to behavior
+
+add range, include to number, default to 1-based
+
 grid.fader -> grid.control
 embed controlspec in grid.fader, align properties with argument names
-
-add range to number, default to 1-based
 
 ---------------------------------------------
 
