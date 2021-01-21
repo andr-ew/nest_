@@ -869,7 +869,7 @@ _grid.fill.output.muxredraw = _obj_:new {
     plane = _grid.binary.output.muxredraw.plane
 }
 
-_grid.number = _grid.muxaffordance:new { edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 }, vlast = 0 }
+_grid.number = _grid.muxaffordance:new { value = 1, edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 }, vlast = 1 }
 
 _grid.number.new = function(self, o) 
     o = _grid.muxaffordance.new(self, o)
@@ -880,8 +880,8 @@ _grid.number.new = function(self, o)
 
     local _, axis = input_contained(o, { -1, -1 })
    
-    if axis.x and axis.y then o.v = type(o.v) == 'table' and o.v or { x = 0, y = 0 } end
-    if axis.x and axis.y then o.vlast = type(o.vlast) == 'table' and o.vlast or { x = 0, y = 0 } end
+    if axis.x and axis.y then o.v = type(o.v) == 'table' and o.v or { x = 1, y = 1 } end
+    if axis.x and axis.y then o.vlast = type(o.vlast) == 'table' and o.vlast or { x = 1, y = 1 } end
  
     o.arg_defaults = {
         0,
@@ -896,7 +896,7 @@ _grid.number.input.muxhandler = _obj_:new {
         if z > 0 then return 0 end
     end,
     line = function(s, x, y, z) 
-        local i = x - s.p_.x[1]
+        local i = x - s.p_.x[1] + 1
         local min, max = fingers(s)
 
         if z > 0 then
@@ -943,7 +943,7 @@ _grid.number.input.muxhandler = _obj_:new {
         end
     end,
     plane = function(s, x, y, z) 
-        local i = { x = x - s.p_.x[1], y = y - s.p_.y[1] }
+        local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
 
         local min, max = fingers(s)
 
@@ -1004,21 +1004,21 @@ _grid.number.output.muxredraw = _obj_:new {
     end,
     line_x = function(s, g, v)
         for i = s.p_.x[1], s.p_.x[2] do
-            local lvl = lvl(s, (s.v == i - s.p_.x[1]) and 1 or 0, i - s.p_.x[1])
+            local lvl = lvl(s, (s.v == i - s.p_.x[1] + 1) and 1 or 0, i - s.p_.x[1] + 1)
             if lvl > 0 then g:led(i, s.p_.y, lvl) end
         end
     end,
     line_y = function(s, g, v)
         for i = s.p_.y[1], s.p_.y[2] do
-            local lvl = lvl(s, (s.v == i - s.p_.y[1]) and 1 or 0, i - s.p_.x[1])
+            local lvl = lvl(s, (s.v == i - s.p_.y[1] + 1) and 1 or 0, i - s.p_.x[1] + 1)
             if lvl > 0 then g:led(s.p_.x, i, lvl) end
         end
     end,
     plane = function(s, g, v)
         for i = s.p_.x[1], s.p_.x[2] do
             for j = s.p_.y[1], s.p_.y[2] do
-                local li, lj = i - s.p_.x[1], j - s.p_.y[1]
-                local l = lvl(s, ((s.v.x == i - s.p_.x[1]) and (s.v.y == j - s.p_.y[1])) and 1 or 0, li, lj)
+                local li, lj = i - s.p_.x[1] + 1, j - s.p_.y[1] + 1
+                local l = lvl(s, ((s.v.x == li) and (s.v.y == lj)) and 1 or 0, li, lj)
                 if l > 0 then g:led(i, j, l) end
             end
         end
@@ -1428,8 +1428,8 @@ end
 _grid.preset = _grid.number:new {
     lvl = function(s, x, y)
         local st
-        if x and y then st = s[1].state[x + 1][y + 1]
-        elseif x then st = s[1].state[x + 1]
+        if x and y then st = s[1].state[x][y]
+        elseif x then st = s[1].state[x]
         else return { 4, 15 } end
 
         if st then return { 4, 15 }
@@ -1437,13 +1437,13 @@ _grid.preset = _grid.number:new {
     end,
     action = function(s, v, t, delta)
         if type(s.v) == 'table' then 
-            if s[1].state[v.x + 1][v.y + 1] then s[1]:recall(v.x + 1, v.y + 1)
-            else s[1]:store(v.x + 1, v.y + 1) end
+            if s[1].state[v.x][v.y] then s[1]:recall(v.x, v.y)
+            else s[1]:store(v.x, v.y) end
         else 
-            if s[1].state[v + 1] then 
-                s[1]:recall(v + 1)
+            if s[1].state[v] then 
+                s[1]:recall(v)
             else 
-                s[1]:store(v + 1) 
+                s[1]:store(v) 
             end
         end
     end
@@ -1471,8 +1471,8 @@ end
 _grid.preset[1] = _preset:new {
     pass = function(self, sender, v)
         local st
-        if type(self.v) == 'table' then st = self.state[self.v.x + 1][self.v.y + 1]
-        else st = self.state[self.v + 1] end
+        if type(self.v) == 'table' then st = self.state[self.v.x][self.v.y]
+        else st = self.state[self.v] end
 
         if st then
             local o = nest_.find(st, sender:path(self.p.p_.target or self.p_.target))

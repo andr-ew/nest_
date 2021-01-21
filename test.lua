@@ -11,7 +11,7 @@ tab = require 'tabutil'
 
 ---[[
 g = nest_ {
-    n = _grid.momentary {
+    n = _grid.number {
         x = { 1, 8 }, y = 1,
         action = function(s, v)
             print(v)

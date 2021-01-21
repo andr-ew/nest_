@@ -72,16 +72,14 @@ preset
 
 ADD
 
-number.include (same as arc.option.include)
+default number to 1-based
 
-REFACTOR
-
-add range, include to number, default to 1-based
+---------------------------------------------
 
 grid.fader -> grid.control
 embed controlspec in grid.fader, align properties with argument names
 
----------------------------------------------
+number.include, number.range (same as arc.option.include)
 
 trigger & toggle t argument: restrict to range of held time when edge == 0 
 

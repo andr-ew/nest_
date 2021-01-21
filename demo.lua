@@ -25,7 +25,7 @@ function print_matrix_2d(v)
     for _,row in ipairs(v) do print_matrix_1d(row) end
 end
 
-local function gpage(self) return demo.g.tab.value + 1 == self.k end
+local function gpage(self) return demo.g.tab.value == self.k end
 local function tpage(self) return demo.t.tab.options[demo.t.tab.value] == self.k end
 local function apage(self) return math.floor(demo.a.tab.value) == self.k end
 
