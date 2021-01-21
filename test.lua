@@ -11,32 +11,19 @@ tab = require 'tabutil'
 
 ---[[
 g = nest_ {
-    n = _grid.number {
-        x = { 1, 8 }, y = function() return 1 end,
+    n = _grid.momentary {
+        x = { 1, 8 }, y = 1,
         action = function(s, v)
             print(v)
         end
     }
 } :connect { g = grid.connect() }
 
-g:insert {
-    foo = 'var',
-    n = {
-        y = 1,
-        foo2 = 'bar2'
-    }
-}
-
-ob = _obj_:new()
-ob.test = 'test'
-
 function init() 
-    g:load()
     g:init() 
 end
 
 function cleanup()
-    g:save()
 end
 --]]
 

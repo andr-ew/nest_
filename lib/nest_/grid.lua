@@ -342,7 +342,7 @@ _grid.binary.output.muxredraw = _obj_:new {
     end
 }
 
-_grid.momentary = _grid.binary:new()
+_grid.momentary = _grid.binary:new { edge = 2 }
 
 local function count(s) 
     local min = 0
@@ -490,10 +490,12 @@ _grid.toggle.input.muxhandler = _obj_:new {
     point = function(s, x, y, z)
         local held = _grid.binary.input.muxhandler.point(s, x, y, z)
 
-        if s.edge == held then
+        if s.edge == held or (held == 1 and s.edge == 2) then
             return toggle(s, s.v, s.p_.lvl, s.p_.range, s.p_.include),
                 s.theld,
                 util.time() - s.tlast
+        elseif s.edge == 2 then
+            return s.v, s.theld, util.time() - s.tlast
         end
     end,
     line = function(s, x, y, z)
@@ -503,7 +505,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
         local add
         local rem
        
-        if s.edge == 1 and hadd then i = hadd end
+        if s.edge > 0 and hadd then i = hadd end
         if s.edge == 0 and hrem then i = hrem end
  
         if i then   
@@ -552,6 +554,8 @@ _grid.toggle.input.muxhandler = _obj_:new {
             end
 
             return s.v, theld, s.ttog, add, rem, s.toglist
+        elseif s.edge == 2 then
+            return s.v, theld, s.ttog, nil, nil, s.toglist
         end
     end,
     plane = function(s, x, y, z)
@@ -561,7 +565,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
         local add
         local rem
        
-        if s.edge == 1 and hadd then i = hadd end
+        if s.edge > 0 and hadd then i = hadd end
         if s.edge == 0 and hrem then i = hrem end
         
         if i and held then   
@@ -622,6 +626,8 @@ _grid.toggle.input.muxhandler = _obj_:new {
             end
 
             return s.v, theld, s.ttog, add, rem, s.toglist
+        elseif s.edge == 2 then
+            return s.v, theld, s.ttog, nil, nil, s.toglist
         end
     end
 }
@@ -897,7 +903,7 @@ _grid.number.input.muxhandler = _obj_:new {
             if #s.hlist == 0 then s.tdown = util.time() end
             table.insert(s.hlist, i)
            
-            if s.edge == 1 then 
+            if s.edge > 0 then 
                 if i ~= s.v or (not s.filtersame) then 
                     local len = #s.hlist
                     --s.hlist = {}
@@ -905,7 +911,7 @@ _grid.number.input.muxhandler = _obj_:new {
 
                     if max == nil or len <= max then
                         s.vlast = s.v
-                        return i, len > 1 and util.time() - s.tdown or 0, i - s.vlast
+                        return i, len > 1 and util.time() - s.tdown or 0, i - s.vlast, i
                     end
                 end
             end
@@ -929,6 +935,10 @@ _grid.number.input.muxhandler = _obj_:new {
                         table.remove(s.hlist, k)
                     end
                 end
+            elseif s.edge == 2 then
+                if i ~= s.v or (not s.filtersame) then 
+                    return i, len > 1 and util.time() - s.tdown or 0, i - s.vlast, nil, i
+                end
             end
         end
     end,
@@ -941,7 +951,7 @@ _grid.number.input.muxhandler = _obj_:new {
             if #s.hlist == 0 then s.tdown = util.time() end
             table.insert(s.hlist, i)
            
-            if s.edge == 1 then 
+            if s.edge > 0 then 
                 if (not (i.x == s.v.x and i.y == s.v.y)) or (not s.filtersame) then 
                     local len = #s.hlist
                     --s.hlist = {}
@@ -952,7 +962,7 @@ _grid.number.input.muxhandler = _obj_:new {
                     s.v.y = i.y
 
                     if max == nil or len <= max then
-                        return s.v, len > 1 and util.time() - s.tdown or 0, { s.v.x - s.vlast.x, s.v.y - s.vlast.y }
+                        return s.v, len > 1 and util.time() - s.tdown or 0, { s.v.x - s.vlast.x, s.v.y - s.vlast.y }, i
                     end
                 end
             end
@@ -980,6 +990,8 @@ _grid.number.input.muxhandler = _obj_:new {
                         end
                     end
                 end
+            elseif s.edge == 2 then
+                return s.v, len > 1 and util.time() - s.tdown or 0, { s.v.x - s.vlast.x, s.v.y - s.vlast.y }, nil, i
             end
         end
     end
