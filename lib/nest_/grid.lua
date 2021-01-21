@@ -1416,8 +1416,8 @@ end
 _grid.preset = _grid.number:new {
     lvl = function(s, x, y)
         local st
-        if x and y then st = s[1].state[x][y]
-        elseif x then st = s[1].state[x]
+        if x and y then st = s[1].state[x + 1][y + 1]
+        elseif x then st = s[1].state[x + 1]
         else return { 4, 15 } end
 
         if st then return { 4, 15 }
@@ -1425,13 +1425,13 @@ _grid.preset = _grid.number:new {
     end,
     action = function(s, v, t, delta)
         if type(s.v) == 'table' then 
-            if s[1].state[v.x][v.y] then s[1]:recall(v.x, v.y)
-            else s[1]:store(v.x, v.y) end
+            if s[1].state[v.x + 1][v.y + 1] then s[1]:recall(v.x + 1, v.y + 1)
+            else s[1]:store(v.x + 1, v.y + 1) end
         else 
-            if s[1].state[v] then 
-                s[1]:recall(v)
+            if s[1].state[v + 1] then 
+                s[1]:recall(v + 1)
             else 
-                s[1]:store(v) 
+                s[1]:store(v + 1) 
             end
         end
     end
@@ -1459,11 +1459,11 @@ end
 _grid.preset[1] = _preset:new {
     pass = function(self, sender, v)
         local st
-        if type(self.v) == 'table' then st = self.state[self.v.x][self.v.y]
-        else st = self.state[self.v] end
+        if type(self.v) == 'table' then st = self.state[self.v.x + 1][self.v.y + 1]
+        else st = self.state[self.v + 1] end
 
         if st then
-            local o = st:find(sender:path(self.p.p_.target or self.p_.target))
+            local o = nest_.find(st, sender:path(self.p.p_.target or self.p_.target))
             if o then
                 o.value = type(v) == 'table' and v:new() or v
             end

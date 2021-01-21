@@ -3,9 +3,10 @@
 local tab = require 'tabutil'
 
 -- add ignored keys table argument
-local function serialize(o, f, skip, dof, itab)
+local function serialize(o, f, skip, dof, types, itab)
     itab = itab or ""
     local ntab = itab .. "    "
+    if types == nil then types = true end
 
     if type(o) == "number" then
         f(o)
@@ -21,7 +22,7 @@ local function serialize(o, f, skip, dof, itab)
             f(" ")
             for i,v in ipairs(o) do
                 if type(v) == "string" or type(v) == "number" then
-                    serialize(v, f, skip, dof, ntab)
+                    serialize(v, f, skip, dof, types, ntab)
                     f(", ")
                 elseif type(v) == "table" then
                     if first then
@@ -29,8 +30,8 @@ local function serialize(o, f, skip, dof, itab)
                         first = false
                     end
                     f(ntab)
-                    if v.serialize then v:serialize(f, skip, dof, ntab)
-                    else serialize(v, f, skip, dof, ntab) end
+                    if v.serialize then v:serialize(f, skip, dof, types, ntab)
+                    else serialize(v, f, skip, dof, types, ntab) end
                     f(",\n")
                 end
             end
@@ -55,8 +56,8 @@ local function serialize(o, f, skip, dof, itab)
                     end
                     f(ntab  .. k ..  " = ")
 
-                    if type(v) == "table" and v.serialize then v:serialize(f, skip, dof, ntab)
-                    else serialize(v, f, skip, dof, ntab) end
+                    if type(v) == "table" and v.serialize then v:serialize(f, skip, dof, types, ntab)
+                    else serialize(v, f, skip, dof, types, ntab) end
 
                     f(",\n")
                 end
@@ -190,9 +191,9 @@ nest_ = {
             if w.k == k then table.remove(self.zsort, i) end
         end
     end,
-    serialize = function(o, f, ...) 
-        f "nest_"
-        serialize(o, f, ...)
+    serialize = function(o, f, skip, dof, types, itab)
+        if types then f "nest_" end
+        serialize(o, f, skip, dof, types, itab)
     end,
     copy = function(self, o) 
         copy(self, o, formattype)
@@ -310,7 +311,7 @@ nest_ = {
         file:write("return ")
         serialize(o, function(st)
             file:write(st)
-        end)
+        end, {}, false, false)
 
         file:close()
     end,
@@ -579,9 +580,9 @@ end
 
 _affordance = nest_:new {
     is_affordance = true,
-    serialize = function(o, f, ...) 
-        f("_affordance ")
-        serialize(o, f, ...)
+    serialize = function(o, f, skip, dof, types, itab)
+        if types then f("_affordance ") end
+        serialize(o, f, skip, dof, types, itab)
     end,
     value = 0,
     devk = nil,
@@ -649,7 +650,9 @@ _affordance = nest_:new {
         nest_.set(self, t, silence)
 
         if t.value then 
-            if type(t.value) == 'table' then self.value = t.value:new()
+            if type(t.value) == 'table' then
+                if t.value.is_obj then self.value = t.value:new()
+                else self.value = _obj_:new(t.value) end
             else self.value = t.value end
         end
 
@@ -706,9 +709,9 @@ _preset = _observer:new {
         local target = self.p.p_.target or self.p_.target
         
         if y then
-            self.state[x]:replace(y, target:get(true, test))
+            self.state[x]:replace(y, target:get(true, test, _obj_))
         else
-            self.state:replace(x, target:get(true, test))
+            self.state:replace(x, target:get(true, test, _obj_))
         end
     end,
     recall = function(self, x, y)
@@ -727,14 +730,31 @@ _preset = _observer:new {
         self.state:replace(n_src, self.state[n_dest]:new())
     end,
     --]]
-    get = function(self, silent, test) 
+    get = function(self, silent, test, typ)
+        local typ = typ or nest_
+
         if test == nil or test(self) then
-            return _obj_:new { state = self.state:new() }
+            local state = typ:new()
+            for x,v in ipairs(self.state) do
+                --[[ deal w/ 2d states somehow ://
+                if #v then
+                    print('stateget1')
+                    state[x] = typ:new()
+                    for y, w in ipairs(v) do
+                        state[x][y] = w:new()
+                    end
+                else
+                --]]
+                state[x] = v:new()
+                --end
+            end
+
+            return typ:new { state = state }
         end
     end,
     set = function(self, t)
         if t.state then
-            self.state = t.state:new()
+            self.state = (t.state.is_nest and t.state.new) and t.state:new() or nest_:new(t.state)
         end
     end
 }
@@ -792,22 +812,33 @@ _pattern = _observer:new {
     end,
     get = function(self, silent, test) 
         if test == nil or test(self) then
-            local t = _obj_:new { event = {}, time = {}, count = self.count, step = self.step }
+            local t = _obj_:new { event = {}, time = {}, 
+                count = self.count, 
+                step = self.step,
+                time_factor = self.time_factor,
+                play = self.play
+            }
 
             for i = 1, self.count do
                 t.time[i] = self.time[i]
                 t.event[i] = self.event[i]:new()
             end
+
+            return t
         end
     end,
     set = function(self, t)
         if t.event then
             self.count = t.count
             self.step = t.step
+            self.time_factor = t.time_factor
+
             for i = 1, t.count do
                 self.time[i] = t.time[i]
-                self.event[i] = t.event[i]:new()
+                self.event[i] = (t.event.is_obj and t.event.new) and t.event[i]:new() or t.event[i]
             end
+
+            if t.play > 0 then self:resume() end
         end
     end
 }
