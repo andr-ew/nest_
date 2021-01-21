@@ -19,7 +19,25 @@ g = nest_ {
     }
 } :connect { g = grid.connect() }
 
-function init() g:init() end
+g:insert {
+    foo = 'var',
+    n = {
+        y = 1,
+        foo2 = 'bar2'
+    }
+}
+
+ob = _obj_:new()
+ob.test = 'test'
+
+function init() 
+    g:load()
+    g:init() 
+end
+
+function cleanup()
+    g:save()
+end
 --]]
 
 --[[

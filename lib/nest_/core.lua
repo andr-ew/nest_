@@ -38,7 +38,7 @@ local function serialize(o, f, skip, dof, itab)
 
         first = true
         for k,v in pairs(o) do
-            if type(k) == 'string' and not tab.contains(skip, k) then
+            if type(k) == 'string' and (skip and (not tab.contains(skip, k)) or true) then
                 if type(v) == 'function' then
                     if dof then
                         if first then
@@ -279,20 +279,75 @@ nest_ = {
             end
         end
     end,
-    get = function(self, silent, test)
+    get = function(self, silent, test, typ)
+        local typ = typ or nest_
         if test == nil or test(self) then
-            local t = nest_:new()
+            local t = typ:new()
             for i,v in ipairs(self.zsort) do
-                if v.is_obj and rawget(v, 'get') then t[v.k] = v:get(silent, test) end
+                if v.is_obj and rawget(v, 'get') then t[v.k] = v:get(silent, test, typ) end
             end
             return t
         end
     end,
+    insert = function(self, o)
+        for k,v in pairs(o) do
+            if self[k] and type(self[k]) == 'table' and self[k].insert then self[k]:insert(v)
+            else self[k] = v end
+        end
+    end,
+    save = function(self, n, name)
+        n = n or 0
+        name = name or norns.state.shortname
+        local filename = norns.state.data .. name .. n .. ".lua"
+        local file, err = io.open(filename, "wb")
+        if err then 
+            print("nest_.save error:")
+            print(err)
+            return
+        end
+        local o = self:get(true, function(s) return s.persistent == nil or s.p_.persistent end, _obj_)
+
+        file:write("return ")
+        serialize(o, function(st)
+            file:write(st)
+        end)
+
+        file:close()
+    end,
+    load = function(self, n, name, script_dir, silent)
+        if silent == nil then silent = true end
+                
+        local function loadme(fn)
+            local ftab,err = loadfile(fn)
+            if err then 
+                print("nest_.load error:")
+                print(err)
+                return
+            end
+            
+            local o = ftab()
+            if o then
+                self:set(o, silent)
+            else
+                print("nest_.load error: can't get :/")
+            end
+        end
+
+        n = n or 0
+        name = name or norns.state.shortname
+        script_dir = script_dir or ""
+        local fdata = norns.state.data .. name .. n .. ".lua"
+        local fscript = norns.state.path .. script_dir .. name .. n .. ".lua"
+
+        if util.file_exists(fdata) then 
+            return loadme(fdata)
+        elseif util.file_exists(fscript) then 
+            return loadme(fscript)
+        else print("nest_.load: no save file " .. n) end
+    end,
     observable = true,
     persistent = true,
-    enabled = true,
-    write = function(self) end,
-    read = function(self) end
+    enabled = true
 }
 
 function nest_:new(o, ...)
@@ -366,6 +421,9 @@ function nest_:new(o, ...)
                 'path',
                 'draw',
                 'each',
+                'insert',
+                'save',
+                'load',
                 'init',
                 'connect',
                 'read',
@@ -576,9 +634,10 @@ _affordance = nest_:new {
             end
         end
     end,
-    get = function(self, silent, test)
+    get = function(self, silent, test, typ)
+
         if test == nil or test(self) then
-            local t = nest_.get(self, silent)
+            local t = nest_.get(self, silent, nil, typ)
 
             t.value = type(self.value) == 'table' and self.value:new() or self.value -- watch out for value ~= _obj_ !
             if silent == false then self:refresh(false) end
