@@ -7,9 +7,7 @@ RENAME
 lvl -> level. add a lvl as a nickname
 add en as a nickname for enabled
 
--------------------------------------------------
-
-zsort -> children. require children to be nest_'s
+zsort -> children
 
 REFACTOR
 
@@ -19,11 +17,15 @@ ADD
 
 support _affordance { input = false } properly when input already exists. use booleans in the constructor to essentially nullify default values, even when they are _obj_ (i.e., members of zsort)
 
-nest_.redraw
-
 FIX
 
 broken _txt.*.list (update issue probably)
+
+ADD
+nest_.redraw
+nest_.redraw as clock function ?
+
+nest:disconnect() : for disconnecting and reconnecting nests to devices
 
 -----------------------------
 
@@ -33,8 +35,6 @@ add creates{} list of creation time functions
 add targets{} list of target nest keys in self 
 
 add :link(_control or function() return control end) to _control, link two controls by appending actions when values are the same type. also allow link to param (overwrites param action)
-
-nest:disconnect() : for disconnecting and reconnecting nests to devices
 
 nest_.focus - focus on a single nest & children for a device & effectively disable otherelatives. will need it's own variable in the _dev. great for popup interfaces
 
@@ -50,14 +50,33 @@ while you can certainly build gridless/arcless applications in nest (i'll be doi
 
 ```
 
+# norns
+```
+ADD
+
+? _screen.affordance.animate 
+
+_key.binary.lvl -- accept clock funtion entry in table as animation
+
+_enc.delta
+_enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range delta stuff for option as in _arc.option
+
+*.option: remove the option string action argument, encourage indexing options instead
+
+-----------------------------------------
+
+trigger & toggle t argument: restrict to range of held time when edge == 0
+
+```
+
 # arc
 
 ```
 REFACTOR
 
+--------------------------------
 arc.option: store v as an int & store the float remainder from delta values as a seperate float
 
---------------------------------
 remove v from fill
 
 ADD
@@ -72,8 +91,6 @@ preset
 
 ADD
 
-default number to 1-based
-
 ---------------------------------------------
 
 grid.fader -> grid.control
@@ -85,25 +102,6 @@ trigger & toggle t argument: restrict to range of held time when edge == 0
 
 ? _grid.simplepattern (reference)
 
-
-```
-
-# norns
-```
-ADD
-
-? _screen.affordance.animate
-
-_key.binary.lvl -- accept clock funtion entry in table as animation
-
-_enc.delta
-_enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range delta stuff for option as in _arc.option
-
-*.option: remove the option string action argument, encourage indexing options instead
-
------------------------------------------
-
-trigger & toggle t argument: restrict to range of held time when edge == 0
 
 ```
 
