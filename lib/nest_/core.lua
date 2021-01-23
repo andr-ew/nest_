@@ -162,17 +162,29 @@ local function zcomp(a, b)
 end
 
 local function nickname(k) 
-    if k == 'v' then return 'value' else return k end
+    if k == 'v' then return 'value' 
+    elseif k == 'lvl' then return 'level'
+    elseif k == 'en' then return 'enabled'
+    else return k end
 end
 
 local function index_nickname(t, k) 
-    if k == 'v' then return t.value end
+    if k == 'v' then return t.value
+    elseif k == 'lvl' then return t.level
+    elseif k == 'en' then return t.enabled
+    end
 end
 
 local function format_nickname(t, k, v) 
     if k == 'v' and not rawget(t, 'value') then
         rawset(t, 'value', v)
         t['v'] = nil
+    elseif k == 'lvl' and not rawget(t, 'level') then
+        rawset(t, 'level', v)
+        t['lvl'] = nil
+    elseif k == 'en' and not rawget(t, 'enabled') then
+        rawset(t, 'enabled', v)
+        t['en'] = nil
     end
     
     return v

@@ -4,9 +4,6 @@
 
 RENAME
 
-lvl -> level. add a lvl as a nickname
-add en as a nickname for enabled
-
 zsort -> children
 
 FIX
