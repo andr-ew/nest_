@@ -15,14 +15,27 @@ broken _txt.*.list (update issue probably)
 
 ADD
 
-support _affordance { input = false } properly when input already exists. use booleans in the constructor to essentially nullify default values, even when they are _obj_ (i.e., members of zsort)
-
+init as callback except for connected nest_
 nest_.redraw
-nest_.redraw as clock function ?
+nest_ refresh()/update() alt modes when redraw
+
+nest_ {
+    redraw = function(self, i) -- unpack(v)
+        screen.drawthing(i)
+    end,
+    init = function(self)
+        clock.run(function()
+            while true do
+                for i = 1, 3 do
+                    self:refresh(i) -- v = { ... }
+                    clock.sleep(0.2)
+                end
+            end
+        end)
+    end
+}
 
 nest:disconnect() : for disconnecting and reconnecting nests to devices
-
-? _screen.affordance.animate 
 
 _key.binary.lvl -- accept clock funtion entry in table as animation
 
