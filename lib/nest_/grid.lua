@@ -111,7 +111,7 @@ local function redrawfilter(s)
     end
 end
 
-_grid.muxaffordance.output.redraw = function(s, g, v)
+_grid.muxaffordance.output.redraw = function(s, v, g)
     return s.muxredraw[redrawfilter(s)](s, g, v)
 end
 

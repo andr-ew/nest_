@@ -6,13 +6,14 @@ end
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
 include 'lib/nest_/grid'
+include 'lib/nest_/arc'
 
 tab = require 'tabutil'
 
 ---[[
 g = nest_ {
-    n = _grid.number {
-        x = { 1, 8 }, y = 1,
+    n = _arc.number {
+        n = 1,
         action = function(s, v)
             print(v)
         end
