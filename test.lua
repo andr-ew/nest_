@@ -6,18 +6,26 @@ end
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
 include 'lib/nest_/grid'
+include 'lib/nest_/arc'
 
 tab = require 'tabutil'
 
 ---[[
 g = nest_ {
-    n = _grid.number {
-        x = { 1, 8 }, y = 1,
-        action = function(s, v)
-            print(v)
-        end
+    number1 = _arc.number {
+        n = 2,
+        sens = 1/2,
+        action = function(self, value) print(self.k, value) end
+    },
+    tab = _arc.option {
+        x = { 42, 24 }, n = 1,
+        sens = 1/16,
+        options = 4,
+        size = 3,
+        lvl = { 0, 4, 15 },
+        action = function(self, value) print(self.k, value) end
     }
-} :connect { g = grid.connect() }
+} :connect { a = arc.connect() }
 
 function init() 
     g:init() 

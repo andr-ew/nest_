@@ -58,7 +58,7 @@ local lvl = function(s, i)
     return (type(x) ~= 'table') and ((i > 0) and x or 0) or x[i + 1] or 15
 end
 
-_arc.fill.output.redraw = function(s, a, v)
+_arc.fill.output.redraw = function(s, v, a)
     local vmode = 1
     local vscale
     local x = xxx(s)
@@ -139,7 +139,7 @@ _arc.number.input.handler = function(self, n, d)
     end
 end
 
-_arc.number.output.redraw = function(s, a, v)
+_arc.number.output.redraw = function(s, v, a)
     local x = xxx(s)
     local range = x[2] - x[1] + 1
     
@@ -204,7 +204,7 @@ _arc.control.input.handler = function(self, n, d)
     end
 end
 
-_arc.control.output.redraw = function(s, a, v)
+_arc.control.output.redraw = function(s, v, a)
     local x = xxx(s)
     local range = x[2] - x[1]
     
@@ -268,7 +268,7 @@ _arc.option.input.handler = function(self, n, d)
     end
 end
 
-_arc.option.output.redraw = function(s, a, v)
+_arc.option.output.redraw = function(s, v, a)
     local x = xxx(s)
     local count = x[2] - x[1]
     
