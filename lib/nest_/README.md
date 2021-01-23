@@ -15,19 +15,18 @@ broken _txt.*.list (update issue probably)
 
 ADD
 
-init as callback except for connected nest_
 nest_.redraw
 nest_ refresh()/update() alt modes when redraw
 
-nest_ {
+_screen.affordance {
     redraw = function(self, i) -- unpack(v)
         screen.drawthing(i)
     end,
-    init = function(self)
+    init_action = function(self)
         clock.run(function()
             while true do
                 for i = 1, 3 do
-                    self:refresh(i) -- v = { ... }
+                    self.value = 3
                     clock.sleep(0.2)
                 end
             end

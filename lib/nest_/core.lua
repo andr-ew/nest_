@@ -203,9 +203,12 @@ nest_ = {
         return o
     end,
     init = function(self)
-        for i,v in ipairs(self._.zsort) do if type(v) == 'table' then if v.init then v:init() end end end
+        for i,v in ipairs(self._.zsort) do if type(v) == 'table' then 
+            if v.init_action then v:init_action() end
+            if v.init then v:init() end 
+        end end
     end,
-    --init = function(self) return self end,
+    --init_action = function(self) self:init() end,
     each = function(self, f) 
         for k,v in pairs(self) do 
             local r = f(k, v)

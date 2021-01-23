@@ -82,19 +82,6 @@ nest_.connect = function(self, objects, fps)
         end
     end
 
-    clock.run(function() 
-        while true do 
-            clock.sleep(1/fps)
-            
-            for k,v in pairs(devs) do 
-                if v.redraw and v.dirty then 
-                    v.dirty = false
-                    v.redraw()
-                end
-            end
-        end   
-    end)
-
     local function linkdevs(obj) 
         if type(obj) == 'table' and obj.is_nest then
             rawset(obj._, 'devs', devs)
@@ -111,6 +98,24 @@ nest_.connect = function(self, objects, fps)
     end
 
     linkdevs(self)
+    
+    local oi = self.init
+    self.init = function(s)
+        oi(s)
+
+        s.drawloop = clock.run(function() 
+            while true do 
+                clock.sleep(1/fps)
+                
+                for k,v in pairs(devs) do 
+                    if v.redraw and v.dirty then 
+                        v.dirty = false
+                        v.redraw()
+                    end
+                end
+            end   
+        end)
+    end
     
     return self
 end
