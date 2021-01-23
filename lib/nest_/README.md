@@ -1,11 +1,6 @@
 # TODO
 
 ```
-
-RENAME
-
-zsort -> children
-
 FIX
 
 broken _txt.*.list (update issue probably)
