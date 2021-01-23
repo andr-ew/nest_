@@ -537,9 +537,9 @@ _output = nest_:new {
     serialize = function(s, f) f "_output()" end,
     redraw = nil,
     devk = nil,
-    draw = function(self, devk, t)
+    draw = function(self, devk)
         if (self.enabled == nil or self.p_.enabled) and self.devk == devk then
-            if self.redraw then self.devs[devk].dirty = self:redraw(self.devs[devk].object, self.v, t) or self.devs[devk].dirty end -- refactor dirty flag set
+            if self.redraw then self.devs[devk].dirty = self:redraw(self.v, self.devs[devk].object) or self.devs[devk].dirty end -- refactor dirty flag set
         end
     end
 }
