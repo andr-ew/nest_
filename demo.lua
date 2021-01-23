@@ -25,9 +25,9 @@ function print_matrix_2d(v)
     for _,row in ipairs(v) do print_matrix_1d(row) end
 end
 
-local function gpage(self) return g.tab.value + 1 == self.k end
-local function tpage(self) return t.tab.options[t.tab.value] == self.k end
-local function apage(self) return math.floor(a.tab.value) == self.k end
+local function gpage(self) return demo.g.tab.value == self.k end
+local function tpage(self) return demo.t.tab.options[demo.t.tab.value] == self.k end
+local function apage(self) return math.floor(demo.a.tab.value) == self.k end
 
 local grid_trigger_level = { 
     4,
@@ -38,10 +38,12 @@ local grid_trigger_level = {
     end
 }
 
+demo = nest_()
+
 -------------------------------------------------grid
 
 -- print more action args
-g = nest_ {
+demo.g = nest_ {
     page = nest_ {
         -----------------------------------------fill
         nest_ { 
@@ -364,7 +366,7 @@ g = nest_ {
 
 -------------------------------------------------txt/screen
 
-t = nest_ {
+demo.t = nest_ {
     page = nest_ {
         -------------------------------------numerical
         numerical = nest_ {
@@ -520,7 +522,7 @@ t = nest_ {
 
 ---------------------------------------------arc
 
-a = nest_ {
+demo.a = nest_ {
     page = {
         -------------------------------------fill & delta
         nest_ {
@@ -638,7 +640,10 @@ a = nest_ {
 } :connect({ a = arc.connect() }, 120) -- refresh @ 120 fps instead of the default 30
 
 function init()
-    g:init()
-    t:init()
-    a:init()
+    demo:load()
+    demo:init()
+end
+
+function cleanup()
+    demo:save()
 end

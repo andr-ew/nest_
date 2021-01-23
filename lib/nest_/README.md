@@ -1,4 +1,4 @@
-# core
+# TODO
 
 ```
 
@@ -7,98 +7,34 @@ RENAME
 lvl -> level. add a lvl as a nickname
 add en as a nickname for enabled
 
--------------------------------------------------
-
-zsort -> children. require children to be nest_'s
-
-REFACTOR
-
-_metaaffordace.target: table of nests rather than single nest ?
-
-delegate most of the facilities of _obj_ into _input/_output/nest_. _obj_ should house only the copy & new behavior
-
-ADD
-
-_obj_:insert() macro for appending /replacing any values within an _obj_ structure - useful for setting up multiple templates then filling in shared data
-
-support _affordance { input = false } properly when input already exists. use booleans in the constructor to essentially nullify default values, even when they are _obj_ (i.e., members of zsort)
-
-nest_.redraw
+zsort -> children
 
 FIX
 
 broken _txt.*.list (update issue probably)
 
------------------------------
+ADD
 
-add actions{} list of action functions
-add inits{} list of init functions
-add creates{} list of creation time functions
-add targets{} list of target nest keys in self 
+nest_.redraw
+nest_ refresh()/update() alt modes when redraw
 
-add :link(_control or function() return control end) to _control, link two controls by appending actions when values are the same type. also allow link to param (overwrites param action)
+_screen.affordance {
+    redraw = function(self, i) -- unpack(v)
+        screen.drawthing(i)
+    end,
+    init_action = function(self)
+        clock.run(function()
+            while true do
+                for i = 1, 3 do
+                    self.value = 3
+                    clock.sleep(0.2)
+                end
+            end
+        end)
+    end
+}
 
 nest:disconnect() : for disconnecting and reconnecting nests to devices
-
-nest_.focus - focus on a single nest & children for a device & effectively disable otherelatives. will need it's own variable in the _dev. great for popup interfaces
-
-```
-# readme
-
-```
-build personalized interfaces as a waypoint into existing musical processes (a sampler, a synth voice, a sequence)
-
-you're welcome to think about nest as a full-blown library, a configuration language, or a maiden scriptable application in the vein of grid ops
-
-while you can certainly build gridless/arcless applications in nest (i'll be doing this), most designs are simple enough not to really warrant a complex library. nest is an **input focused** syntax, and shines most when syncronizing many forms of interaction data
-
-```
-
-# arc
-
-```
-REFACTOR
-
-arc.option: store v as an int & store the float remainder from delta values as a seperate float
-
---------------------------------
-remove v from fill
-
-ADD
-
-pattern
-preset
-
-```
-
-# grid
-```
-
-ADD
-
-number.include (same as arc.option.include)
-
-REFACTOR
-
-grid.fader -> grid.control
-embed controlspec in grid.fader, align properties with argument names
-
-add range to number, default to 1-based
-
----------------------------------------------
-
-trigger & toggle t argument: restrict to range of held time when edge == 0 
-
-? _grid.simplepattern (reference)
-
-
-```
-
-# norns
-```
-ADD
-
-? _screen.affordance.animate
 
 _key.binary.lvl -- accept clock funtion entry in table as animation
 
@@ -107,69 +43,15 @@ _enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range d
 
 *.option: remove the option string action argument, encourage indexing options instead
 
------------------------------------------
-
-trigger & toggle t argument: restrict to range of held time when edge == 0
-
 ```
 
-# txt
-```
----------------------------------------------
-RENAME
-
-left, right, top, bottom -> start, end
-
-ADD
-
-underline property
-
-sumbmenus inside list:
-
-items = nest_ {
-    nest_ {
-        label = 'more items',
-        items = {
-        }
-    },
-    nest_ {
-        label = 'even more items',
-        nest_ {
-            label = 'yet more items',
-            items = {
-            }
-        }
-        items = {
-        }
-    }
-}
-
-display strings inside list.itmes like headers in the params menu
+# readme notes
 
 ```
+build personalized interfaces as a waypoint into existing musical processes (a sampler, a synth voice, a sequence)
 
-# etc
-```
-_etc.et12
-_etc.et24
-_etc.filebrowser
+you're welcome to think about nest as a full-blown library, a configuration language, or a maiden scriptable application in the vein of grid ops
 
-```
-
-?????
-```
-_grid.affordance.wrap ?
-_grid.shape (eathsea) named combinations of normalized trigger presses for line & plane. add the naming feature to trigger ? (un-normalized)
-
-remove v from fill ?
-
-? _obj_.metatable - allow access to the metatable for e.g. reassigning the __call metamethod, which is both useful when pointed to new and set. ?? what if we defaulted it to set but overrode it for library objects? 
-simpler solution would just be adding a property called __call which the metatable references. the other things we probs don't want to expose
-
-? consider splitting up "value" into a raw value (state) and a user facig value (meaning). the difference between these two concepts is made most evident by the option types.
-
-implimentation could be an actual value ("raw", maybe keep the nickname "v" for now to avoid measurable refactoring work) and a key (stick with "value") which is a (non-silent) proxy to getter/setter functions.
-
-? create readonly properties, which cannot be overwritten outside of the p_ proxy or a constructor. the _ table can basically become this. when the obj is printed, don't print functions in this table, we can put the builtins here and hide them on user print. properties like x, y, n, which we don't want to be editable after creation, can be put in this table after initialization
+while you can certainly build gridless/arcless applications in nest (i'll be doing this), most designs are simple enough not to really warrant a complex library. nest is an **input focused** syntax, and shines most when syncronizing many forms of interaction data
 
 ```
