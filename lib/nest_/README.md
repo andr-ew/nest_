@@ -1,11 +1,6 @@
 # TODO
 
 ```
-FIX
-
-broken _txt.*.list (update issue probably)
-
-ADD
 
 _key.binary.lvl -- accept clock funtion entry in table as animation
 

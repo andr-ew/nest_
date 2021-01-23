@@ -236,7 +236,7 @@ nest_ = {
             end 
 
             for i,v in ipairs(self.children) do 
-                if v.update then
+                if type(v) == 'table' and v.update then
                     v:update(devk, args, ob)
                 end
             end
@@ -621,7 +621,14 @@ _affordance = nest_:new {
             end 
 
             if self.input then
-                local hargs, aargs = self.input:update(devk, args, ob)
+                local hargs, aargs 
+               
+                for i,v in ipairs(self.children) do 
+                    if type(v) == 'table' and v.update then
+                        local h, a = v:update(devk, args, ob)
+                        if a then hargs, aargs = h, a end
+                    end
+                end
 
                 if aargs and aargs[1] then 
                     clockaction(self, aargs)
