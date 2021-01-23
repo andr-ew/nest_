@@ -15,34 +15,12 @@ broken _txt.*.list (update issue probably)
 
 ADD
 
-nest_.redraw
-nest_ refresh()/update() alt modes when redraw
-
-_screen.affordance {
-    redraw = function(self, i) -- unpack(v)
-        screen.drawthing(i)
-    end,
-    init_action = function(self)
-        clock.run(function()
-            while true do
-                for i = 1, 3 do
-                    self.value = 3
-                    clock.sleep(0.2)
-                end
-            end
-        end)
-    end
-}
-
-nest:disconnect() : for disconnecting and reconnecting nests to devices
-
 _key.binary.lvl -- accept clock funtion entry in table as animation
 
 _enc.delta
 _enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range delta stuff for option as in _arc.option
 
-*.option: remove the option string action argument, encourage indexing options instead
-
+-----------
 ```
 
 # readme notes

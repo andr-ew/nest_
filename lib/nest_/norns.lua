@@ -120,6 +120,9 @@ nest_.connect = function(self, objects, fps)
     return self
 end
 
+nest_.disconnect = function(self)
+    if self.drawloop then clock.cancel(self.drawloop) end
+end
 ----------------------------------------------------------------------------------------------------
 
 _screen = _group:new()
