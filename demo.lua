@@ -523,7 +523,7 @@ demo.t = nest_ {
 ---------------------------------------------arc
 
 demo.a = nest_ {
-    page = {
+    page = nest_ {
         -------------------------------------fill & delta
         nest_ {
             fill1 = _arc.fill {
