@@ -11,13 +11,13 @@ include 'lib/nest_/arc'
 tab = require 'tabutil'
 
 g = nest_ {
-    _grid.toggle {
+    _grid.control {
         x = { 2, 7 },
         y = 2,
         action = function(s, v) print(v) end
     },
-    _grid.number {
-        x = 1, y = { 1, 8 },
+    _grid.control {
+        x = 1, y = { 2, 7 },
         action = function(s, v) print(v) end
     }
 } :connect { g = grid.connect() }

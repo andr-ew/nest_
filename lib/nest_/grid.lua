@@ -68,12 +68,12 @@ _grid.muxaffordance.input.filter = function(s, args)
         if axis_size.x == nil and axis_size.y == nil then
             return { "point", nil, nil, args[3] }
         elseif axis_size.x ~= nil and axis_size.y ~= nil then
-            return { "plane", args[1] - s.p_.x[1] + 1, args[2] - s.p_.y[1] + 1, args[3] }
+            return { "plane", args[1] - s.p_.x[1] + 1, s.p_.y[2] - args[2] + 1, args[3] }
         else
             if axis_size.x ~= nil then
                 return { "line", args[1] - s.p_.x[1] + 1, nil, args[3] }
             elseif axis_size.y ~= nil then
-                return { "line", args[2] - s.p_.y[1] + 1, nil, args[3] }
+                return { "line", s.p_.y[2] - args[2] + 1, nil, args[3] }
             end
         end
     else return nil end
@@ -329,7 +329,7 @@ _grid.binary.output.muxredraw = _obj_:new {
         for y,l in ipairs(v) do 
             local lvl = lvl(s, l, y)
             if type(lvl) == 'function' then lvl = s.lvl_frame[y] end
-            if lvl > 0 then g:led(s.p_.x, y + s.p_.y[1] - 1, lvl) end
+            if lvl > 0 then g:led(s.p_.x, s.p_.y[2] - y + 1, lvl) end
         end
     end,
     plane = function(s, g, v)
@@ -337,7 +337,7 @@ _grid.binary.output.muxredraw = _obj_:new {
             for y,l in ipairs(r) do 
                 local lvl = lvl(s, l, x, y)
                 if type(lvl) == 'function' then lvl = s.lvl_frame[x][y] end
-                if lvl > 0 then g:led(x + s.p_.x[1] - 1, y + s.p_.y[1] - 1, lvl) end
+                if lvl > 0 then g:led(x + s.p_.x[1] - 1, s.p_.y[2] - y + 1, lvl) end
             end
         end
     end
@@ -1012,14 +1012,14 @@ _grid.number.output.muxredraw = _obj_:new {
     end,
     line_y = function(s, g, v)
         for i = s.p_.y[1], s.p_.y[2] do
-            local lvl = lvl(s, (s.v == i - s.p_.y[1] + 1) and 1 or 0, i - s.p_.y[1] + 1)
+            local lvl = lvl(s, (s.v == s.p_.y[2] - i + 1) and 1 or 0, s.p_.y[2] - i + 1)
             if lvl > 0 then g:led(s.p_.x, i, lvl) end
         end
     end,
     plane = function(s, g, v)
         for i = s.p_.x[1], s.p_.x[2] do
             for j = s.p_.y[1], s.p_.y[2] do
-                local li, lj = i - s.p_.x[1] + 1, j - s.p_.y[1] + 1
+                local li, lj = i - s.p_.x[1] + 1, s.p_.y[2] - j + 1
                 local l = lvl(s, ((s.v.x == li) and (s.v.y == lj)) and 1 or 0, li, lj)
                 if l > 0 then g:led(i, j, l) end
             end
@@ -1078,7 +1078,7 @@ _grid.control.output.muxredraw = _obj_:new {
             if m == v then l = lvl(s, 2)
             elseif m > v and m <= 0 then l = lvl(s, 1)
             elseif m < v and m >= 0 then l = lvl(s, 1) end
-            if l > 0 then g:led(s.p_.x, i, l) end
+            if l > 0 then g:led(s.p_.x, s.p_.y[2] - i + 2, l) end
         end
     end,
     plane = function(s, g, v)
@@ -1088,7 +1088,7 @@ _grid.control.output.muxredraw = _obj_:new {
                 local r = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
                 local m = {
                     x = util.linlin(s.p_.x[1], s.p_.x[2], r[1], r[2], i),
-                    y = util.linlin(s.p_.y[1], s.p_.y[2], r[1], r[2], j)
+                    y = util.linlin(s.p_.y[1], s.p_.y[2], r[1], r[2], s.p_.y[2] - j + 2)
                 }
                 if m.x == v.x and m.y == v.y then l = lvl(s, 2)
                 --[[
@@ -1145,7 +1145,7 @@ _grid.range.input.muxhandler = _obj_:new {
            
             if s.edge == 1 then 
                 if #s.hlist >= 2 then 
-                    local v = { s.hlist[1], s.hlist[#s.hlist] }
+                    local v = _obj_ { s.hlist[1], s.hlist[#s.hlist] }
                     table.sort(v)
                     --s.hlist = {}
                     s:replace('hlist', {})
@@ -1155,7 +1155,7 @@ _grid.range.input.muxhandler = _obj_:new {
         else
             if #s.hlist >= 2 then 
                 if s.edge == 0 then
-                    local v = { s.hlist[1], s.hlist[#s.hlist] }
+                    local v = _obj_ { s.hlist[1], s.hlist[#s.hlist] }
                     table.sort(v)
                     --s.hlist = {}
                     s:replace('hlist', {})
@@ -1179,7 +1179,7 @@ _grid.range.input.muxhandler = _obj_:new {
            
             if s.edge == 1 then 
                 if #s.hlist >= 2 then 
-                    local v = { s.hlist[1], s.hlist[#s.hlist] }
+                    local v = _obj_ { s.hlist[1], s.hlist[#s.hlist] }
                     table.sort(v, function(a, b) 
                         return a.x < b.x
                     end)
@@ -1191,7 +1191,7 @@ _grid.range.input.muxhandler = _obj_:new {
         else
             if #s.hlist >= 2 then 
                 if s.edge == 0 then
-                    local v = { s.hlist[1], s.hlist[#s.hlist] }
+                    local v = _obj_ { s.hlist[1], s.hlist[#s.hlist] }
                     table.sort(v, function(a, b) 
                         return a.x < b.x
                     end)
@@ -1226,7 +1226,7 @@ _grid.range.output.muxredraw = _obj_:new {
         for i = 1, s.p_.y[2] - s.p_.y[1] + 1 do
             local l = lvl(s, 0)
             if i >= v[1] and i <= v[2] then l = lvl(s, 1) end
-            if l > 0 then g:led(s.p_.x, i + s.p_.y[1] - 1, l) end
+            if l > 0 then g:led(s.p_.x, s.p_.y[2] - i + 1, l) end
         end
     end,
     plane = function(s, g, v)
@@ -1237,7 +1237,7 @@ _grid.range.output.muxredraw = _obj_:new {
                 elseif (j == v[1].y or j == v[2].y) and i >= v[1].x and i <= v[2].x then l = lvl(s, 1)
                 elseif v[2].y < v[1].y and (i == v[1].x or i == v[2].x) and j >= v[2].y and j <= v[1].y then l = lvl(s, 1)
                 end
-                if l > 0 then g:led(i + s.p_.x[1] - 1, j + s.p_.y[1] - 1, l) end
+                if l > 0 then g:led(i + s.p_.x[1] - 1, s.p_.y[2] - j + 1, l) end
             end
         end
     end
