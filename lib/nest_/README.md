@@ -1,15 +1,3 @@
-# TODO
-
-```
-_grid.fader -> _grid.control
-correct orientation for vertical
-
-allow table for multiple targets
-fix offser buggo
-
-
-```
-
 # readme notes
 
 ```
