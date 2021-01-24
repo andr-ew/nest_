@@ -10,22 +10,15 @@ include 'lib/nest_/arc'
 
 tab = require 'tabutil'
 
----[[
 g = nest_ {
-    number1 = _arc.number {
-        n = 2,
-        sens = 1/2,
-        action = function(self, value) print(self.k, value) end
-    },
-    tab = _arc.option {
-        x = { 42, 24 }, n = 1,
-        sens = 1/16,
-        options = 4,
-        size = 3,
-        lvl = { 0, 4, 15 },
-        action = function(self, value) print(self.k, value) end
+    _grid.toggle {
+        x = { 1, 3 },
+        y = 1,
+        level = { 4, 15 },
+        en = true,
+        action = function(s,v) print(v) end
     }
-} :connect { a = arc.connect() }
+} :connect { g = grid.connect() }
 
 function init() 
     g:init() 

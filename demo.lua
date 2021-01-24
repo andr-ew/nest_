@@ -26,7 +26,7 @@ function print_matrix_2d(v)
 end
 
 local function gpage(self) return demo.g.tab.value == self.k end
-local function tpage(self) return demo.t.tab.options[demo.t.tab.value] == self.k end
+local function tpage(self) return demo.t.tab.options[math.floor(demo.t.tab.value)] == self.k end
 local function apage(self) return math.floor(demo.a.tab.value) == self.k end
 
 local grid_trigger_level = { 
@@ -370,16 +370,13 @@ demo.t = nest_ {
     page = nest_ {
         -------------------------------------numerical
         numerical = nest_ {
-            --[[
-            TODO: bugfix
             trigger = _txt.key.trigger {
-                x = 2, y = 14,
+                x = 2, y = 18,
                 n = 1,
                 action = function(self, value) print(self.k, 'bang') end
             },
-            --]]
             number = _txt.enc.number {
-                x = 2, y = 32,
+                x = 2, y = 38,
                 n = 2,
                 range = { 1, 8 },
                 wrap = true,
@@ -388,19 +385,19 @@ demo.t = nest_ {
                 label ="foo"
             },
             control = _txt.enc.control {
-                x = 64, y = 32,
+                x = 64, y = 38,
                 n = 3,
                 controlspec = controlspec.BIPOLAR,
                 align = { 'left', 'bottom' },
                 action = function(self, value) print(self.k, value) end
             },
             momentary = _txt.key.momentary {
-                x = 2, y = 46, 
+                x = 2, y = 50, 
                 n = 2,
                 action = function(self, value) print(self.k, value) end
             },
             toggle = _txt.key.toggle {
-                x = 64, y = 42, 
+                x = 64, y = 46, 
                 n = 3,
                 padding = 4,
                 lvl = { 15, 0 },
@@ -486,6 +483,7 @@ demo.t = nest_ {
                 y = 14,
                 x = { 2, 96 },
                 n = 2,
+                sens = 0.5,
                 items = nest_ { 
                     _txt.enc.control { n = 3, label = "control 1" },
                     _txt.key.toggle { n = 3, label = "toggle" },
@@ -505,6 +503,7 @@ demo.t = nest_ {
     },
     tab = _txt.enc.option {
         x = 2, y = 2, n = 1, margin = 6,
+        sens = 0.5,
         options = {
             "numerical",
             "label",

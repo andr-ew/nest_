@@ -137,12 +137,12 @@ local function formattype(t, k, v)
             v = _obj_:new(v)
         end
 
-        local zsort = t._.zsort
-        for i,w in ipairs(zsort) do 
-            if w.k == k then table.remove(zsort, i) end
+        local children = t._.children
+        for i,w in ipairs(children) do 
+            if w.k == k then table.remove(children, i) end
         end
         
-        zsort[#zsort + 1] = v
+        children[#children + 1] = v
     end
 
     return v
@@ -162,17 +162,29 @@ local function zcomp(a, b)
 end
 
 local function nickname(k) 
-    if k == 'v' then return 'value' else return k end
+    if k == 'v' then return 'value' 
+    elseif k == 'lvl' then return 'level'
+    elseif k == 'en' then return 'enabled'
+    else return k end
 end
 
 local function index_nickname(t, k) 
-    if k == 'v' then return t.value end
+    if k == 'v' then return t.value
+    elseif k == 'lvl' then return t.level
+    elseif k == 'en' then return t.enabled
+    end
 end
 
 local function format_nickname(t, k, v) 
     if k == 'v' and not rawget(t, 'value') then
         rawset(t, 'value', v)
         t['v'] = nil
+    elseif k == 'lvl' and not rawget(t, 'level') then
+        rawset(t, 'level', v)
+        t['lvl'] = nil
+    elseif k == 'en' and not rawget(t, 'enabled') then
+        rawset(t, 'enabled', v)
+        t['en'] = nil
     end
     
     return v
@@ -187,8 +199,8 @@ nest_ = {
     remove = function(self, k)
         self[k] = nil
 
-        for i,w in ipairs(self._.zsort) do 
-            if w.k == k then table.remove(self.zsort, i) end
+        for i,w in ipairs(self._.children) do 
+            if w.k == k then table.remove(self.children, i) end
         end
     end,
     serialize = function(o, f, skip, dof, types, itab)
@@ -198,12 +210,12 @@ nest_ = {
     copy = function(self, o) 
         copy(self, o, formattype)
 
-        table.sort(o.zsort, zcomp)
+        table.sort(o.children, zcomp)
 
         return o
     end,
     init = function(self)
-        for i,v in ipairs(self._.zsort) do if type(v) == 'table' then 
+        for i,v in ipairs(self._.children) do if type(v) == 'table' then 
             if v.init_action then v:init_action() end
             if v.init then v:init() end 
         end end
@@ -223,8 +235,8 @@ nest_ = {
                 for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
             end 
 
-            for i,v in ipairs(self.zsort) do 
-                if v.update then
+            for i,v in ipairs(self.children) do 
+                if type(v) == 'table' and v.update then
                     v:update(devk, args, ob)
                 end
             end
@@ -232,7 +244,7 @@ nest_ = {
     end,
     refresh = function(self, silent)
         local ret
-        for i,v in ipairs(self.zsort) do 
+        for i,v in ipairs(self.children) do 
             if v.refresh then
                 ret = v:refresh(silent) or ret
             end
@@ -241,7 +253,7 @@ nest_ = {
         return ret
     end,
     draw = function(self, devk)
-        for i,v in ipairs(self.zsort) do
+        for i,v in ipairs(self.children) do
             if self.enabled == nil or self.p_.enabled == true then
                 if v.draw then
                     v:draw(devk)
@@ -287,7 +299,7 @@ nest_ = {
         local typ = typ or nest_
         if test == nil or test(self) then
             local t = typ:new()
-            for i,v in ipairs(self.zsort) do
+            for i,v in ipairs(self.children) do
                 if v.is_obj and rawget(v, 'get') then t[v.k] = v:get(silent, test, typ) end
             end
             return t
@@ -384,7 +396,7 @@ function nest_:new(o, ...)
         p = nil,
         k = nil,
         z = 0,
-        zsort = {}, -- list of obj children sorted by descending z value
+        children = {}, -- list of obj children sorted by descending z value
         id = nextid(),
         devs = {},
         ob_links = {},
@@ -404,7 +416,7 @@ function nest_:new(o, ...)
             else
                 rawset(t, k, formattype(t, k, v))
                 
-                table.sort(_.zsort, zcomp)
+                table.sort(_.children, zcomp)
             end
         end,
         __call = function(_, ...)
@@ -609,7 +621,14 @@ _affordance = nest_:new {
             end 
 
             if self.input then
-                local hargs, aargs = self.input:update(devk, args, ob)
+                local hargs, aargs 
+               
+                for i,v in ipairs(self.children) do 
+                    if type(v) == 'table' and v.update then
+                        local h, a = v:update(devk, args, ob)
+                        if a then hargs, aargs = h, a end
+                    end
+                end
 
                 if aargs and aargs[1] then 
                     clockaction(self, aargs)
@@ -630,7 +649,7 @@ _affordance = nest_:new {
             local defaults = self.arg_defaults or {}
             clockaction(self, { self.v, table.unpack(defaults) })
         else
-            for i,v in ipairs(self.zsort) do 
+            for i,v in ipairs(self.children) do 
                 if v.is_output and self.devs[v.devk] then 
                     self.devs[v.devk].dirty = true
                     if v.handler then v:handler(self.v) end
@@ -727,7 +746,7 @@ _preset = _observer:new {
     end,
     --[[
     clear = function(self, n)
-        self.state:remove(n) --- meh, i wish zsort wasn't so annoying :/
+        self.state:remove(n) --- meh, i wish children wasn't so annoying :/
     end,
     copy = function(self, n_src, n_dest)
         self.state:replace(n_src, self.state[n_dest]:new())

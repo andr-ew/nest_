@@ -15,7 +15,7 @@ local function txtpoint(txt, a, extents)
     local etc = {}
     for j,k in ipairs { 'font_face', 'font_size', 'lvl', 'border', 'fill', 'font_headroom', 'font_leftroom' } do 
         if type(a[k]) == 'table' and a.selected then
-            etc[k] = a[k][a.selected + 1]
+            etc[k] = a[k][math.floor(a.selected) + 1]
         else
             etc[k] = a[k]
         end
@@ -147,7 +147,7 @@ local function placeaxis(txt, mode, iax, lax, selected, place, extents, a)
                                         pa[k][l] = w[1]
                                     end
 
-                                    pa[k][selected[noflow]] = w[2]
+                                    pa[k][math.floor(selected[noflow])] = w[2]
                                 end
                             else
                                 for l,v in ipairs(selected) do  
@@ -159,7 +159,7 @@ local function placeaxis(txt, mode, iax, lax, selected, place, extents, a)
                             end
                         end
                     else
-                        pa[k] = w[(selected == i) and 2 or 1]
+                        pa[k] = w[(math.floor(selected) == i) and 2 or 1]
                     end
                 else
                     pa[k] = w[i] or w[#w]
@@ -505,6 +505,7 @@ _txt.affordance.output.txtdraw = function(s, txt)
             local f = s.p_.scroll_focus or { w[1], w[2] }
 
             sel = ax and sel0[s.p_.flow] or sel0
+            sel = math.floor(sel)
 
             while sel > f[2] do
                 w[1] = w[1] + 1
@@ -603,7 +604,7 @@ _txt.list.output.txt = function(s)
     for i,v in ipairs(s.items) do
         
         --meh, this should be in an initialization function but init stuff is being overwritten by the enc type ://
-        v.enabled = function() return i == s.v end
+        v.enabled = function() return i == math.floor(s.v) end
 
         ret[i] = v.output.ltxt and v.output:ltxt() or v.output:txt()
     end
@@ -641,32 +642,20 @@ end
 _txt.binary.output.txt = function(s) return s.p_.label end
 _txt.binary.output.ltxt = labeltxt
 
-_txt.key.trigger = _key.trigger:new()
+_txt.key.trigger = _key.trigger:new { blinktime = 0.2 }
 _txt.binary:copy(_txt.key.trigger)
-_txt.key.trigger.output.redraw = function(s, ...) 
-    _txt.binary.output.redraw(s, ...)
-
-    if type(s.p_.n) == 'table' then
-        for x,w in ipairs(s.v) do 
-            if w > 0 then 
-                s.v[x] = w - 1/30/s.blinktime
-            else
-                s.v[x] = 0
+--_txt.key.trigger.selected = 0
+_txt.key.trigger.output.handler = function(s)
+    clock.run(function()
+        clock.sleep(s.blinktime)
+        if type(s.p_.n) == 'table' then
+            for i,v in ipairs(s.v) do
+                s.v[i] = 0
             end
-            
-            ret = true
-        end
+        else s.v = 0 end
 
-        return ret
-    else
-        if s.v > 0 then
-            s.v = s.v - 1/30/s.blinktime
-        else
-            s.v = 0
-        end
-        
-        return s.v > 0
-    end
+        s.devs[s.devk].dirty = true
+    end)
 end
 
 _txt.key.momentary = _key.momentary:new()

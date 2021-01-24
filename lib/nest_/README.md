@@ -1,28 +1,3 @@
-# TODO
-
-```
-
-RENAME
-
-lvl -> level. add a lvl as a nickname
-add en as a nickname for enabled
-
-zsort -> children
-
-FIX
-
-broken _txt.*.list (update issue probably)
-
-ADD
-
-_key.binary.lvl -- accept clock funtion entry in table as animation
-
-_enc.delta
-_enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range delta stuff for option as in _arc.option
-
------------
-```
-
 # readme notes
 
 ```
