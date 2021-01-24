@@ -12,11 +12,13 @@ tab = require 'tabutil'
 
 g = nest_ {
     _grid.toggle {
-        x = { 1, 3 },
-        y = 1,
-        level = { 4, 15 },
-        en = true,
-        action = function(s,v) print(v) end
+        x = { 2, 7 },
+        y = 2,
+        action = function(s, v) print(v) end
+    },
+    _grid.number {
+        x = 1, y = { 1, 8 },
+        action = function(s, v) print(v) end
     }
 } :connect { g = grid.connect() }
 
@@ -26,12 +28,3 @@ end
 
 function cleanup()
 end
---]]
-
---[[
-n = nest_ {
-    a = _affordance {
-        input = _input()
-    }
-}
---]]

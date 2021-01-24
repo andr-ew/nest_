@@ -26,8 +26,8 @@ function print_matrix_2d(v)
 end
 
 local function gpage(self) return demo.g.tab.value == self.k end
-local function tpage(self) return demo.t.tab.options[math.floor(demo.t.tab.value)] == self.k end
-local function apage(self) return math.floor(demo.a.tab.value) == self.k end
+local function tpage(self) return demo.t.tab.options[demo.t.tab.value // 1] == self.k end
+local function apage(self) return demo.a.tab.value // 1 == self.k end
 
 local grid_trigger_level = { 
     4,
@@ -93,16 +93,16 @@ demo.g = nest_ {
             },
             enabled = gpage
         },
-        -----------------------------------------fader
+        -----------------------------------------control
         nest_ {
-            fader_0d = _grid.fader {
+            control_0d = _grid.control {
                 x = 1,
                 y = 3,
                 action = function(self, value) 
                     print(self.k, value) 
                 end
             }, 
-            fader_1d = _grid.fader {
+            control_1d = _grid.control {
                 x = { 1, 7 },
                 y = 5,
                 range = { 0, 1 },
@@ -110,7 +110,7 @@ demo.g = nest_ {
                     print(self.k, value) 
                 end
             }, 
-            fader_2d = _grid.fader {
+            control_2d = _grid.control {
                 x = { 9, 15 },
                 y = { 2, 8 },
                 range = { 0, 1 },
