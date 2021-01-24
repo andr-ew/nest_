@@ -1,12 +1,3 @@
-# TODO
-
-```
-
-_enc.delta
-
------------
-```
-
 # readme notes
 
 ```
