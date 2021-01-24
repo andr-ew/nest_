@@ -182,6 +182,18 @@ local function minit(n)
     else return 0 end
 end
 
+_enc.delta = _enc.muxaffordance:new()
+
+_enc.delta.input.muxhandler = _obj_:new {
+    point = function(s, n, d) 
+        return d
+    end,
+    line = function(s, n, d) 
+        local i = tab.key(s.p_.n, n)
+        return d, i
+    end
+}
+
 local function delta_number(self, value, d)
     local v = value + d
 
