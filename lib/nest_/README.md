@@ -3,7 +3,6 @@
 ```
 
 _enc.delta
-_enc.affordance.sens (impliment in input.filter, v easy) also: fine tune range delta stuff for option as in _arc.option
 
 -----------
 ```

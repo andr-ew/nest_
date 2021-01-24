@@ -140,13 +140,15 @@ _enc.devk = 'enc'
 
 _enc.affordance = _affordance:new { 
     n = 2,
+    sens = 1,
     input = _input:new()
 }
 
 _enc.affordance.input.filter = function(self, args) -- args = { n, d }
+    local n, d = args[1], args[2] * self.p_.sens
     if type(n) == "table" then 
-        if tab.contains(self.p_.n, args[1]) then return args end
-    elseif args[1] == self.p_.n then return args
+        if tab.contains(self.p_.n, args[1]) then return n, d end
+    elseif args[1] == self.p_.n then return n, d
     else return nil
     end
 end
@@ -154,9 +156,11 @@ end
 _enc.muxaffordance = _enc.affordance:new()
 
 _enc.muxaffordance.input.filter = function(self, args) -- args = { n, d }
+    local sens = self.p_.sens or 1
+    local n, d = args[1], args[2] * sens
     if type(self.p_.n) == "table" then 
-        if tab.contains(self.p_.n, args[1]) then return { "line", args[1], args[2] } end
-    elseif args[1] == self.p_.n then return { "point", args[1], args[2] }
+        if tab.contains(self.p_.n, args[1]) then return { "line", n, d } end
+    elseif args[1] == self.p_.n then return { "point", n, d }
     else return nil
     end
 end
@@ -290,17 +294,18 @@ local tab = require 'tabutil'
 local function delta_option_point(self, value, d)
     local i = value or 0
     local v = i + d
+    local size = #self.p_.options + 1 - self.p_.sens
 
     if self.wrap then
-        while v > #self.p_.options do
-            v = v - #self.p_.options
+        while v > size do
+            v = v - size
         end
         while v < 1 do
-            v = v + #self.p_.options + 1
+            v = v + size + 1
         end
     end
 
-    local c = util.clamp(v, 1, #self.p_.options)
+    local c = util.clamp(v, 1, size)
     if i ~= c then
         return c
     end
@@ -309,31 +314,33 @@ end
 local function delta_option_line(self, value, dx, dy)
     local i = value.x
     local j = value.y
+    local sizey = #self.p_.options + 1 - self.p_.sens
 
     vx = i + (dx or 0)
     vy = j + (dy or 0)
 
     if self.wrap then
-        while vy > #self.p_.options do
-            vy = vy - #self.p_.options
+        while vy > sizey do
+            vy = vy - sizey
         end
         while vy < 1 do
-            vy = vy + #self.p_.options + 1
+            vy = vy + sizey + 1
         end
     end
 
-    local cy = util.clamp(vy, 1, #self.p_.options)
+    local cy = util.clamp(vy, 1, sizey)
+    local sizex = #self.p_.options[cy] + 1 - self.p_.sens
 
     if self.wrap then
-        while vx > #self.p_.options[cy] do
-            vx = vx - #self.p_.options[cy]
+        while vx > sizex do
+            vx = vx - sizex
         end
         while vx < 1 do
-            vx = vx + #self.p_.options[cy] + 1
+            vx = vx + sizex + 1
         end
     end
 
-    local cx = util.clamp(vx, 1, #self.p_.options[cy])
+    local cx = util.clamp(vx, 1, sizex)
 
     if i ~= cx or j ~= cy then
         value.x = cx

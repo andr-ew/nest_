@@ -26,7 +26,7 @@ function print_matrix_2d(v)
 end
 
 local function gpage(self) return demo.g.tab.value == self.k end
-local function tpage(self) return demo.t.tab.options[demo.t.tab.value] == self.k end
+local function tpage(self) return demo.t.tab.options[math.floor(demo.t.tab.value)] == self.k end
 local function apage(self) return math.floor(demo.a.tab.value) == self.k end
 
 local grid_trigger_level = { 
@@ -483,6 +483,7 @@ demo.t = nest_ {
                 y = 14,
                 x = { 2, 96 },
                 n = 2,
+                sens = 0.5,
                 items = nest_ { 
                     _txt.enc.control { n = 3, label = "control 1" },
                     _txt.key.toggle { n = 3, label = "toggle" },
@@ -502,6 +503,7 @@ demo.t = nest_ {
     },
     tab = _txt.enc.option {
         x = 2, y = 2, n = 1, margin = 6,
+        sens = 0.5,
         options = {
             "numerical",
             "label",
