@@ -641,32 +641,20 @@ end
 _txt.binary.output.txt = function(s) return s.p_.label end
 _txt.binary.output.ltxt = labeltxt
 
-_txt.key.trigger = _key.trigger:new()
+_txt.key.trigger = _key.trigger:new { blinktime = 0.2 }
 _txt.binary:copy(_txt.key.trigger)
-_txt.key.trigger.output.redraw = function(s, ...) 
-    _txt.binary.output.redraw(s, ...)
-
-    if type(s.p_.n) == 'table' then
-        for x,w in ipairs(s.v) do 
-            if w > 0 then 
-                s.v[x] = w - 1/30/s.blinktime
-            else
-                s.v[x] = 0
+--_txt.key.trigger.selected = 0
+_txt.key.trigger.output.handler = function(s)
+    clock.run(function()
+        clock.sleep(s.blinktime)
+        if type(s.p_.n) == 'table' then
+            for i,v in ipairs(s.v) do
+                s.v[i] = 0
             end
-            
-            ret = true
-        end
+        else s.v = 0 end
 
-        return ret
-    else
-        if s.v > 0 then
-            s.v = s.v - 1/30/s.blinktime
-        else
-            s.v = 0
-        end
-        
-        return s.v > 0
-    end
+        s.devs[s.devk].dirty = true
+    end)
 end
 
 _txt.key.momentary = _key.momentary:new()
