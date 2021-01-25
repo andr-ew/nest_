@@ -446,6 +446,7 @@ function nest_:new(o, ...)
                 'load',
                 'init',
                 'connect',
+                'disconnect',
                 'read',
                 'write',
                 'refresh',
