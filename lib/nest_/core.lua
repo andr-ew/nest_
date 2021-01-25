@@ -39,7 +39,7 @@ local function serialize(o, f, skip, dof, types, itab)
 
         first = true
         for k,v in pairs(o) do
-            if type(k) == 'string' and (skip and (not tab.contains(skip, k)) or true) then
+            if type(k) == 'string' and (skip == nil or (not tab.contains(skip, k))) then
                 if type(v) == 'function' then
                     if dof then
                         if first then
@@ -165,6 +165,8 @@ local function nickname(k)
     if k == 'v' then return 'value' 
     elseif k == 'lvl' then return 'level'
     elseif k == 'en' then return 'enabled'
+    elseif k == 'parent' then return 'p'
+    elseif k == 'key' then return 'k'
     else return k end
 end
 
@@ -172,6 +174,8 @@ local function index_nickname(t, k)
     if k == 'v' then return t.value
     elseif k == 'lvl' then return t.level
     elseif k == 'en' then return t.enabled
+    elseif k == 'parent' then return t._.p
+    elseif k == 'key' then return t._.k
     end
 end
 
