@@ -246,11 +246,11 @@ nest_ = {
             end
         end
     end,
-    refresh = function(self, silent)
+    update = function(self, silent)
         local ret
         for i,v in ipairs(self.children) do 
-            if v.refresh then
-                ret = v:refresh(silent) or ret
+            if v.update then
+                ret = v:update(silent) or ret
             end
         end
 
@@ -449,7 +449,7 @@ function nest_:new(o, ...)
                 'disconnect',
                 'read',
                 'write',
-                'refresh',
+                'update',
                 'set',
                 'get',
                 'is_obj',
@@ -588,7 +588,7 @@ end
 
 local function runaction(self, aargs)
     self.v = self.action and self.action(self, table.unpack(aargs)) or aargs[1] or self.v
-    self:refresh(true)
+    self:update(true)
 end
 
 local function clockaction(self, aargs)
@@ -608,7 +608,7 @@ _affordance = nest_:new {
     devk = nil,
     action = nil,
     init = function(self)
-        self:refresh()
+        self:update()
 
         nest_.init(self)
     end,
@@ -649,7 +649,7 @@ _affordance = nest_:new {
             end
         end
     end,
-    refresh = function(self, silent)
+    update = function(self, silent)
         if (not silent) and self.action then
             local defaults = self.arg_defaults or {}
             clockaction(self, { self.v, table.unpack(defaults) })
@@ -668,7 +668,7 @@ _affordance = nest_:new {
             local t = nest_.get(self, silent, nil, typ)
 
             t.value = type(self.value) == 'table' and self.value:new() or self.value -- watch out for value ~= _obj_ !
-            if silent == false then self:refresh(false) end
+            if silent == false then self:update(false) end
 
             return t
         end
@@ -683,17 +683,17 @@ _affordance = nest_:new {
             else self.value = t.value end
         end
 
-        self:refresh(silent)
+        self:update(silent)
     end
     --[[
     get = function(self, silent) 
         if not silent then
-            return self:refresh()
+            return self:update()
         else return self.v end
     end,
     set = function(self, v, silent)
         self:replace('v', v or self.v)
-        if not self.silent then return self:refresh() end
+        if not self.silent then return self:update() end
     end
     --]]
 }
@@ -825,7 +825,7 @@ _pattern = _observer:new {
         if o then
             if self.capture == 'value' then
                 o.value = type(p) == 'table' and p:new() or p
-                o:refresh(false)
+                o:update(false)
             elseif self.capture == 'action' then
                 clockaction(o, p)
             elseif o.input then
