@@ -233,15 +233,15 @@ nest_ = {
 
         return self 
     end,
-    update = function(self, devk, args, ob)
+    process = function(self, devk, args, ob)
         if self.enabled == nil or self.p_.enabled == true then
             if self.observable then 
                 for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
             end 
 
             for i,v in ipairs(self.children) do 
-                if type(v) == 'table' and v.update then
-                    v:update(devk, args, ob)
+                if type(v) == 'table' and v.process and not v.is_observer then
+                    v:process(devk, args, ob)
                 end
             end
         end
@@ -436,7 +436,7 @@ function nest_:new(o, ...)
                 'serialize',
                 'replace',
                 'find',
-                'update',
+                'process',
                 'copy',
                 'path',
                 'draw',
@@ -506,7 +506,7 @@ _input = nest_:new {
     handler = nil,
     devk = nil,
     filter = function(self, devk, args) return args end,
-    update = function(self, devk, args, ob)
+    process = function(self, devk, args, ob)
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
@@ -619,7 +619,7 @@ _affordance = nest_:new {
             end
         end
     end,
-    update = function(self, devk, args, ob)
+    process = function(self, devk, args, ob)
         if self.enabled == nil or self.p_.enabled == true then
             if self.observable then 
                 for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
@@ -629,8 +629,8 @@ _affordance = nest_:new {
                 local hargs, aargs 
                
                 for i,v in ipairs(self.children) do 
-                    if type(v) == 'table' and v.update then
-                        local h, a = v:update(devk, args, ob)
+                    if type(v) == 'table' and v.process and not v.is_observer then
+                        local h, a = v:process(devk, args, ob)
                         if a then hargs, aargs = h, a end
                     end
                 end
@@ -894,6 +894,10 @@ function _pattern:new(o)
         if k == 'new' then mtn(t, k, v)
         elseif pt[k] ~= nil then pt[k] = v
         else mtn(t, k, v) end
+    end
+    
+    o.process = function(e) 
+        o:proc(e) 
     end
 
     return o
