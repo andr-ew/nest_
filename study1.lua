@@ -4,6 +4,7 @@
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
 
+-- a nest structure named dave
 dave = nest_ {
     tommy = _affordance {
         value = 5,
@@ -39,7 +40,7 @@ dave = nest_ {
 }
 
 function init()
-    dave:init()
+    dave:init() -- initialize dave on script load, which updates all of dave's affordances
 end
 
 -- >> dave.tommy.value 
@@ -51,14 +52,18 @@ end
 -- >> dave.tommy.key
 -- tommy
 
--- >> dave.tommy.value = 10; dave.tommy:update()
+
+-- >> dave.tommy.value = 10
+-- >> dave.tommy:update()
 -- my name is tommy
 -- my value is 10
 
--- >> dave.things[2].value = 20; dave.things[2]:update()
+-- >> dave.things[2].value = 20
+-- >> dave.things[2]:update()
 -- I'm thing number 2
 -- my value is 20
 -- tommy's value is 10
+
 
 -- >> print(dave.tommy)
 -- >> print(dave)
