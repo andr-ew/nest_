@@ -454,7 +454,8 @@ function nest_:new(o, ...)
                 'get',
                 'is_obj',
                 'is_nest',
-                'is_affordance'
+                'is_affordance',
+                'devk'
             }, true)
 
             return st

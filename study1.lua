@@ -1,3 +1,6 @@
+-- nest_ study 1
+-- nested affordances
+
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
 
@@ -14,7 +17,6 @@ dave = nest_ {
         action = function(self, value)
             print("my name is " .. self.key)
             print("my value is " .. value)
-            print("tommy's value is " .. self.p.tommy.value)
         end
     },
     things = nest_ {
@@ -30,6 +32,7 @@ dave = nest_ {
             action = function(self, value)
                 print("I'm thing number " .. self.key)
                 print("my value is " .. value)
+                print("tommy's value is " .. self.parent.parent.tommy.value)
             end
         }
     }
@@ -38,3 +41,25 @@ dave = nest_ {
 function init()
     dave:init()
 end
+
+-- >> dave.tommy.value 
+-- 5
+-- >> dave.elanore.value
+-- 6
+-- >> dave.tommy.parent.elanore.value
+-- 6
+-- >> dave.tommy.key
+-- tommy
+
+-- >> dave.tommy.value = 10; dave.tommy:update()
+-- my name is tommy
+-- my value is 10
+
+-- >> dave.things[2].value = 20; dave.things[2]:update()
+-- I'm thing number 2
+-- my value is 20
+-- tommy's value is 10
+
+-- >> print(dave.tommy)
+-- >> print(dave)
+
