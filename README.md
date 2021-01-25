@@ -31,7 +31,7 @@ run `;install "https://github.com/andr-ew/nest_"` in maiden to download
 
 # Studies
 
-1. [nests of affordances](./study/study1.md)
+1. [nested affordances](./study/study1.md)
 
 2. [multiplicity & the grid module](./study/study2.md)
 
