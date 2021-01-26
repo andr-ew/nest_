@@ -350,25 +350,6 @@ demo.txt = nest_ {
     screen = screen
 }
 
----------------------------------------------TODO: nest_.redraw: animated screen drawing example
---[[ _screen {
-    redraw = function(self, v)
-        screen.drawthing(v)
-    end,
-    init_action = function(self)
-        clock.run(function()
-            while true do
-                for i = 1, 3 do
-                    self.value = 3
-                    self:refresh()
-                    clock.sleep(0.2)
-                end
-            end
-        end)
-    end
-}
-]]
-
 ---------------------------------------------arc
 
 demo.arc = nest_ {

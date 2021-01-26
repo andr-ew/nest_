@@ -18,8 +18,8 @@ grid_nest = nest_ {
             },
             pattern = _grid.pattern {
                 x = { 2, 6 }, y = 7,
-                count = 1,
-                target = function(self) return self.p.number end
+                count = 1, ----------- limit to 1 pattern playing or recording at a time
+                target = function(self) return self.parent.number end
             },
             enabled = function(self)
                 return (grid_nest.tab.value == self.key)
@@ -36,7 +36,7 @@ grid_nest = nest_ {
             },
             preset = _grid.preset {
                 x = { 2, 6 }, y = 7,
-                target = function(self) return self.p.toggle end
+                target = function(self) return self.parent.toggle end
             },
             enabled = function(self)
                 return (grid_nest.tab.value == self.key)
@@ -50,7 +50,6 @@ grid_nest = nest_ {
         persistent = false,
     }
 } :connect { g = grid.connect() }
-
 
 function init()
     grid_nest:load()

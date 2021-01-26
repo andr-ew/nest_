@@ -1,18 +1,37 @@
+-- nest_ study 5
+-- making a script
+
+include 'lib/nest_/core'
+include 'lib/nest_/norns'
+include 'lib/nest_/grid'
+include 'lib/nest_/txt'
+
 --[[
 
-musical demo script
+grid (polysub):
 
-128 grid, screen, arc
+1-8                      9-15              16
 
-molly the polly: tuned to a nice patch + a few choice macro controls on arc/grid (filter, glide, envelope shapes)
-every other parameter editable on screen w/ the power of _txt.enc.control. also put the macros on the screen
-presets!
-pattern recorded grid keyboard, pentatonic scales or maybe use the _etc.et12_ nest on screen
+1: pattern recorders     1-8 : controls    1-8: presets
+2-8: scale octaves
 
-2x softcut voices, phase polls drawn to grid & arc (use wardn) mlr-jumps & subloops
-pitch glide controls on grid (+ bends on arc ? or maybe loop boundaries for one of the voices)
-maybe share the buffer region, so it's just a crazy delay
+screen (halfsecond):
 
-demo deep saving functionality: ship nest_ w/ a load state for twigs w/ presets & a pattern playing
+e1: delay
+e2: rate
+e3: feedback
+k1: reverse
 
 --]]
+
+polysub = include 'we/lib/polysub'
+halfsecond = include 'awake/lib/halfsecond'
+
+engine.name = 'PolySub'
+
+function init()
+    halfsecond.init()
+    polysub:params()
+    
+    
+end
