@@ -914,6 +914,8 @@ _grid.number.input.muxhandler = _obj_:new {
                         s.vlast = s.v
                         return i, len > 1 and util.time() - s.tdown or 0, i - s.vlast, i
                     end
+                elseif edge == 2 then
+                    return i, 0, i - s.vlast, i
                 end
             end
         else
@@ -937,15 +939,16 @@ _grid.number.input.muxhandler = _obj_:new {
                     end
                 end
             elseif s.edge == 2 then
-                if i ~= s.v or (not s.filtersame) then 
-                    return i, len > 1 and util.time() - s.tdown or 0, i - s.vlast, nil, i
-                end
+                --if i ~= s.v or (not s.filtersame) then 
+                    s:replace('hlist', {})
+                    if i ~= s.v then return i, len > 1 and util.time() - s.tdown or 0, i - s.vlast, nil, i end
+                --end
             end
         end
     end,
     plane = function(s, x, y, z) 
         --local i = { x = x - s.p_.x[1] + 1, y = y - s.p_.y[1] + 1 }
-        local i = { x = x, y = y }
+        local i = _obj_ { x = x, y = y }
 
         local min, max = fingers(s)
 
@@ -954,8 +957,8 @@ _grid.number.input.muxhandler = _obj_:new {
             table.insert(s.hlist, i)
            
             if s.edge > 0 then 
+                local len = #s.hlist
                 if (not (i.x == s.v.x and i.y == s.v.y)) or (not s.filtersame) then 
-                    local len = #s.hlist
                     --s.hlist = {}
                     s:replace('hlist', {})
                     s.vlast.x = s.v.x
@@ -964,14 +967,18 @@ _grid.number.input.muxhandler = _obj_:new {
                     s.v.y = i.y
 
                     if max == nil or len <= max then
-                        return s.v, len > 1 and util.time() - s.tdown or 0, { s.v.x - s.vlast.x, s.v.y - s.vlast.y }, i
+                        return s.v, len > 1 and util.time() - s.tdown or 0, _obj_ { s.v.x - s.vlast.x, s.v.y - s.vlast.y }, i
+                    end
+                elseif s.edge == 2 then
+                    if max == nil or len <= max then
+                        return s.v, 0, _obj_ { s.v.x - s.vlast.x, s.v.y - s.vlast.y }, i
                     end
                 end
             end
         else
             if s.edge == 0 then
                 if #s.hlist >= min then
-                    i = s.hlist[#s.hlist]
+                    --i = s.hlist[#s.hlist] or i
                     local len = #s.hlist
                     --s.hlist = {}
                     s:replace('hlist', {})
@@ -982,7 +989,7 @@ _grid.number.input.muxhandler = _obj_:new {
                             s.vlast.y = s.v.y
                             s.v.x = i.x
                             s.v.y = i.y
-                            return i, util.time() - s.tdown, { s.v.x - s.vlast.x, s.v.y - s.vlast.y }
+                            return i, util.time() - s.tdown, _obj_ { s.v.x - s.vlast.x, s.v.y - s.vlast.y }
                         end
                     end
                 else
@@ -993,7 +1000,10 @@ _grid.number.input.muxhandler = _obj_:new {
                     end
                 end
             elseif s.edge == 2 then
-                return s.v, len > 1 and util.time() - s.tdown or 0, { s.v.x - s.vlast.x, s.v.y - s.vlast.y }, nil, i
+                s:replace('hlist', {})
+                if (i.x == s.v.x and i.y == s.v.y) then
+                    return s.v, util.time() - s.tdown, _obj_ { s.v.x - s.vlast.x, s.v.y - s.vlast.y }, nil, i
+                end
             end
         end
     end

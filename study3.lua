@@ -9,25 +9,9 @@ include 'lib/nest_/arc'
 
 -------------------------------------------------utility functions
 
-function r()
-    norns.script.load(norns.state.script)
-end
-
-function stringrow(i) 
-    o = ""
-    for _,v in ipairs(i) do o = o .. v .. " " end
-    return o
-end
-
-function print_matrix_1d(v) print(stringrow(v)) end
-
-function print_matrix_2d(v) 
-    for _,row in ipairs(v) do print_matrix_1d(row) end
-end
-
-local function gpage(self) return demo.g.tab.value == self.k end
-local function tpage(self) return demo.t.tab.options[demo.t.tab.value // 1] == self.k end
-local function apage(self) return demo.a.tab.value // 1 == self.k end
+local function gpage(self) return demo.grid.tab.value == self.k end
+local function tpage(self) return demo.txt.tab.options[demo.txt.tab.value // 1] == self.k end
+local function apage(self) return demo.arc.tab.value // 1 == self.k end
 
 local grid_trigger_level = { 
     4,
@@ -38,12 +22,23 @@ local grid_trigger_level = {
     end
 }
 
+local function gridaction(self, value, time, delta, add, rem, list)
+    print(self.key)
+    print('args:')
+    print('1. self')
+    print('2. value: ' .. tostring(value))
+    print('3. time: ' .. tostring(time))
+    print('4. delta: ' .. tostring(delta))
+    print('5. add: ' .. tostring(add))
+    print('6. remove: ' .. tostring(rem))
+    print('7. list: ' .. tostring(list))
+end
+
 demo = nest_()
 
 -------------------------------------------------grid
 
--- print more action args
-demo.g = nest_ {
+demo.grid = nest_ {
     page = nest_ {
         -----------------------------------------fill
         nest_ { 
@@ -70,26 +65,19 @@ demo.g = nest_ {
                 x = 1,
                 y = 3,
                 lvl = { 4, 15 },
-                action = function(self, value) 
-                    print(self.k, value) 
-                end
+                action = gridaction
             }, 
             number_1d = _grid.number {
                 x = { 1, 7 },
                 y = 5,
                 lvl = { 4, 15 },
-                action = function(self, value) 
-                    print(self.k, value) 
-                end
+                action =  gridaction
             }, 
             number_2d = _grid.number {
                 x = { 9, 15 },
                 y = { 2, 8 },
                 lvl = { 4, 15 },
-                action = function(self, value) 
-                    print(self.k) 
-                    tab.print(value)
-                end
+                action = gridaction
             },
             enabled = gpage
         },
@@ -98,26 +86,19 @@ demo.g = nest_ {
             control_0d = _grid.control {
                 x = 1,
                 y = 3,
-                action = function(self, value) 
-                    print(self.k, value) 
-                end
+                action = gridaction
             }, 
             control_1d = _grid.control {
                 x = { 1, 7 },
                 y = 5,
                 range = { 0, 1 },
-                action = function(self, value) 
-                    print(self.k, value) 
-                end
+                action = gridaction
             }, 
             control_2d = _grid.control {
                 x = { 9, 15 },
                 y = { 2, 8 },
                 range = { 0, 1 },
-                action = function(self, value) 
-                    print(self.k) 
-                    tab.print(value)
-                end
+                action = gridaction
             },
             enabled = gpage
         },
@@ -127,27 +108,19 @@ demo.g = nest_ {
                 x = 1,
                 y = 3,
                 lvl = grid_trigger_level,
-                action = function(self, value) 
-                    print(self.k, "1") 
-                end
+                action = gridaction
             }, 
             trigger_1d = _grid.trigger {
                 x = { 1, 7 },
                 y = 5,
                 lvl = grid_trigger_level,
-                action = function(self, value) 
-                    print(self.k)
-                    print_matrix_1d(value)
-                end
+                action = gridaction
             }, 
             trigger_2d = _grid.trigger {
                 x = { 9, 15 },
                 y = { 2, 8 },
                 lvl = grid_trigger_level,
-                action = function(self, value) 
-                    print(self.k) 
-                    print_matrix_2d(value)
-                end
+                action = gridaction
             },
             enabled = gpage
         },
@@ -157,27 +130,19 @@ demo.g = nest_ {
                 x = 1,
                 y = 3,
                 lvl = { 4, 15 },
-                action = function(self, value) 
-                    print(self.k, v) 
-                end
+                action = gridaction
             }, 
             toggle_1d = _grid.toggle {
                 x = { 1, 7 },
                 y = 5,
                 lvl = { 4, 15 },
-                action = function(self, value) 
-                    print(self.k)
-                    print_matrix_1d(value)
-                end
+                action = gridaction
             }, 
             toggle_2d = _grid.toggle {
                 x = { 9, 15 },
                 y = { 2, 8 },
                 lvl = { 4, 15 },
-                action = function(self, value) 
-                    print(self.k) 
-                    print_matrix_2d(value)
-                end
+                action = gridaction
             },
             enabled = gpage
         },
@@ -187,27 +152,19 @@ demo.g = nest_ {
                 x = 1,
                 y = 3,
                 lvl = { 4, 15 },
-                action = function(self, value) 
-                    print(self.k, v) 
-                end
+                action = gridaction
             }, 
             momentary_1d = _grid.momentary {
                 x = { 1, 7 },
                 y = 5,
                 lvl = { 4, 15 },
-                action = function(self, value) 
-                    print(self.k)
-                    print_matrix_1d(value)
-                end
+                action = gridaction
             }, 
             momentary_2d = _grid.momentary {
                 x = { 9, 15 },
                 y = { 2, 8 },
                 lvl = { 4, 15 },
-                action = function(self, value) 
-                    print(self.k) 
-                    print_matrix_2d(value)
-                end
+                action = gridaction
             },
             enabled = gpage
         },
@@ -216,26 +173,17 @@ demo.g = nest_ {
             range_0d = _grid.range {
                 x = 1,
                 y = 3,
-                action = function(self, value) 
-                    print(self.k, value)
-                end
+                action = gridaction
             }, 
             range_1d = _grid.range {
                 x = { 1, 7 },
                 y = 5,
-                action = function(self, value) 
-                    print(self.k)
-                    tab.print(value)
-                end
+                action = gridaction
             }, 
             range_2d = _grid.range {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                action = function(self, value) 
-                    print(self.k) 
-                    tab.print(value[1])
-                    tab.print(value[2])
-                end
+                action = gridaction
             },
             enabled = gpage
         },
@@ -245,9 +193,7 @@ demo.g = nest_ {
                 x = { 2, 6 },
                 y = { 3, 5 },
                 lvl = { 4, 15 },
-                action = function(self, value)
-                    print(self.k, value.x, value.y)
-                end
+                action = gridaction
             },
             pattern = _grid.pattern {
                 x = { 2, 6 }, y = 6,
@@ -258,10 +204,7 @@ demo.g = nest_ {
                 x = { 9, 13 },
                 y = { 3, 5 },
                 lvl = { 4, 15 },
-                action = function(self, value)
-                    print(self.k)
-                    print_matrix_2d(value)
-                end
+                action = gridaction
             },
             preset = _grid.preset {
                 x = { 9, 13 }, y = 6,
@@ -298,9 +241,7 @@ demo.g = nest_ {
                         end
                     end
                 },
-                action = function(self, value) 
-                    print(self.k, value)
-                end
+                action = gridaction
             },
             fancy_trigger = _grid.trigger {
                 x = 3,
@@ -318,39 +259,28 @@ demo.g = nest_ {
                         end
                     end
                 },
-                action = function(self)
-                    print(self.k)
-                end
+                action = gridaction
             },
             two_trigger = _grid.trigger {
                 x = { 1, 4 },
                 y = 5,
                 lvl = grid_trigger_level,
                 fingers = { 2, 2 },
-                action = function(self, value) 
-                    print(self.k)
-                    print_matrix_1d(value)
-                end
+                action = gridaction
             },
             combo_trigger = _grid.trigger {
                 x = { 6, 9 },
                 y = 5,
                 lvl = grid_trigger_level,
                 edge = 0,
-                action = function(self, value) 
-                    print(self.k)
-                    print_matrix_1d(value)
-                end
+                action = gridaction
             },
             limit_toggle = _grid.toggle {
                 x = { 1, 7 },
                 y = 7,
                 lvl = { 4, 15 },
                 count = 2,
-                action = function(self, value)
-                    print(self.k)
-                    print_matrix_1d(value)
-                end
+                action = gridaction
             },
             enabled = gpage
         }
@@ -366,14 +296,14 @@ demo.g = nest_ {
 
 -------------------------------------------------txt/screen
 
-demo.t = nest_ {
+demo.txt = nest_ {
     page = nest_ {
         -------------------------------------numerical
         numerical = nest_ {
             trigger = _txt.key.trigger {
                 x = 2, y = 18,
                 n = 1,
-                action = function(self, value) print(self.k, 'bang') end
+                action = function(self, value) print(self.k, value) end,
             },
             number = _txt.enc.number {
                 x = 2, y = 38,
@@ -538,7 +468,7 @@ demo.t = nest_ {
 
 ---------------------------------------------arc
 
-demo.a = nest_ {
+demo.arc = nest_ {
     page = nest_ {
         -------------------------------------fill & delta
         nest_ {

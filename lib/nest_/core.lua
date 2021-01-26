@@ -226,7 +226,7 @@ nest_ = {
     end,
     --init_action = function(self) self:init() end,
     each = function(self, f) 
-        for k,v in pairs(self) do 
+        for k,v in pairs(self.children) do 
             local r = f(k, v)
             if r then self:replace(k, r) end
         end
@@ -390,7 +390,7 @@ function nest_:new(o, ...)
                 o[i] = nest_:new()
             end
         else
-            for _,k in arg do o[k] = nest_:new() end
+            for _,k in ipairs(arg) do o[k] = nest_:new() end
         end
     end
 
