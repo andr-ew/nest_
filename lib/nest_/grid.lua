@@ -1037,7 +1037,33 @@ _grid.number.output.muxredraw = _obj_:new {
     end
 }
 
-_grid.control = _grid.number:new { range = { 0, 1 }, lvl = { 0, 4, 15 } } ----> grid.control
+_grid.control = _grid.number:new { 
+    range = { 0, 1 }, 
+    lvl = { 0, 4, 15 },
+    step = 0, --0.01,
+    v = 0,
+    units = '',
+    quantum = 0.01,
+    warp = 'lin',
+    wrap = false,
+    controlspec = nil
+}
+
+_grid.control.new = function(self, o)
+    local cs = o.controlspec
+
+    o = _grid.affordance.new(self, o)
+
+    local _, axis = input_contained(o, { -1, -1 })
+   
+    if axis.x and axis.y then o.v = type(o.v) == 'table' and o.v or { x = 0, y = 0 } end
+    if axis.x and axis.y then o.vlast = type(o.vlast) == 'table' and o.vlast or { x = 0, y = 0 } end
+    local default = type(o.v) == 'table' and o.v[1] or o.v
+
+    o.controlspec = cs or controlspec.new(o.p_.range[1], o.p_.range[2], o.p_.warp, o.p_.step, default, o.p_.units, o.p_.quantum, o.p_.wrap)
+
+    return o
+end
 
 _grid.control.input.muxhandler = _obj_:new {
     point = function(s, x, y, z) 
@@ -1046,18 +1072,31 @@ _grid.control.input.muxhandler = _obj_:new {
     line = function(s, x, y, z) 
         local v,t,d = _grid.number.input.muxhandler.line(s, x, y, z)
         if v then
-            local r1 = type(s.x) == 'table' and s.x or s.y
-            local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
-            return util.linlin(0, r1[2] - r1[1], r2[1], r2[2], v - 1), t, d
+            local r = type(s.x) == 'table' and s.x or s.y
+            local vv = (v - 1) / (r[2] - r[1])
+
+            local c = s.p_.controlspec:map(vv)
+            if s.v ~= c then
+                return c, t, d
+            end
         end
     end,
     plane = function(s, x, y, z) 
         local v,t,d = _grid.number.input.muxhandler.plane(s, x, y, z)
         if v then
-            local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
-            s.v.x = util.linlin(0, s.x[2] - s.x[1], r2[1], r2[2], v.x - 1)
-            s.v.y = util.linlin(0, s.y[2] - s.y[1], r2[1], r2[2], v.y - 1)
-            return s.v, t, d
+            local ret = false
+            for _,k in ipairs { 'x', 'y' } do
+                local r = s[k]
+                local vv = (v[k] - 1) / (r[2] - r[1])
+
+                local c = s.p_.controlspec:map(vv)
+                if s.v[k] ~= c then
+                    ret = true
+                    s.v[k] = c
+                end
+            end
+
+            if ret then return s.v, t, d end
         end
     end
 }
@@ -1070,9 +1109,8 @@ _grid.control.output.muxredraw = _obj_:new {
     line_x = function(s, g, v)
         for i = s.p_.x[1], s.p_.x[2] do
             local l = lvl(s, 0)
-            local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
-            local m = util.linlin(s.p_.x[1], s.p_.x[2], r2[1], r2[2], i)
-            --print("m", i - s.p_.x[1], m)
+            local vv = (i - s.p_.x[1]) / (s.p_.x[2] - s.p_.x[1])
+            local m = s.p_.controlspec:map(vv)
             if m == v then l = lvl(s, 2)
             elseif m > v and m <= 0 then l = lvl(s, 1)
             elseif m < v and m >= 0 then l = lvl(s, 1) end
@@ -1082,8 +1120,8 @@ _grid.control.output.muxredraw = _obj_:new {
     line_y = function(s, g, v)
         for i = s.p_.y[1], s.p_.y[2] do
             local l = lvl(s, 0)
-            local r2 = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
-            local m = util.linlin(s.p_.y[1], s.p_.y[2], r2[1], r2[2], i)
+            local vv = (i - s.p_.y[1]) / (s.p_.y[2] - s.p_.y[1])
+            local m = s.p_.controlspec:map(vv)
             --print("m", i - s.p_.x[1], m)
             if m == v then l = lvl(s, 2)
             elseif m > v and m <= 0 then l = lvl(s, 1)
@@ -1092,13 +1130,13 @@ _grid.control.output.muxredraw = _obj_:new {
         end
     end,
     plane = function(s, g, v)
+        local cs = s.p_.controlspec
         for i = s.p_.x[1], s.p_.x[2] do
             for j = s.p_.y[1], s.p_.y[2] do
                 local l = lvl(s, 0)
-                local r = type(s.p_.range) == 'table' and s.p_.range or { 0, s.p_.range }
                 local m = {
-                    x = util.linlin(s.p_.x[1], s.p_.x[2], r[1], r[2], i),
-                    y = util.linlin(s.p_.y[1], s.p_.y[2], r[1], r[2], s.p_.y[2] - j + 2)
+                    x = cs:map((i - s.p_.x[1]) / (s.p_.x[2] - s.p_.x[1])),
+                    y = cs:map(((s.p_.y[2] - j + 2) - s.p_.y[1]) / (s.p_.y[2] - s.p_.y[1])),
                 }
                 if m.x == v.x and m.y == v.y then l = lvl(s, 2)
                 --[[
@@ -1111,7 +1149,7 @@ _grid.control.output.muxredraw = _obj_:new {
                 elseif m.x <= v.x and m.y >= v.y and m.x >= 0 and m.y <= 0 then l = lvl(s, 1)
 
                 ]]
-                elseif m.x == r[1] or m.y == r[1] or m.x == r[2] or m.y == r[2] then l = lvl(s, 1)
+                elseif m.x == cs.minval or m.y == cs.minval or m.x == cs.maxval or m.y == cs.maxval then l = lvl(s, 1)
                 elseif m.x == 0 or m.y == 0 then l = lvl(s, 1)
                 end
                 if l > 0 then g:led(i, j, l) end

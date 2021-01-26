@@ -97,7 +97,7 @@ demo.grid = nest_ {
             control_2d = _grid.control {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                range = { 0, 1 },
+                range = { -1, 1 },
                 action = gridaction
             },
             enabled = gpage
