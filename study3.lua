@@ -1,5 +1,5 @@
---paginated demos of 
---affordances included in nest_ 
+-- nest_ study 3
+-- affordance demo
 
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
@@ -187,106 +187,9 @@ demo.grid = nest_ {
             },
             enabled = gpage
         },
-        -----------------------------------------pattern & preset
-        nest_ {
-            number = _grid.number {
-                x = { 2, 6 },
-                y = { 3, 5 },
-                lvl = { 4, 15 },
-                action = gridaction
-            },
-            pattern = _grid.pattern {
-                x = { 2, 6 }, y = 6,
-                count = 1,
-                target = function(self) return self.p.number end
-            },
-            toggle = _grid.toggle {
-                x = { 9, 13 },
-                y = { 3, 5 },
-                lvl = { 4, 15 },
-                action = gridaction
-            },
-            preset = _grid.preset {
-                x = { 9, 13 }, y = 6,
-                target = function(self) return self.p.toggle end
-            },
-            enabled = gpage
-        },
-        -----------------------------------------advanced properties
-        nest_ {
-            modal_toggle = _grid.toggle {
-                x = 1, 
-                y = 3,
-                lvl = { 
-                    4, 
-                    15,
-                    function(self, draw)
-                        while true do
-                            draw(15)
-                            clock.sleep(0.2)
-                            draw(4)
-                            clock.sleep(0.2)
-                        end
-                    end,
-                    function(self, draw)
-                        while true do
-                            draw(15)
-                            clock.sleep(0.1)
-                            draw(0)
-                            clock.sleep(0.1)
-                            draw(15)
-                            clock.sleep(0.1)
-                            draw(0)
-                            clock.sleep(0.6)
-                        end
-                    end
-                },
-                action = gridaction
-            },
-            fancy_trigger = _grid.trigger {
-                x = 3,
-                y = 3,
-                lvl = {
-                    1,
-                    function(self, draw)
-                        for i = 1, 15 do
-                            draw(i)
-                            clock.sleep(0.03)
-                        end
-                        for i = 15, 1, -1 do
-                            draw(i)
-                            clock.sleep(0.03)
-                        end
-                    end
-                },
-                action = gridaction
-            },
-            two_trigger = _grid.trigger {
-                x = { 1, 4 },
-                y = 5,
-                lvl = grid_trigger_level,
-                fingers = { 2, 2 },
-                action = gridaction
-            },
-            combo_trigger = _grid.trigger {
-                x = { 6, 9 },
-                y = 5,
-                lvl = grid_trigger_level,
-                edge = 0,
-                action = gridaction
-            },
-            limit_toggle = _grid.toggle {
-                x = { 1, 7 },
-                y = 7,
-                lvl = { 4, 15 },
-                count = 2,
-                action = gridaction
-            },
-            enabled = gpage
-        }
     },
     tab = _grid.number {
-        x = { 1, 9 },
+        x = { 1, 7 },
         y = 1,
         lvl = { 4, 15 }
     }
@@ -585,11 +488,4 @@ demo.arc = nest_ {
     }
 } :connect({ a = arc.connect() }, 120) -- refresh @ 120 fps instead of the default 30
 
-function init()
-    demo:load()
-    demo:init()
-end
-
-function cleanup()
-    demo:save()
-end
+function init() demo:init() end
