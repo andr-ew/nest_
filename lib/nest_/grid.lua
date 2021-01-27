@@ -343,7 +343,7 @@ _grid.binary.output.muxredraw = _obj_:new {
     end
 }
 
-_grid.momentary = _grid.binary:new { edge = 2 }
+_grid.momentary = _grid.binary:new { edge = 2, persistent = false }
 
 local function count(s) 
     local min = 0
@@ -634,6 +634,7 @@ _grid.toggle.input.muxhandler = _obj_:new {
 }
 
 _grid.trigger = _grid.binary:new { 
+    persistent = false,
     edge = 1, 
     lvl = {
         0,
@@ -831,7 +832,7 @@ _grid.trigger.output.muxhandler = _obj_:new {
 
 _grid.binary.output.muxhandler.line_y = _grid.binary.output.muxhandler.line_x
 
-_grid.fill = _grid.muxaffordance:new()
+_grid.fill = _grid.muxaffordance:new { persistent = false }
 _grid.fill.input = nil
 
 _grid.fill.new = function(self, o) 

@@ -221,7 +221,7 @@ nest_ = {
     init = function(self)
         for i,v in ipairs(self._.children) do if type(v) == 'table' then 
             if v.init_action then v:init_action() end
-            if v.init then v:init() end 
+            if (s.p_.persistent == nil or s.p_.persistent) and v.init then v:init() end 
         end end
     end,
     --init_action = function(self) self:init() end,
@@ -609,7 +609,7 @@ _affordance = nest_:new {
     devk = nil,
     action = nil,
     init = function(self)
-        self:update()
+        if s.p_.persistent == nil or s.p_.persistent then self:update() end
 
         nest_.init(self)
     end,
