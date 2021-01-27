@@ -47,7 +47,7 @@ synth = nest_ {
                     
                     local key = added or removed -- the key that was pressed or released
                     
-                    local id = key.y * #value.y + key.x -- a unique integer for this grid key
+                    local id = key.y * 7 + key.x -- a unique integer for this grid key
                     
                     local octave = key.y - 4
                     local note = scale[key.x]
@@ -73,41 +73,46 @@ synth = nest_ {
                 x = 9, y = { 2, 8 },
                 action = function(self, value) engine.shape(value) end
             },
-            noise = _grid.control {
+            timbre = _grid.control {
                 x = 10, y = { 2, 8 },
+                v = 0.5,
+                action = function(self, value) engine.timbre(value) end
+            },
+            noise = _grid.control {
+                x = 11, y = { 2, 8 },
                 action = function(self, value) engine.noise(value) end
             },
             hzlag = _grid.control {
-                x = 11, y = { 2, 8 },
+                x = 12, y = { 2, 8 },
                 action = function(self, value) engine.hzLag(value) end
             },
             cut = _grid.control {
-                x = 12, y = { 2, 8 },
+                x = 13, y = { 2, 8 },
                 range = { 0, 32 },
-                value = 8,
+                value = 16,
                 action = function(self, value) engine.cut(value) end
             },
             attack = _grid.control {
-                x = 13, y = { 2, 8 },
-                controlspec = cs.new(0.01, 10, "lin", 0, 0.05, ""),
-                value = 0.05,
+                x = 14, y = { 2, 8 },
+                range = { 0.01, 10 },
+                value = 0.01,
                 action = function(self, value)
                     engine.cutAtk(value)
                     engine.ampAtk(value)
                 end
             },
             sustain = _grid.control {
-                x = 14, y = { 2, 8 },
-                value = 0.9,
+                x = 15, y = { 2, 8 },
+                value = 1,
                 action = function(self, value)
                     engine.cutSus(value)
                     engine.ampSus(value)
                 end
             },
             release = _grid.control {
-                x = 15, y = { 2, 8 },
+                x = 16, y = { 2, 8 },
                 range = { 0.01, 10 },
-                value = 1,
+                value = 0.01,
                 action = function(self, value)
                     engine.cutDec(value)
                     engine.ampDec(value)
@@ -164,10 +169,10 @@ function init()
     delay.init()
     polysub.params()
     
-    synth:load()
+    --synth:load()
     synth:init()
 end
 
 function cleanup()
-    synth:save()
+    --synth:save()
 end
