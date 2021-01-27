@@ -214,8 +214,7 @@ demo.txt = nest_ {
                 range = { 1, 8 },
                 wrap = true,
                 align = { 'left', 'bottom' },
-                action = function(self, value) print(self.k, value) end,
-                label ="foo"
+                action = function(self, value) print(self.k, value) end
             },
             control = _txt.enc.control {
                 x = 64, y = 38,

@@ -1,5 +1,5 @@
 -- nest_ study 4
--- state & observaion
+-- state & meta-affordances
 
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
