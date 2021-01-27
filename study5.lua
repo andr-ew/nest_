@@ -64,7 +64,13 @@ synth = nest_ {
         },
         pattern = _grid.pattern { -- pattern recorder for the keyboard + preset selector
             y = 1, x = { 1, 8 },
-            target = function(self) return synth.grid.pattern_group end
+            target = function(self) return synth.grid.pattern_group end,
+            
+            -- clear out held notes when a pattern stops
+            stop = function()
+                synth.grid.pattern_group.keyboard:clear()
+                engine.stopAll()
+            end
         },
     
         -- synth controls
@@ -126,13 +132,13 @@ synth = nest_ {
     -- delay controls
     screen = nest_ {
         delay = _txt.enc.control {
-            x = 2, y = 18,
+            x = 2, y = 8,
             value = 0.5,
             n = 1,
             action = function(self, value) softcut.level(1, value) end
         },
         rate = _txt.enc.control {
-            x = 2, y = 38,
+            x = 2, y = 30,
             range = { 0.5, 2 },
             value = 0.5,
             n = 2,
@@ -142,7 +148,7 @@ synth = nest_ {
             end
         },
         feedback = _txt.enc.control {
-            x = 64, y = 38,
+            x = 64, y = 30,
             n = 3,
             value = 0.75,
             action = function(self, value) softcut.rate(1, value) end
@@ -169,10 +175,10 @@ function init()
     delay.init()
     polysub.params()
     
-    --synth:load()
+    synth:load()
     synth:init()
 end
 
 function cleanup()
-    --synth:save()
+    synth:save()
 end
