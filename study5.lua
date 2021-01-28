@@ -49,7 +49,7 @@ synth = nest_ {
                     
                     local id = key.y * 7 + key.x -- a unique integer for this grid key
                     
-                    local octave = key.y - 4
+                    local octave = key.y - 5
                     local note = scale[key.x]
                     local hz = root * 2^octave * 2^(note/12)
                     
@@ -90,12 +90,13 @@ synth = nest_ {
             },
             hzlag = _grid.control {
                 x = 12, y = { 2, 8 },
+                range = { 0, 10 },
                 action = function(self, value) engine.hzLag(value) end
             },
             cut = _grid.control {
                 x = 13, y = { 2, 8 },
-                range = { 0, 32 },
-                value = 16,
+                range = { 1.5, 8 },
+                value = 8,
                 action = function(self, value) engine.cut(value) end
             },
             attack = _grid.control {
@@ -140,23 +141,30 @@ synth = nest_ {
         rate = _txt.enc.control {
             x = 2, y = 30,
             range = { 0.5, 2 },
+            warp = 'exp',
             value = 0.5,
             n = 2,
             action = function(self, value) 
-                local dir = (self.parent.reverse.value > 0) and -1 or 1
+                local dir = (self.parent.reverse.value == 1) and -1 or 1
                 softcut.rate(1, value * dir) 
+                print("rate", value * dir)
             end
         },
         feedback = _txt.enc.control {
             x = 64, y = 30,
             n = 3,
             value = 0.75,
-            action = function(self, value) softcut.rate(1, value) end
+            action = function(self, value) softcut.pre_level(1, value) end
         },
         reverse = _txt.key.toggle {
             x = 2, y = 50,
             n = 2,
-            action = function(self) self.parent.rate:update() end
+            action = function(self, value) 
+                local dir = (value == 1) and -1 or 1
+                local rate = self.parent.rate.value
+                softcut.rate(1, rate * dir)
+                print("rate", rate * dir)
+            end
         }
     }
 }
