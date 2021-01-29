@@ -197,7 +197,7 @@ demo.grid = nest_ {
     g = grid.connect()
 }
 
--------------------------------------------------txt/screen
+-------------------------------------------------txt (keys, encoders, screen)
 
 demo.txt = nest_ {
     page = nest_ {
