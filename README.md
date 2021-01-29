@@ -44,7 +44,7 @@ feel free to play around with studies 3 & 5 on your grid before digging in to th
 
 5. making a script
 
-get the study scripts by installing nest_ in the maiden project manager.
+get the study scripts by installing `nest_` in the maiden project manager.
 
 # Docs
 
@@ -62,7 +62,7 @@ the various types and interface buidling blocks of nestworld are split up into a
 
 ## Including
 
-typically, it will make the most sense to include nest_ by copying the required module files into your script's `/lib/nest_` folder, including them like so:
+typically, it will make the most sense to include nest by copying the required module files into your script's `/lib/nest_` folder, including them like so:
 
 ```
 include 'lib/nest_/core'
@@ -71,4 +71,4 @@ include 'lib/nest_/grid'
 include 'lib/nest_/txt'
 ```
 
-alternatively, you can incude modules externally (`nest_` will be a dependency): `include 'nest_/lib/nest_/core'`
+alternatively, you can incude modules externally (other users will need to install nest first): `include 'nest_/lib/nest_/core'`
