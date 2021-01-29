@@ -30,7 +30,7 @@ while a norns by itself is technically the only requirement for nest (see the tx
 
 start here! the studies assume only basic knowledge of lua and the norns system (see [norns studies](https://monome.org/docs/norns/scripting/) if you want to get your bearings first). in 5 steps, we’ll work towards building a playable, earthsea-like synth for the grid. here it is in action:
 
-https://www.youtube.com/watch?v=MagBGbhtZTY
+[https://www.youtube.com/watch?v=MagBGbhtZTY](https://www.youtube.com/watch?v=MagBGbhtZTY)
 
 feel free to play around with studies 3 & 5 on your grid before digging in to the rest! (if you’re using norns gridless, see the note above on compatibility).
 
