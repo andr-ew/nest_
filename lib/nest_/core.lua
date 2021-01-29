@@ -309,9 +309,9 @@ nest_ = {
             return t
         end
     end,
-    insert = function(self, o)
+    merge = function(self, o)
         for k,v in pairs(o) do
-            if self[k] and type(self[k]) == 'table' and self[k].insert then self[k]:insert(v)
+            if self[k] and type(self[k]) == 'table' and self[k].merge then self[k]:merge(v)
             else self[k] = v end
         end
     end,
@@ -441,7 +441,7 @@ function nest_:new(o, ...)
                 'path',
                 'draw',
                 'each',
-                'insert',
+                'merge',
                 'save',
                 'load',
                 'init',
