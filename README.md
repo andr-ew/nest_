@@ -20,7 +20,7 @@ nest_ {
 }
 ```
 
-# compatibility
+# Compatibility
 
 nest is a tool for the [monome norns](https://monome.org/) ecosystem
 
