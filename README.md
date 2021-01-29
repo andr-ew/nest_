@@ -31,17 +31,15 @@ run `;install "https://github.com/andr-ew/nest_"` in maiden to download
 
 # Studies
 
-1. [nests of affordances](./study/study1.md)
+1. [nested affordances](./study/study1.md)
 
-2. [multiplicity & the grid module](./study/study2.md)
+2. [the grid & multiples](./study/study2.md)
 
-3. all the affordances
+3. affordance demo
 
-4. interdependent interaction
+4. state & meta-affordances
 
-6. making a script
-
-5. customization
+5. making a script
 
 # Docs
 
