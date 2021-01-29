@@ -24,11 +24,11 @@ nest_ {
 
 nest is a tool for the [monome norns](https://monome.org/) ecosystem
 
-while a norns by itself is technically the only requirement for nest (see the txt module), it tends to prove more useful when building interfaces with lots of input (grid, grid + norns, or grid + arc + norns). norns after all, just has three keys and two encoders, so many musical ideas can be expressed cleanly without this sort of system (see the examples in norns studies, if you haven’t already). if you want to get a better idea of the sort of interface the txt module can be used for by itself, feel free to skip ahead to study 3.
+while a norns by itself is technically the only requirement for nest (see the txt module), it tends to prove more useful when building interfaces with lots of input (grid, grid + norns, or grid + arc + norns). norns after all, just has three keys and two encoders, so many musical ideas can be expressed cleanly without this sort of system (see the examples in [norns studies](https://monome.org/docs/norns/scripting/), if you haven’t already). if you want to get a better idea of the sort of interface the txt module can be used for by itself, feel free to skip ahead to study 3.
 
 # Studies
 
-start here! the studies assume only basic knowledge of lua and the norns system (see norns studies if you want to get your bearings first). in 5 steps, we’ll work towards building a playable, earthsea-like synth for the grid. here it is in action:
+start here! the studies assume only basic knowledge of lua and the norns system (see [norns studies](https://monome.org/docs/norns/scripting/) if you want to get your bearings first). in 5 steps, we’ll work towards building a playable, earthsea-like synth for the grid. here it is in action:
 
 https://www.youtube.com/watch?v=MagBGbhtZTY
 
