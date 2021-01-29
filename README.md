@@ -24,7 +24,7 @@ nest_ {
 
 nest is a tool for the [monome norns](https://monome.org/) ecosystem
 
-while a norns by itself is technically the only requirement for nest (see the txt module), it tends to prove more useful when building interfaces with lots of input (grid, grid + norns, or grid + arc + norns). norns after all, just has three keys and two encoders, so many musical ideas can be expressed cleanly without this sort of system (see the examples in [norns studies](https://monome.org/docs/norns/scripting/), if you haven’t already). if you want to get a better idea of the sort of interface the txt module can be used for by itself, feel free to skip ahead to study 3.
+while a norns by itself is technically the only requirement for nest (see the txt module), it tends to prove more useful when building interfaces with lots of input (grid, grid + norns, or grid + arc + norns). norns after all, just has three keys and two encoders, so many musical ideas can be expressed cleanly without this sort of system, and you get some more flexibility as a bonus (see the examples in [norns studies](https://monome.org/docs/norns/scripting/), if you haven’t already). if you want to get a feel for the sort of textual norns interfaces the txt module can be used for, feel free to skip ahead to study 3.
 
 # Studies
 
