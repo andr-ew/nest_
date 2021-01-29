@@ -20,7 +20,7 @@ nest_ {
 }
 ```
 
-## compatibility
+# compatibility
 
 while a norns by itself is technically the only requirement for nest (see the txt module), it tends to prove more useful when building interfaces with lots of input (grid, grid + norns, or grid + arc + norns). norns after all, just has three keys and two encoders, so many musical ideas can be expressed cleanly without this sort of system (see the examples in norns studies, if you haven’t already). if you want to get a better idea of the sort of interface the txt module can be used for by itself, feel free to skip ahead to study 3.
 
