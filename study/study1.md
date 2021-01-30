@@ -50,7 +50,7 @@ dave = nest_ {
 
 affordances live in nests. 
 
-affordances look much like nests like tables, but typically what you fill them with has special meaning. the two universal fillings are `value` and `action`.
+affordances look much like nests like tables, but typically what you fill them with has special meaning. the fillings are called properties. the two universal properties are `value` and `action`.
 ```
 dave = nest_ {
     elanore = _affordance {
@@ -61,7 +61,7 @@ dave = nest_ {
     }
 }
 ```
-the idea here is whenever value changes, it's sent as the second argument to the `action` function. it's a very similar principle to how the [`params`](https://monome.org/docs/norns/study-3/#parameters) system operates. if you paste the snippet above in your blank script, we can test this out in the REPL.
+action is a function, value can be anything (usually it's a number or many numbers). the idea here is whenever value changes, it's sent as the second argument to the `action` function. it's a very similar principle to how the [`params`](https://monome.org/docs/norns/study-3/#parameters) system operates. if you paste the snippet above in your blank script, we can test this out in the REPL.
 
 run `dave.elanore.value = 5` followed by `dave.elanore:update()`
 
