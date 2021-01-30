@@ -4,7 +4,7 @@
 
 nest is a language of touch for objects by monome
 
-nest helps you build a touchable user interface for a norns script, and provides the tools to hook up that interface to whatever sound engine or musical process you’d like to interact with (a synth engine, a softcut looper,  a lua sequencer, crow voltages & i2c). you're welcome to think about nest as a full-blown library, a markup language, or a maiden-scriptable application in the vein of [grid ops](https://github.com/scanner-darkly/teletype/wiki/GRID-INTEGRATION).
+nest helps you build a touchable user interface for a norns script, and provides the tools to hook up that interface to whatever sound engine or musical process you’d like to interact with (a synth engine, a softcut looper,  a lua sequencer, crow voltages & i2c). you're welcome to think about nest as a full-blown library, a markup language, or a maiden-scriptable application in the vein of teletype's [grid ops](https://github.com/scanner-darkly/teletype/wiki/GRID-INTEGRATION).
 
 it works by splitting up an interface (grid, arc, or norns itself) into any number of lego pieces called **affordances**, each with a unique **value** and unique behaviors configured through **properties**. these lego blocks can then be bound to your musical process using custom **action functions** (much like the params system). affordances are organized inside special tables called **nests** which help group your affordances and allow them to communicate with each other and with the hardware itself. a basic snippet of nest code might look a bit like this:
 
