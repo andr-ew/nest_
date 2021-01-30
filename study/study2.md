@@ -185,9 +185,9 @@ there you have it, `tab` up top switches between two affordance pages ( though i
 
 believe it or not, you can send a function to most properties - try subsitituting:
 ```
-level = function(self) return self.value * 3 end,
+level = function(self, x) return x * 3 end,
 ```
-now `level` changes when `value` changes!
+now `level` is different for each `x` position! for grids, a `level` function gets three arguments: `self, x, y` (`x` & `y` are relative offsets)
 
 nests have enabled properties too, so if we wanted `lever` and `switch` to show up on the same page we could group them in a subnest and enable things there:
 ```
