@@ -9,7 +9,7 @@ include 'lib/nest_/norns'
 
 nest is a folder of lua files, we call the lua files modules. `core` & `norns` are the modules that are required at minimum. ~ cool ~
 
-#nesting
+# nesting
 
 we introduced you to `nest_` and `_affordance` in the [intro](https://github.com/andr-ew/nest_). both are special cases of the plain old lua [table](https://monome.org/docs/norns/study-2/#tables-everywhere), with secret functions that allow them to do various cool other things. let's make a nest:
 ```
