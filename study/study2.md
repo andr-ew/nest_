@@ -31,14 +31,14 @@ function init() n:init() end
 ```
 well, just one light - in the upper left corner - but hey at least something is happening now. we've introduced our first grid affordance, called `fill`, which lives in a handy table for all the grid affordances called `_grid`. each affordance brings along it's own set of properties in addition to the basics (often the property names are shared throughout the module, so you don't have to memorize a long list of terms & definitions for each inddividual affordance). pretty expected stuff so far - `x` and `y` set a position, `level` sets led brightness. 
 
-you probably already know what happens when you run `n.light.x = 5; n:update()`. (did you know you can separate two lua commands in re REPL with a semicolin??? I found out recently). these three properties change the appearence - or output behavior - of the affordance. other affordances will show us properties that configure input behavior as well (some change both!)
+you probably already know what will happen when you run `n.light.x = 5; n.light:update()`. (did you know you can separate two lua commands in re REPL with a semicolin??? I found out recently). these three properties change the appearence - or output behavior - of the affordance. other affordances will show us properties that configure input behavior as well (some change both!)
 
 cool. what if we set `x = { 1, 5 }` ? change it out in the script & rerun - you'll see that leds 1-5 on the top row will all be lit in one swoop. and likewise:
 ```
 x = { 1, 5 }, 
 y = { 1, 5 },
 ```
-will yield a 5x5 square. so we see that the dimentions of a grid affordance are changable, all through the use of two properties. 
+will yield a 5x5 square. so we see that the dimentions of a grid affordance are changable, all through the use of two properties (try lighting up the whole grid - undoubtably useful for power outages).
 
 # do something, please
 
@@ -84,4 +84,140 @@ y = { 1, 5 },
 you'll notice that the 1's and 0's are rotated 90 degrees from what's actually lit on the grid - that lets you index the value like this: `value[x][y]` rather than this: `value[y][x]`.
 
 (but wait, how are the tables printing like this??? magic!)
+
+# it's me again, numbers
+
+let's give `number` a whirl:
+```
+n = nest_ {
+    lever = _grid.number {
+        x =  { 1, 8 },
+        y = 1,
+        level = 15,
+        action = function(self, value)
+            print(value)
+        end
+    }
+}
+```
+number can be a fader, a tab, a preset selector, a playhead - key presses assign to value a single number from 1 to the range of `x`. if we send a table to y, value will become `{ x = 1, y = 1 }`. (you can image how setting `x` and `y` to single numbers will negate the usefulnees of this affordance - there's nothing stopping you though). 
+
+like `toggle`, `number` has input and output, but what if we just want the latter? add a new propery:
+```
+input = false,
+```
+key presses will have no effect, but you can set still change the value externally: `n.lever.value = 3; n.lever:update()`. this is useful for displaying stuff, like a sequencer position. likewise, we can set:
+```
+output = false
+```
+all is dark on the grid, but we can still see our value being printed in the REPL. what's this good for? let's do something wierd:
+```
+n = nest_ {
+    jump = _grid.number {
+        x =  { 1, 16 },
+        y = 1,
+        action = function(self, myvalue)
+            self.parent.step.value = myvalue
+            self.parent.step:update()
+            print("jump", myvalue)
+        end,
+        output = false
+    },
+    step = _grid.number {
+        x = { 1, 16 },
+        y = 1,
+        action = function(self, value)
+            print("step", value)
+        end,
+        input = false
+    }
+}
+
+clock.run(function()
+    while true do
+        n.step.value = n.step.value % 16 + 1
+        n.step:update()
+        clock.sleep(0.1)
+    end
+end)
+```
+hello, mlr. the [clock](https://monome.org/docs/norns/clocks/) function below incriments & wraps `step` every `0.1` second, while `jump` instantaneously assigns its own value to `step` on a keypress. using two affordances, you can decouple input & output behavior - a classic monome move.
+
+# enabling
+
+to disable things completely, we can use the `enable` property:
+```
+n = nest_ {
+    lever = _grid.number {
+        x =  { 1, 4 },
+        y = 3,
+        level = { 4, 15 },
+        enabled = false,
+        action = function(self, value)
+            print(value)
+        end
+    }
+}
+```
+seems like a lot of nothing, but of course we can change things: `n.lever.enabled = true; n.tab:update()`. enabled allows you to sort of push things out of view - affordances can still operate, but you won't be able to see them or interact with them. with this, we have a recipe for pagination.
+
+let's jump ahead:
+```
+n = nest_ {
+    lever = _grid.number {
+        x =  { 1, 4 },
+        y = 3,
+        level = { 4, 15 },
+        action = function(self, value)
+            print(self.key, value)
+        end,
+        enabled = function() return n.tab.value == 1 end
+    },
+    switch = _grid.toggle {
+        x = { 1, 4 },
+        y = { 3, 6 },
+        level = { 4, 15 },
+        action = function(self, value)
+            print(self.key, value)
+        end,
+        enabled = function() return n.tab.value == 2 end
+    },
+    tab = _grid.number {
+        x =  { 1, 2 },
+        y = 1,
+        level = { 4, 15 }
+    }
+}
+```
+there you have it, `tab` up top switches between two affordance pages ( though it makes more sense to do this once you've filled up the grid). but check it out - enabled _is a function_. every time `switch` is drawn, this function checks the state of tab and returns `true` or `false` accordingly. by setting a unique equlity condition for each affordance, we get pagination. 
+
+believe it or not, you can send a function to most properties - try subsitituting:
+```
+level = function(self) return self.value * 3 end,
+```
+now `level` changes when `value` changes!
+
+nests have enabled properties too, so if we wanted `lever` and `switch` to show up on the same page we could group them in a subnest and enable things there:
+```
+n = nest_ {
+    pages = nest_ {
+        nest_ {
+            -- page 1 affordances
+            
+            enabled = function(self) return n.tab.value == self.key end
+        },
+        nest_ {
+            -- page 2 affordances
+            
+            enabled = function(self) return n.tab.value == self.key end
+        }
+    },
+    tab = _grid.number {
+        x =  { 1, 2 },
+        y = 1,
+        level = { 4, 15 }
+    }
+}
+```
+notice the shortcut of using a numeric table for the `pages` nest and checking `tab` against the table key.
 
