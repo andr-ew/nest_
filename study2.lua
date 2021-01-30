@@ -55,6 +55,9 @@ grid_nest = nest_ {
                     end
                 }
             end),
+            
+            --add the sequencer playhead bit & make the levels responsive !
+            
             enabled = function(self)
                 return (grid_nest.tab.value == self.key)
             end
