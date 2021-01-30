@@ -43,28 +43,3 @@ function init()
     dave:init() -- initialize dave on script load, which updates all of dave's affordances
 end
 
--- >> dave.dale.value 
--- 5
--- >> dave.elanore.value
--- 6
--- >> dave.dale.parent.elanore.value
--- 6
--- >> dave.dale.key
--- dale
-
-
--- >> dave.dale.value = 10
--- >> dave.dale:update()
--- my name is dale
--- my value is 10
-
--- >> dave.things[2].value = 20
--- >> dave.things[2]:update()
--- I'm thing number 2
--- my value is 20
--- dale's value is 10
-
-
--- >> print(dave.dale)
--- >> print(dave)
-
