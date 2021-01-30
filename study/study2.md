@@ -113,22 +113,14 @@ output = false
 all is dark on the grid, but we can still see our value being printed in the REPL. what's this good for? let's do something wierd:
 ```
 n = nest_ {
-    jump = _grid.number {
+    rate = _grid.number {
         x =  { 1, 16 },
         y = 1,
-        action = function(self, myvalue)
-            self.parent.step.value = myvalue
-            self.parent.step:update()
-            print("jump", myvalue)
-        end,
         output = false
     },
     step = _grid.number {
         x = { 1, 16 },
         y = 1,
-        action = function(self, value)
-            print("step", value)
-        end,
         input = false
     }
 }
@@ -137,11 +129,11 @@ clock.run(function()
     while true do
         n.step.value = n.step.value % 16 + 1
         n.step:update()
-        clock.sleep(0.1)
+        clock.sleep(0.4 / n.rate.value)
     end
 end)
 ```
-hello, mlr. the [clock](https://monome.org/docs/norns/clocks/) function below incriments & wraps `step` every `0.1` second, while `jump` instantaneously assigns its own value to `step` on a keypress. using two affordances, you can decouple input & output behavior - a classic monome move.
+now keypresses set not the position of a light, but the rate of movement - the [clock](https://monome.org/docs/norns/clocks/) function below incriments & wraps `step` and calculates a wait time between updates based on `rate`. using two affordances, you can decouple input & output behavior - a classic monome move.
 
 # enabling
 
