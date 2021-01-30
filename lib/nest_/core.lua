@@ -455,7 +455,8 @@ function nest_:new(o, ...)
                 'is_obj',
                 'is_nest',
                 'is_affordance',
-                'devk'
+                'devk',
+                'drawloop'
             }, true)
 
             return st
