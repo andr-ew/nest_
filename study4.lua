@@ -11,7 +11,7 @@ grid_nest = nest_ {
             number = _grid.number {
                 x = { 2, 6 },
                 y = { 3, 6 },
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = function(self, value)
                     print(self.key, self.value)
                 end
@@ -29,7 +29,7 @@ grid_nest = nest_ {
             toggle = _grid.toggle {
                 x = { 2, 6 },
                 y = { 3, 6 },
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = function(self, value)
                     print(self.key, self.value)
                 end

@@ -45,17 +45,17 @@ demo.grid = nest_ {
             fill_0d = _grid.fill {
                 x = 1,
                 y = 3,
-                lvl = 15
+                level = 15
             }, 
             fill_1d = _grid.fill {
                 x = { 1, 7 },
                 y = 5,
-                lvl = 15
+                level = 15
             },
             fill_2d = _grid.fill {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                lvl = 15
+                level = 15
             },
             enabled = gpage
         },
@@ -64,19 +64,19 @@ demo.grid = nest_ {
             number_0d = _grid.number {
                 x = 1,
                 y = 3,
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = gridaction
             }, 
             number_1d = _grid.number {
                 x = { 1, 7 },
                 y = 5,
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action =  gridaction
             }, 
             number_2d = _grid.number {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = gridaction
             },
             enabled = gpage
@@ -107,19 +107,19 @@ demo.grid = nest_ {
             trigger_0d = _grid.trigger {
                 x = 1,
                 y = 3,
-                lvl = grid_trigger_level,
+                level = grid_trigger_level,
                 action = gridaction
             }, 
             trigger_1d = _grid.trigger {
                 x = { 1, 7 },
                 y = 5,
-                lvl = grid_trigger_level,
+                level = grid_trigger_level,
                 action = gridaction
             }, 
             trigger_2d = _grid.trigger {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                lvl = grid_trigger_level,
+                level = grid_trigger_level,
                 action = gridaction
             },
             enabled = gpage
@@ -129,19 +129,19 @@ demo.grid = nest_ {
             toggle_0d = _grid.toggle {
                 x = 1,
                 y = 3,
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = gridaction
             }, 
             toggle_1d = _grid.toggle {
                 x = { 1, 7 },
                 y = 5,
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = gridaction
             }, 
             toggle_2d = _grid.toggle {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = gridaction
             },
             enabled = gpage
@@ -151,19 +151,19 @@ demo.grid = nest_ {
             momentary_0d = _grid.momentary {
                 x = 1,
                 y = 3,
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = gridaction
             }, 
             momentary_1d = _grid.momentary {
                 x = { 1, 7 },
                 y = 5,
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = gridaction
             }, 
             momentary_2d = _grid.momentary {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                lvl = { 4, 15 },
+                level = { 4, 15 },
                 action = gridaction
             },
             enabled = gpage
@@ -191,7 +191,7 @@ demo.grid = nest_ {
     tab = _grid.number {
         x = { 1, 7 },
         y = 1,
-        lvl = { 4, 15 }
+        level = { 4, 15 }
     }
 } :connect {
     g = grid.connect()
@@ -232,7 +232,7 @@ demo.txt = nest_ {
                 x = 64, y = 46, 
                 n = 3,
                 padding = 4,
-                lvl = { 15, 0 },
+                level = { 15, 0 },
                 fill = { 0, 15 },
                 border = 15,
                 edge = 0,
@@ -250,27 +250,27 @@ demo.txt = nest_ {
                 x = 2, y = 24, 
                 margin = 6,
                 padding = 2,
-                lvl = 0,
+                level = 0,
                 fill = 15,
                 value = { "one", "two", "three" }
             },
             label3 = _txt.label {
                 x = { 46, 128 - 2 }, y = 44,
-                lvl = { 15, 7, 2 },
+                level = { 15, 7, 2 },
                 value = { "four", "five", "six" }
             },
             label4 = _txt.label {
                 x = 128 - 2, y = 64 - 4,
                 margin = 8,
                 align = { 'right', 'bottom' },
-                lvl = { 2, 7, 15 },
+                level = { 2, 7, 15 },
                 value = { "seven", "eight", "nine" }
             },
             label5 = _txt.label {
                 x = 128 - 2, y = 14,
                 flow = 'y',
                 align = 'right',
-                --lvl = 7,
+                --level = 7,
                 value = { "ten", "eleven", "twelve" }
             },
             label6 = _txt.label {
@@ -358,12 +358,12 @@ demo.arc = nest_ {
             fill1 = _arc.fill {
                 n = 2,
                 v = 1/64,
-                lvl = 15
+                level = 15
             },
             fill2 = _arc.fill {
                 n = 3,
                 v = { 0.2, 0.5 },
-                lvl = 7
+                level = 7
             },
             fill3 = _arc.fill {
                 n = 4,
@@ -416,7 +416,7 @@ demo.arc = nest_ {
                 n = 4,
                 x = { 40, 40 + 12 },
                 sens = 1,
-                lvl = { 4, 4, 15 },
+                level = { 4, 4, 15 },
                 action = function(self, value) print(self.k, value) end
             },
             enabled = apage
@@ -430,7 +430,7 @@ demo.arc = nest_ {
                 range = { 1, 4 },
                 size = { 1, 2, 4, 8, 16 },
                 margin = 1,
-                lvl = { 0, 4, 15 },
+                level = { 0, 4, 15 },
                 action = function(s, v) print(math.floor(v)) end
             },
             option2 = _arc.option {
@@ -440,7 +440,7 @@ demo.arc = nest_ {
                 include = { 1, 2, 4 },
                 size = 4,
                 margin = 0,
-                lvl = { 0, 4, 15 },
+                level = { 0, 4, 15 },
                 action = function(s, v) print(math.floor(v)) end
             },
             option3 = _arc.option {
@@ -464,7 +464,7 @@ demo.arc = nest_ {
         sens = 1/16,
         options = 4,
         size = 3,
-        lvl = { 0, 4, 15 },
+        level = { 0, 4, 15 },
     }
 } :connect({ a = arc.connect() }, 120) -- refresh @ 120 fps instead of the default 30
 
