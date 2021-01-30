@@ -871,7 +871,7 @@ _grid.fill.output.muxredraw = _obj_:new {
     plane = _grid.binary.output.muxredraw.plane
 }
 
-_grid.number = _grid.muxaffordance:new { value = 1, edge = 1, fingers = nil, tdown = 0, filtersame = false, count = { 1, 1 }, vlast = 1 }
+_grid.number = _grid.muxaffordance:new { value = 1, edge = 1, fingers = nil, tdown = 0, filtersame = true, count = { 1, 1 }, vlast = 1 }
 
 _grid.number.new = function(self, o) 
     o = _grid.muxaffordance.new(self, o)
