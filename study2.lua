@@ -41,7 +41,7 @@ grid_nest = nest_ {
                 end
             },
             enabled = function(self)
-                return (grid_nest.tab.value == 1)
+                return (grid_nest.tab.value == self.key)
             end
         },
         nest_ {
@@ -56,7 +56,7 @@ grid_nest = nest_ {
                 }
             end),
             enabled = function(self)
-                return (grid_nest.tab.value == 2)
+                return (grid_nest.tab.value == self.key)
             end
         }
     },
