@@ -221,3 +221,6 @@ n = nest_ {
 ```
 notice the shortcut of using a numeric table for the `pages` nest and checking `tab` against the table key.
 
+# automagic
+
+sometimes we want 16 numbers.
