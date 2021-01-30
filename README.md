@@ -50,7 +50,7 @@ get the study scripts by installing `nest_` in the maiden project manager.
 
 ## Modules
 
-the various types and interface buidling blocks of nestworld are split up into a growing collection files or `modules`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read up on !
+the various types and interface buidling blocks of nestworld are split up into a growing collection files or `modules`. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read up on the full details of each module and the affordances contained.
 
 
 - [`nest_/grid`](./doc/grid.md)
