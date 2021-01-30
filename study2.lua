@@ -5,10 +5,20 @@ include 'lib/nest_/core'
 include 'lib/nest_/norns'
 include 'lib/nest_/grid'
 
+--[[
+
+page 1: notes
+page 2: octave + gate toggle
+bottom: step display, jump, background shows gate
+
+]]
+
 -- a grid nest structure
 grid_nest = nest_ {
     pages = nest_ {
         nest_ {
+            -- instead of this bit, maybe to a second page with like a toggle per step ? make an actual sequencer ?
+            
             -- (we're just using the default initial values for these, so there's no need to supply value)
             toggle = _grid.toggle {
                 x = 2,
