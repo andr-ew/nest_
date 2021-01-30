@@ -148,12 +148,13 @@ this means that we don't need to provide `value` to an affordance (or even `acti
 
 # beginning
 
-typically, whenever our norns script loads we'll want to kick things off by updating all affordances. for this, we have a special function called `init` which does the updating in addition to some other behind the scenes tasks. natually we stick this in init:
+typically, whenever our norns script loads we'll want to kick things off by updating all affordances. for this, we have a special function called `init` which does the updating in addition to some other behind the scenes tasks. natually we stick this in the init global function:
 ```
 function init()
-    dave:init() -- initialize dave on script load, which updates all of dave's affordances
+    dave:init()
 end
 ```
+if we re-run the snippet we'll see those printouts right away.
 
 # example
 
