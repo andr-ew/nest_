@@ -607,7 +607,7 @@ _affordance = nest_:new {
     end,
     value = 0,
     devk = nil,
-    action = nil,
+    action = function() end,
     init = function(self)
         if self.p_.persistent then self:update() end
 
