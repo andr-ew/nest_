@@ -26,7 +26,7 @@ m = nest_('a', 'b', 'c')
 ```
 both these make a nest with more nests already inside of it. `n` with have sub-nests from `n[1]` to `n[10]`, `m` will have sub-nests `m.a`, `m.b`, `m.c`. that'll come in handy a little later.
 
-so yes, we can put a nests in nests (hence the name). you'll usually do it this way:
+so yes, we can put nests in nests (hence the name). you'll usually do it this way:
 ```
 dave = nest_ {
     things = nest_ {
