@@ -236,23 +236,16 @@ running this, we get a unique vertical number on each grid column. [look at all 
 
 phew! if that's a lot to remember, it's easy to just copy and paste the snippet above, adjusting as needed. but having all of these seperate tools at your desposal opens up some handy shortcuts beyond simple repetition. for example, we can consolidate the repeated function in the last pagination example:
 ```
-n = nest_ {
-    pages = nest_ {
-        nest_ {
-            -- page 1 affordances
-        },
-        nest_ {
-            -- page 2 affordances
-        } :each(function(i, v)
-            v.enabled = function(self) return n.tab.value == self.key end
-        end)
+pages = nest_ {
+    nest_ {
+        -- page 1 affordances
     },
-    tab = _grid.number {
-        x =  { 1, 2 },
-        y = 1,
-        level = { 4, 15 }
-    }
-}
+    nest_ {
+        -- page 2 affordances
+    } 
+} :each(function(i, v)
+    v.enabled = function(self) return n.tab.value == self.key end
+end),
 ```
 a small enhancement, but certainly useful once the page count starts getting high!
 
