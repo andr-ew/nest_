@@ -215,4 +215,16 @@ notice the shortcut of using a numeric table for the `pages` nest and checking `
 
 # automagic
 
-sometimes we want 16 numbers.
+sometimes we want 16 numbers. yes we could type out sixteen affordances, no let's not do that. as always: when things get repetetive, think loops.
+
+a for loop could most certainly be used for this task, but there's an even nestier way to do things. check this out:
+```
+n = nest_(16):each(function(i)
+    return _grid.number {
+        x = i,
+        y = { 1, 8 },
+    }
+end)
+```
+running this, we get a unique vertical number on each grid column.
+
