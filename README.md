@@ -42,8 +42,6 @@ feel free to play around with studies 3 & 5 on your grid before digging in to th
 
 4. state & meta-affordances
 
-5. making a script
-
 get the study scripts by installing `nest_` in the maiden project manager.
 
 # Docs
