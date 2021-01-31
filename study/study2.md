@@ -35,7 +35,7 @@ you probably already know what will happen when you run `n.light.x = 5; n.light:
 
 cool. what if we set `x = { 1, 5 }` ? change it out in the script & rerun - you'll see that leds 1-5 on the top row will all be lit in one swoop. and likewise:
 ```
-x = { 1, 5 }, 
+x = { 1, 5 },
 y = { 1, 5 },
 ```
 will yield a 5x5 square. so we see that the dimentions of a grid affordance are changable, all through the use of two properties (try lighting up the whole grid - undoubtably useful for power outages).
@@ -219,12 +219,155 @@ sometimes we want 16 numbers. yes we could type out sixteen affordances, no let'
 
 a for loop could most certainly be used for this task, but there's an even nestier way to do things. check this out:
 ```
-n = nest_(16):each(function(i)
+n = nest_(16):each(function(i, v)
     return _grid.number {
         x = i,
         y = { 1, 8 },
     }
 end)
 ```
-running this, we get a unique vertical number on each grid column.
+running this, we get a unique vertical number on each grid column. [look at all those functions !](https://www.youtube.com/watch?v=F-X4SLhorvw) let's take this apart:
 
+1. `nest_(16)` creates a nest with 16 bank slots, numbered `n[1]` to `n[16]`
+2. the `each` is a function that runs another function for each item in a nest. 
+3. the function sent to `each` gets two arguments, the current key (numeric or string) and the current item
+4. within our function we return something, this gets placed in the current slot.
+5. we're returning a number affordance. the `x` coordinate is set to the key, `i`, which counts up to 16
+
+phew! if that's a lot to remember, it's easy to just copy and paste the snippet above, adjusting as needed. but having all of these seperate tools at your desposal opens up some handy shortcuts beyond simple repetition. for example, we can consolidate the repeated function in the last pagination example:
+```
+n = nest_ {
+    pages = nest_ {
+        nest_ {
+            -- page 1 affordances
+        },
+        nest_ {
+            -- page 2 affordances
+        } :each(function(i, v)
+            v.enabled = function(self) return n.tab.value == self.key end
+        end)
+    },
+    tab = _grid.number {
+        x =  { 1, 2 },
+        y = 1,
+        level = { 4, 15 }
+    }
+}
+```
+a small enhancement, but certainly useful once the page count starts getting high!
+
+# example
+
+a suprisingly fun step sequencer on the grid, in just 100 lines. 16 steps, a note selection page & octave page, gate selection on row 7 and a touchable playhead on row 8. take some time to study it, and feel free to make some modifications to fit your musical interests!
+
+```
+include 'lib/nest_/core'
+include 'lib/nest_/norns'
+include 'lib/nest_/grid'
+
+engine.name = "PolyPerc"
+
+scale = { 0, 2, 4, 7, 9 }
+root = 440 * 2^(5/12) -- the d above middle a
+
+seq = nest_ {
+    tab = _grid.number {
+        x = { 1, 2 },
+        y = 1,
+        level = { 4, 15 },
+    },
+    pages = nest_ {
+        nest_ {
+            notes = nest_(16):each(function(i)
+                return _grid.number {
+                    x = i,
+                    y = { 2, 6 },
+                    value = math.random(1, 5), -- initialize every note with a random number
+                    
+                    -- adjust the brightness level based on step & gates
+                    level = function(self)
+                        if seq.gates.value[i] == 0 then return 0 -- if this step's gate is off set brightness low
+                        elseif seq.step.value == i then return 15 -- if it's the current step set level high 
+                        else return 4 end -- otherwise set dim
+                    end,
+                }
+            end),
+            enabled = function(self)
+                return (seq.tab.value == self.key)
+            end
+        },
+        nest_ {
+            octaves = nest_(16):each(function(i)
+                return _grid.number {
+                    x = i,
+                    y = { 2, 6 },
+                    value = 3,
+                    level = function(self)
+                        if seq.gates.value[i] == 0 then return 0
+                        elseif seq.step.value == i then return 15
+                        else return 4 end
+                    end
+                }
+            end),
+            enabled = function(self)
+                return (seq.tab.value == self.key)
+            end
+        }
+    }:each(function(i, v)
+        v.enabled = function(self)
+            return (seq.tab.value == self.key)
+        end
+    end),
+    gates = _grid.toggle {
+        x = { 1, 16 },
+        y = 7,
+        level = 4,
+        value = 1 -- a shortcut, toggle knows to set all the toggle values to 1
+    },
+    step = _grid.number {
+        x = { 1, 16 },
+        y = 8
+    }
+}
+
+-- sequencer counter
+count = function()
+    while true do -- loop forever
+        
+        local step = seq.step.value -- the current step
+        
+        if seq.gates.value[step] == 1 then -- if the current gate is high
+            
+            -- find note frequency
+            local note = scale[seq.pages[1].notes[step].value]
+            local octave = seq.pages[2].octaves[step].value - 4
+            local hz = root * 2^octave * 2^(note/12)
+            
+            engine.hz(hz) -- send a note to the engine
+        end
+        
+        seq.step.value = step % 16 + 1 -- incriment & wrap step
+        seq.step:update()
+        
+        clock.sync(1/4) -- wait for the next quarter note
+    end
+end
+
+-- connect the nest to a grid device
+seq:connect {
+    g = grid.connect()
+}
+
+-- initialize the nest, start counting
+function init()
+    seq:init()
+    clock.run(count)
+end
+```
+
+# continued
+
+- part 1: [nested affordances](./study1.md)
+- part 2: the grid & multiples
+- part 3: [affordance demo](./study3.md)
+- part 4: [state & meta-affordances](./study4.md)
