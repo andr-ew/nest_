@@ -254,13 +254,22 @@ a small enhancement, but certainly useful once the page count starts getting hig
 the study 2 script is a suprisingly fun step sequencer on the grid, in just 100 lines. 16 steps, a note selection page & octave page, gate selection on row 7 and a touchable playhead on row 8. take some time to study it, and feel free to make some modifications to fit your musical interests!
 
 ```
+-- nest_ study 2
+-- the grid & multiples
+--
+-- grid:
+--   1 : page select
+-- 2-6: note/octave
+--   3: gate
+--   4: step
+
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
 include 'lib/nest_/grid'
 
 engine.name = "PolyPerc"
 
-scale = { 0, 2, 4, 7, 9 }
+scale = { 0, 2, 4, 7, 9 } -- scale degrees in semitones
 root = 440 * 2^(5/12) -- the d above middle a
 
 seq = nest_ {
