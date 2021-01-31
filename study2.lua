@@ -13,7 +13,7 @@ include 'lib/nest_/grid'
 
 engine.name = "PolyPerc"
 
-scale = { 0, 2, 4, 7, 9 }
+scale = { 0, 2, 4, 7, 9 } -- scale degrees in semitones
 root = 440 * 2^(5/12) -- the d above middle a
 
 seq = nest_ {

@@ -21,7 +21,7 @@ polysub = include 'we/lib/polysub'
 delay = include 'awake/lib/halfsecond'
 local cs = require 'controlspec'
 
-scale = { 0, 2, 4, 7, 9 }
+scale = { 0, 2, 4, 7, 9 } -- scale degrees in semitones (you can add more than 5)
 root = 440 * 2^(5/12) -- the d above middle a
 
 engine.name = 'PolySub'
