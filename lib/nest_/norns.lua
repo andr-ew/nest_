@@ -21,14 +21,14 @@ nest_.connect = function(self, objects, fps)
                     vv:refresh()
                 end,
                 handler = function(...)
-                    self:update(kk, {...}, {})
+                    self:process(kk, {...}, {})
                 end
             }
 
             if k == 'a' then
                 devs.akey = _dev:new {
                     handler = function(...)
-                        self:update('akey', {...}, {})
+                        self:process('akey', {...}, {})
                     end
                 }
 
@@ -45,7 +45,7 @@ nest_.connect = function(self, objects, fps)
             devs[kk] = _dev:new {
                 object = vv,
                 handler = function(data)
-                    self:update(kk, data, {})
+                    self:process(kk, data, {})
                 end
             }
 
@@ -56,7 +56,7 @@ nest_.connect = function(self, objects, fps)
 
             devs[kk] = _dev:new {
                 handler = function(...)
-                    self:update(kk, {...}, {})
+                    self:process(kk, {...}, {})
                 end
             }
 

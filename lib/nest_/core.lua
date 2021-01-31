@@ -39,7 +39,7 @@ local function serialize(o, f, skip, dof, types, itab)
 
         first = true
         for k,v in pairs(o) do
-            if type(k) == 'string' and (skip and (not tab.contains(skip, k)) or true) then
+            if type(k) == 'string' and (skip == nil or (not tab.contains(skip, k))) then
                 if type(v) == 'function' then
                     if dof then
                         if first then
@@ -165,6 +165,8 @@ local function nickname(k)
     if k == 'v' then return 'value' 
     elseif k == 'lvl' then return 'level'
     elseif k == 'en' then return 'enabled'
+    elseif k == 'parent' then return 'p'
+    elseif k == 'key' then return 'k'
     else return k end
 end
 
@@ -172,6 +174,8 @@ local function index_nickname(t, k)
     if k == 'v' then return t.value
     elseif k == 'lvl' then return t.level
     elseif k == 'en' then return t.enabled
+    elseif k == 'parent' then return t._.p
+    elseif k == 'key' then return t._.k
     end
 end
 
@@ -217,36 +221,36 @@ nest_ = {
     init = function(self)
         for i,v in ipairs(self._.children) do if type(v) == 'table' then 
             if v.init_action then v:init_action() end
-            if v.init then v:init() end 
+            if self.p_.persistent and v.init then v:init() end 
         end end
     end,
     --init_action = function(self) self:init() end,
     each = function(self, f) 
-        for k,v in pairs(self) do 
+        for k,v in pairs(self.children) do 
             local r = f(k, v)
             if r then self:replace(k, r) end
         end
 
         return self 
     end,
-    update = function(self, devk, args, ob)
+    process = function(self, devk, args, ob)
         if self.enabled == nil or self.p_.enabled == true then
             if self.observable then 
                 for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
             end 
 
             for i,v in ipairs(self.children) do 
-                if type(v) == 'table' and v.update then
-                    v:update(devk, args, ob)
+                if type(v) == 'table' and v.process and not v.is_observer then
+                    v:process(devk, args, ob)
                 end
             end
         end
     end,
-    refresh = function(self, silent)
+    update = function(self, silent)
         local ret
         for i,v in ipairs(self.children) do 
-            if v.refresh then
-                ret = v:refresh(silent) or ret
+            if v.update then
+                ret = v:update(silent) or ret
             end
         end
 
@@ -305,9 +309,9 @@ nest_ = {
             return t
         end
     end,
-    insert = function(self, o)
+    merge = function(self, o)
         for k,v in pairs(o) do
-            if self[k] and type(self[k]) == 'table' and self[k].insert then self[k]:insert(v)
+            if self[k] and type(self[k]) == 'table' and self[k].merge then self[k]:merge(v)
             else self[k] = v end
         end
     end,
@@ -386,7 +390,7 @@ function nest_:new(o, ...)
                 o[i] = nest_:new()
             end
         else
-            for _,k in arg do o[k] = nest_:new() end
+            for _,k in ipairs(arg) do o[k] = nest_:new() end
         end
     end
 
@@ -432,24 +436,27 @@ function nest_:new(o, ...)
                 'serialize',
                 'replace',
                 'find',
-                'update',
+                'process',
                 'copy',
                 'path',
                 'draw',
                 'each',
-                'insert',
+                'merge',
                 'save',
                 'load',
                 'init',
                 'connect',
+                'disconnect',
                 'read',
                 'write',
-                'refresh',
+                'update',
                 'set',
                 'get',
                 'is_obj',
                 'is_nest',
-                'is_affordance'
+                'is_affordance',
+                'devk',
+                'drawloop'
             }, true)
 
             return st
@@ -501,7 +508,7 @@ _input = nest_:new {
     handler = nil,
     devk = nil,
     filter = function(self, devk, args) return args end,
-    update = function(self, devk, args, ob)
+    process = function(self, devk, args, ob)
         if (self.enabled == nil or self.p_.enabled == true) and self.devk == devk then
             local hargs = self:filter(args)
             
@@ -583,7 +590,7 @@ end
 
 local function runaction(self, aargs)
     self.v = self.action and self.action(self, table.unpack(aargs)) or aargs[1] or self.v
-    self:refresh(true)
+    self:update(true)
 end
 
 local function clockaction(self, aargs)
@@ -601,9 +608,9 @@ _affordance = nest_:new {
     end,
     value = 0,
     devk = nil,
-    action = nil,
+    action = function() end,
     init = function(self)
-        self:refresh()
+        if self.p_.persistent then self:update() end
 
         nest_.init(self)
     end,
@@ -614,7 +621,7 @@ _affordance = nest_:new {
             end
         end
     end,
-    update = function(self, devk, args, ob)
+    process = function(self, devk, args, ob)
         if self.enabled == nil or self.p_.enabled == true then
             if self.observable then 
                 for i,v in ipairs(self.ob_links) do table.insert(ob, v) end
@@ -624,8 +631,8 @@ _affordance = nest_:new {
                 local hargs, aargs 
                
                 for i,v in ipairs(self.children) do 
-                    if type(v) == 'table' and v.update then
-                        local h, a = v:update(devk, args, ob)
+                    if type(v) == 'table' and v.process and not v.is_observer then
+                        local h, a = v:process(devk, args, ob)
                         if a then hargs, aargs = h, a end
                     end
                 end
@@ -644,7 +651,7 @@ _affordance = nest_:new {
             end
         end
     end,
-    refresh = function(self, silent)
+    update = function(self, silent)
         if (not silent) and self.action then
             local defaults = self.arg_defaults or {}
             clockaction(self, { self.v, table.unpack(defaults) })
@@ -663,7 +670,7 @@ _affordance = nest_:new {
             local t = nest_.get(self, silent, nil, typ)
 
             t.value = type(self.value) == 'table' and self.value:new() or self.value -- watch out for value ~= _obj_ !
-            if silent == false then self:refresh(false) end
+            if silent == false then self:update(false) end
 
             return t
         end
@@ -678,17 +685,17 @@ _affordance = nest_:new {
             else self.value = t.value end
         end
 
-        self:refresh(silent)
+        self:update(silent)
     end
     --[[
     get = function(self, silent) 
         if not silent then
-            return self:refresh()
+            return self:update()
         else return self.v end
     end,
     set = function(self, v, silent)
         self:replace('v', v or self.v)
-        if not self.silent then return self:refresh() end
+        if not self.silent then return self:update() end
     end
     --]]
 }
@@ -820,7 +827,7 @@ _pattern = _observer:new {
         if o then
             if self.capture == 'value' then
                 o.value = type(p) == 'table' and p:new() or p
-                o:refresh(false)
+                o:update(false)
             elseif self.capture == 'action' then
                 clockaction(o, p)
             elseif o.input then
@@ -889,6 +896,10 @@ function _pattern:new(o)
         if k == 'new' then mtn(t, k, v)
         elseif pt[k] ~= nil then pt[k] = v
         else mtn(t, k, v) end
+    end
+    
+    o.process = function(e) 
+        o:proc(e) 
     end
 
     return o
