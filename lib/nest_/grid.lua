@@ -117,23 +117,24 @@ end
 
 _grid.binary = _grid.muxaffordance:new({ count = nil, fingers = nil }) -- local supertype for binary, toggle, trigger
 
-local function minit(axis) 
+local function minit(axis, n) 
+    n = type(n) == 'number' and n or 0
     local v
     if axis.x and axis.y then 
         v = _obj_:new()
         for x = 1, axis.x do 
             v[x] = _obj_:new()
             for y = 1, axis.y do
-                v[x][y] = 0
+                v[x][y] = n
             end
         end
     elseif axis.x or axis.y then
         v = _obj_:new()
         for x = 1, (axis.x or axis.y) do 
-            v[x] = 0
+            v[x] = n
         end
     else 
-        v = 0
+        v = n
     end
 
     return v
@@ -144,7 +145,7 @@ local binaryvals = function(o)
 
     local _, axis = input_contained(o, { -1, -1 })
 
-    local v = minit(axis)
+    local v = minit(axis, o.v)
     o.held = minit(axis)
     o.tdown = minit(axis)
     o.tlast = minit(axis)
@@ -171,7 +172,7 @@ _grid.binary.new = function(self, o)
     --rawset(o, 'list', {})
     local v = binaryvals(o)
 
-    if type(o.v) ~= 'table' or type(o.v) == 'table' and #o.v ~= #v then o.v = v end
+    if type(o.v) ~= 'table' or (type(o.v) == 'table' and #o.v ~= #v) then o.v = v end
     
     return o
 end
