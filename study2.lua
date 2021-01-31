@@ -59,7 +59,11 @@ seq = nest_ {
                 return (seq.tab.value == self.key)
             end
         }
-    },
+    }:each(function(i, v)
+        v.enabled = function(self)
+            return (seq.tab.value == self.key)
+        end
+    end),
     gates = _grid.toggle {
         x = { 1, 16 },
         y = 7,
