@@ -251,7 +251,7 @@ a small enhancement, but certainly useful once the page count starts getting hig
 
 # example
 
-a suprisingly fun step sequencer on the grid, in just 100 lines. 16 steps, a note selection page & octave page, gate selection on row 7 and a touchable playhead on row 8. take some time to study it, and feel free to make some modifications to fit your musical interests!
+the study 2 script is a suprisingly fun step sequencer on the grid, in just 100 lines. 16 steps, a note selection page & octave page, gate selection on row 7 and a touchable playhead on row 8. take some time to study it, and feel free to make some modifications to fit your musical interests!
 
 ```
 include 'lib/nest_/core'
