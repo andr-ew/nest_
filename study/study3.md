@@ -51,6 +51,8 @@ overview:
 
 (note in the case of `_grid`, `_txt`, `_txt.enc`, `_txt.key`, the value may be a table or nested tables of numbers or string)
 
+`_arc.key` is only for the 2011 edition arcs that had pushbuttons. I happen to have one of them :)
+
 # properties
 
 as much as possible, the names and behaviors of properties are shared throughout a group, and sometimes across groups. I won't list all of the properties here, instead, reference the module docs. the docs contain a complete list of every affordance and meta-affordance in the module, along with a list of properies and what affordances they belong to. while exploring the study script, I encourage you to reference the docs to take in specific information:
