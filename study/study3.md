@@ -8,7 +8,7 @@ the library affordances are split into three optional modules, each operating on
 | ---          | ---      | ---    |---             | ---
 | `grid` | grid | light | `g = grid.connect(n)` | `_grid` |
 | `arc` | arc | light |`a = arc.connect(n)` | `_arc`, `_arc.key` |
-| `txt` | keys, encoders, screen | text | `screen = screen, key = key, enc = enc` | `_txt.enc`, `_txt.key` |
+| `txt` | keys, encoders, screen | text | `screen = screen, key = key, enc = enc` | `_txt`, `_txt.enc`, `_txt.key` |
 
 in review:
 
