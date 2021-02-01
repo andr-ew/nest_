@@ -36,7 +36,7 @@ feel free to play around with study scripts 2-4 on your grid before digging in t
 
 2. [the grid & multiples](./study/study2.md)
 
-3. affordance overview
+3. [affordance overview](./study/study3.md)
 
 4. state & meta-affordances
 
