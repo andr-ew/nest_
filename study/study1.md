@@ -211,5 +211,5 @@ end
 
 - part 1: nested affordances
 - part 2: [the grid & multiples](./study2.md)
-- part 3: [affordance demo](./study3.md)
+- part 3: [affordance overview](./study3.md)
 - part 4: [state & meta-affordances](./study4.md)
