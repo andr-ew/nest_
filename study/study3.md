@@ -55,11 +55,11 @@ overview:
 
 as much as possible, the names and behaviors of properties are shared throughout a group, and sometimes across groups. I won't list all of the properties here, instead, reference the module docs. the docs contain a complete list of every affordance and meta-affordance in the module, along with a list of properies and what affordances they belong to. while exploring the study script, I encourage you to reference the docs to take in specific information:
 
-- [`nest_/grid`](./doc/grid.md)
-- [`nest_/arc`](./doc/arc.md)
-- [`nest_/norns`](./doc/norns.md)
-- [`nest_/txt`](./doc/txt.md)
-- [`nest_/core`](./doc/core.md)
+- [`nest_/grid`](../doc/grid.md)
+- [`nest_/arc`](../doc/arc.md)
+- [`nest_/norns`](../doc/norns.md)
+- [`nest_/txt`](../doc/txt.md)
+- [`nest_/core`](../doc/core.md)
 
 # example
 
