@@ -1,3 +1,7 @@
+# video
+
+[https://www.youtube.com/watch?v=8rI3b7ZaqlE](https://www.youtube.com/watch?v=8rI3b7ZaqlE)
+
 # light em up
 
 well by now you may have noticed that nothing quite that interesting has happened - let's change that... or, well we'll try. things lighting up is a decent shot.
