@@ -26,6 +26,7 @@
 [_grid.momentary](#momentary) { 
   - ... 
   - [clear](#clear)
+  
 }
 
 [_grid.toggle](#toggle) { 
