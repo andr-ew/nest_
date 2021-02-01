@@ -1,3 +1,7 @@
+# example
+
+![docs](./img/study3-01.png)
+
 # continued
 
 - part 1: [nested affordances](./study1.md)
