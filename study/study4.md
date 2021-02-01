@@ -2,6 +2,8 @@
 
 [https://www.youtube.com/watch?v=MagBGbhtZTY](https://www.youtube.com/watch?v=MagBGbhtZTY)
 
+hi I'm still editing this one
+
 # continued (but actually it's the end now)
 
 - part 1: [nested affordances](./study1.md)
