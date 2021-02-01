@@ -17,7 +17,7 @@
 
 [_grid.control](#control) {
   - ...
-  - [range](#range)
+  - [range](#range(property))
   - [controlspec](#controlspec)
   
 }
@@ -136,7 +136,7 @@ the affordance value. the format of value depends on the affordance type and the
 
 sets the brightness levels for the affordance. for most types, assigning a single integer sets the "on" level and assigning a table of two sets the "off" and "on" levels. a member of the lvl table may be a clock function, and a pointer function assigned to lvl will receive additional `x` and/or `y` arguments for relative offset being filled. 
 
-### range
+### range(property)
 
 a table in the format `{ min, max }` to specify the range of `value`.
 
