@@ -38,7 +38,7 @@ overview:
 
 | type | value | descripton | `_grid` | `_arc` | `_arc.key` | `_txt` | `_txt.enc` | `_txt.key` |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `fill` | none | a static display | x | x | | | | |
+| `fill` | none | a static display of light | x | x | | | | |
 | `label` | string | a static display of text | | | | x | | |
 | `number` | integer or decimal | a point in space | x | x | | | x | x |
 | `control` | decimal | a number bound by an internal `controlspec` | x | x | | | x | |
