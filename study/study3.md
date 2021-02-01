@@ -48,6 +48,8 @@ overview:
 | `toggle` | integer | cycles forward through a list of numbers, but usually just 0 and 1 | x | | x | | x |
 | `momentary` | 0 or 1 | becomes 1 on a rising edge, 0 on a falling edge | x | | x | | x |
 
+(note in the case of `_grid`, `_txt.enc`, `_txt.key`, the value may be a table of numbers or a table of table of numbers)
+
 # example
 
 ![docs](./img/study3-01.png)
