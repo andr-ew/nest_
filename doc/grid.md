@@ -15,9 +15,10 @@
 
 [_grid.number](#number) { ... }
 
-[_grid.fader](#fader) {
+[_grid.control](#control) {
   - ...
-  - range
+  - [range](#range)
+  - [controlspec](#controlspec)
   
 }
 
@@ -82,9 +83,9 @@ a simple output-only affordance which draws the provided `x` and `y` dimentions 
 
 a integer or "radio button" style affordance for which an integer `value` is assinged to index of the last key pressed. `x` and `y` dimentions set the size of the affordance and the range of `value`.
 
-### fader
+### control
 
-a fader style value with a decimal `value` in the range of `range = { min, max }`. `range = { -1, 1 }` will yeild a crossfader/pan style. `x` and `y` dimentions set the size of the affordance.
+like the `paramset` "control" type, a number with musicaly convenient properties. a `controlspec` is used internally, which may be provided at init time rather than properties.
 
 ### trigger
 
@@ -134,6 +135,10 @@ the affordance value. the format of value depends on the affordance type and the
 ### lvl
 
 sets the brightness levels for the affordance. for most types, assigning a single integer sets the "on" level and assigning a table of two sets the "off" and "on" levels. a member of the lvl table may be a clock function, and a pointer function assigned to lvl will receive additional `x` and/or `y` arguments for relative offset being filled. 
+
+### range
+
+a table in the format `{ min, max }` to specify the range of `value`.
 
 ### edge
 
