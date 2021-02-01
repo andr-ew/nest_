@@ -49,9 +49,7 @@ overview:
 | `toggle` | integer | cycles forward through a list of numbers, but usually just 0 and 1 | x | | x | | | x |
 | `momentary` | 0 or 1 | becomes 1 on a rising edge, 0 on a falling edge | x | | x | | | x |
 
-(note in the case of `_grid`, `_txt`, `_txt.enc`, `_txt.key`, the value may be a table or nested tables of numbers or string)
-
-`_arc.key` is only for the 2011 edition arcs that had pushbuttons. I happen to have one of them :)
+note in the case of `_grid`, `_txt`, `_txt.enc`, `_txt.key`, the value may be a table or nested tables of numbers or string. `_arc.key` is only for the 2011 edition arcs that had pushbuttons. I happen to have one of them :)
 
 # properties
 
