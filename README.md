@@ -38,7 +38,7 @@ feel free to play around with study scripts 2-4 on your grid before digging in t
 
 3. [affordance overview](./study/study3.md)
 
-4. state & meta-affordances
+4. [state & meta-affordances](./study/study4.md)
 
 get the study scripts by installing `nest_` in the maiden project manager.
 
