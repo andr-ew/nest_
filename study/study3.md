@@ -32,7 +32,7 @@ you've already been doing this with `grid`, but now you have some formality to t
 
 # affordance types
 
-rather than a long list of terms & behaviors, there are 10 affordance types - each utimately with seprate implimentations in every group that uses it - but some similarities overall. 
+rather than a long list of terms & behaviors, there are 10 affordance types - each utimately with seperate implimentations in every group that uses it - but some similarities overall. 
 
 overview:
 
