@@ -53,9 +53,8 @@ overview:
 
 # properties
 
-as much as possible, the names and behaviors of properties are shared throughout a group, and sometimes across groups. I won't list all of the properties here, instead, reference the nest_ docs. the docs contain a complete list of every affordance and meta-affordance in the group, along with a list of properies and what affordances they belong to. while exploring the study script, I encourage you to reference the docs to take in specific information
+as much as possible, the names and behaviors of properties are shared throughout a group, and sometimes across groups. I won't list all of the properties here, instead, reference the module docs. the docs contain a complete list of every affordance and meta-affordance in the module, along with a list of properies and what affordances they belong to. while exploring the study script, I encourage you to reference the docs to take in specific information:
 
-module docs:
 - [`nest_/grid`](./doc/grid.md)
 - [`nest_/arc`](./doc/arc.md)
 - [`nest_/norns`](./doc/norns.md)
@@ -64,7 +63,7 @@ module docs:
 
 # example
 
-the study 3 script is a demo of all the affordance types and thier unique iterations on grid, arc, and norns. 
+the study 3 script is a demo of all the affordance types and thier unique iterations on grid, arc, and norns. interact with the script, and reference the source code and module docs to learn about interactions that interest you.
 
 ![docs](./img/study3-01.png)
 
