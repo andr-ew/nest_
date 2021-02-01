@@ -63,7 +63,9 @@ as much as possible, the names and behaviors of properties are shared throughout
 
 # example
 
-the study 3 script is a demo of all the affordance types and thier unique iterations on grid, arc, and norns. interact with the script, and reference the source code and module docs to learn about interactions that interest you.
+the study 3 script is a demo of all the affordance types and thier unique iterations on grid, arc, and norns. interact with the script, and reference the source code and module docs to learn about interactions that interest you. every affordance has an action function that will print it's value to the REPL.
+
+for the grid, each affordance type is on a page three times, so you can understand how the behavior changes when inititalized as a point (e.g., `x = 1, y = 3`), a line (e.g., `x = { 1, 7 }, y = 5`), and a plane (e.g., `x = { 9, 15 }, y = { 2, 8 }`).
 
 ![docs](./img/study3-01.png)
 
