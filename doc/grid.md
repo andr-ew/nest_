@@ -17,7 +17,7 @@
 
 [_grid.control](#control) {
   - ...
-  - [range](#range(property))
+  - [range](#rangeproperty)
   - [controlspec](#controlspec)
   
 }
