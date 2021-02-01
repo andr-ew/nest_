@@ -16,7 +16,7 @@ in review:
 ```
 include "lib/nest_/<module>"
 ```
-- hardware is connected to a nest like this (you can connect key-value pairs to one nest):
+- hardware is connected to a nest like this (you can connect multiple key-value pairs to one nest):
 ```
 my_nest:connect {
     <key-value pairs>
