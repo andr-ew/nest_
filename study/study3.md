@@ -37,7 +37,7 @@ rather than a long list of terms & behaviors, there are 10 affordance types - ea
 overview:
 
 | type | value | descripton | `_grid` | `_arc` | `_arc.key` | `_txt` | `_txt.enc` | `_txt.key` |
-| --- | --- | --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `fill` | none | a static display | x | x | | | | |
 | `label` | string | a static display of text | x | x | | | | |
 | `number` | integer or decimal | a point in space | x | x | | | x | x |
