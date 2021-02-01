@@ -20,17 +20,17 @@ nest_ {
 }
 ```
 
-# A video
+# a video
 
 [https://www.youtube.com/watch?v=MagBGbhtZTY](https://www.youtube.com/watch?v=MagBGbhtZTY)
 
-# Compatibility
+# compatibility
 
 nest is a tool for the [monome norns](https://monome.org/) ecosystem
 
 while a norns by itself is technically the only requirement for nest (see the txt module), it tends to prove more useful when building interfaces with lots of input (grid, grid + norns, or grid + arc + norns). norns after all, just has three keys and two encoders, so many musical ideas can be expressed cleanly without this sort of system, and you get some more flexibility as a bonus (see the examples in [norns studies](https://monome.org/docs/norns/scripting/), if you haven’t already). if you want to get a feel for the sort of textual norns interfaces the txt module can be used for, feel free to skip ahead to study 3.
 
-# Studies
+# studies
 
 start here! the studies assume only basic knowledge of lua and the norns system (see [norns studies](https://monome.org/docs/norns/scripting/) if you want to get your bearings first). 
 
@@ -46,9 +46,9 @@ feel free to play around with study scripts 2-4 on your grid before digging in t
 
 get the study scripts by installing `nest_` in the maiden project manager.
 
-# Docs
+# docs
 
-## Modules
+## modules
 
 the various types and interface buidling blocks of nestworld are split up into a collection files/modules. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read up on the full details of each module and the affordances contained.
 
@@ -60,7 +60,7 @@ the various types and interface buidling blocks of nestworld are split up into a
 - [`nest_/core`](./doc/core.md)
 
 
-## Including
+## including
 
 typically, it will make the most sense to include nest by copying the required module files into your script's `/lib/nest_` folder, including them like so:
 
