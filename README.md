@@ -34,7 +34,7 @@ while a norns by itself is technically the only requirement for nest (see the tx
 
 start here! the studies assume only basic knowledge of lua and the norns system (see [norns studies](https://monome.org/docs/norns/scripting/) if you want to get your bearings first). 
 
-feel free to play around with study scripts 2-4 on your grid before digging in to the rest! (if you’re using norns gridless, see the note above on compatibility).
+get the study scripts by installing `nest_` in the maiden project manager. feel free to play around with study scripts 2-4 on your grid before digging in to the rest! (if you’re using norns gridless, see the note above on compatibility).
 
 1. [nested affordances](./study/study1.md)
 
@@ -43,8 +43,6 @@ feel free to play around with study scripts 2-4 on your grid before digging in t
 3. [affordance overview](./study/study3.md)
 
 4. [state & meta-affordances](./study/study4.md)
-
-get the study scripts by installing `nest_` in the maiden project manager.
 
 # docs
 
