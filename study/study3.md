@@ -36,15 +36,15 @@ rather than a long list of terms & behaviors, there are 9 affordance types - eac
 
 | type | value | descripton | `_grid` | `_arc` | `_arc.key` | `_txt.enc` | `_txt.key` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| fill | none | a static display | | | | | |
-| number | integer or decimal | a point in space | | | | | |
-| control | decimal | a number bound by an internal `controlspec` | | | | | |
-| option | decimal | an index in a range of options. should be rounded down before use. | | | | | |
-| list | decimal | an option that selects from a list of other affordances | | | | | |
-| range | two integers | two numbers in a table, denoting a slice of a whole | | | | | |
-| trigger | 0 or 1 | an instantaneous bang, value is used only for display | | | | | |
-| toggle | integer | cycles forward through a list of numbers, but usually just 0 and 1 | | | | | |
-| momentary | 0 or 1 | becomes 1 on a rising edge, 0 on a falling edge | | | | | |
+| `fill` | none | a static display | x | x | | | |
+| `number` | integer or decimal | a point in space | x | x | | x | x |
+| `control` | decimal | a number bound by an internal `controlspec` | x | x | | x | |
+| `option` | decimal | an index in a range of options. should be rounded down before use. | | x | | x | x |
+| `list` | decimal | an option that selects from a list of other affordances | | | | x | x |
+| `range` | two integers | two numbers in a table, denoting a slice of a whole | x | | | | |
+| `trigger` | 0 or 1 | an instantaneous bang, value is used only for display | x | | x | | x |
+| `toggle` | integer | cycles forward through a list of numbers, but usually just 0 and 1 | x | | x | | x |
+| `momentary` | 0 or 1 | becomes 1 on a rising edge, 0 on a falling edge | x | | x | | x |
 
 # example
 
