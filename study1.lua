@@ -1,5 +1,7 @@
 -- nest_ study 1
 -- nested affordances
+--
+-- (REPL only)
 
 include 'lib/nest_/core'
 include 'lib/nest_/norns'

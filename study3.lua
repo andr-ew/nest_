@@ -1,5 +1,7 @@
 -- nest_ study 3
--- affordance demo
+-- affordance overview
+--
+-- (docs on github)
 
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
@@ -9,10 +11,6 @@ include 'lib/nest_/arc'
 
 -------------------------------------------------utility functions
 
-local function gpage(self) return demo.grid.tab.value == self.k end
-local function tpage(self) return demo.txt.tab.options[demo.txt.tab.value // 1] == self.k end
-local function apage(self) return demo.arc.tab.value // 1 == self.k end
-
 local grid_trigger_level = { 
     4,
     function(s, draw)
@@ -21,7 +19,6 @@ local grid_trigger_level = {
         draw(4)
     end
 }
-
 local function gridaction(self, value, time, delta, add, rem, list)
     print(self.key)
     print('args:')
@@ -56,8 +53,7 @@ demo.grid = nest_ {
                 x = { 9, 15 },
                 y = { 2, 8 },
                 level = 15
-            },
-            enabled = gpage
+            }
         },
         -----------------------------------------number
         nest_ {
@@ -78,8 +74,7 @@ demo.grid = nest_ {
                 y = { 2, 8 },
                 level = { 4, 15 },
                 action = gridaction
-            },
-            enabled = gpage
+            }
         },
         -----------------------------------------control
         nest_ {
@@ -99,8 +94,7 @@ demo.grid = nest_ {
                 y = { 2, 8 },
                 range = { -1, 1 },
                 action = gridaction
-            },
-            enabled = gpage
+            }
         },
         -----------------------------------------trigger
         nest_ {
@@ -121,8 +115,7 @@ demo.grid = nest_ {
                 y = { 2, 8 },
                 level = grid_trigger_level,
                 action = gridaction
-            },
-            enabled = gpage
+            }
         },
         -----------------------------------------toggle
         nest_ {
@@ -143,8 +136,7 @@ demo.grid = nest_ {
                 y = { 2, 8 },
                 level = { 4, 15 },
                 action = gridaction
-            },
-            enabled = gpage
+            }
         },
         -----------------------------------------momentary
         nest_ {
@@ -165,8 +157,7 @@ demo.grid = nest_ {
                 y = { 2, 8 },
                 level = { 4, 15 },
                 action = gridaction
-            },
-            enabled = gpage
+            }
         },
         -----------------------------------------range
         nest_ {
@@ -184,10 +175,11 @@ demo.grid = nest_ {
                 x = { 9, 15 },
                 y = { 2, 8 },
                 action = gridaction
-            },
-            enabled = gpage
-        },
-    },
+            }
+        }
+    } :each(function(i, v)
+        v.enabled = function(self) return demo.grid.tab.value == self.k end
+    end),
     tab = _grid.number {
         x = { 1, 7 },
         y = 1,
@@ -237,8 +229,7 @@ demo.txt = nest_ {
                 border = 15,
                 edge = 0,
                 action = function(self, value) print(self.k, value) end
-            },
-            enabled = tpage
+            }
         },
         -------------------------------------label / display properies
         label = nest_ {
@@ -278,8 +269,7 @@ demo.txt = nest_ {
                 y = { 38, 64 - 2 },
                 border = 15,
                 value = "button"
-            },
-            enabled = tpage
+            }
         },
         -------------------------------------option (also see tab)
         option = nest_ {
@@ -306,8 +296,7 @@ demo.txt = nest_ {
                     { 'm', 'n', 'o', 'p' }
                 },
                 action = function(self, value, option) print(self.k, option) end
-            },
-            enabled = tpage
+            }
         },
         -------------------------------------list
         list = nest_ {
@@ -316,7 +305,7 @@ demo.txt = nest_ {
                 x = { 2, 96 },
                 n = 2,
                 sens = 0.5,
-                items = nest_ { 
+                items = nest_ {
                     _txt.enc.control { n = 3, label = "control 1" },
                     _txt.key.toggle { n = 3, label = "toggle" },
                     _txt.enc.control { n = 3, label = "control 2" },
@@ -330,9 +319,10 @@ demo.txt = nest_ {
                 scroll_window = 5,
                 scroll_focus = 3,
             },
-            enabled = tpage
         }
-    },
+    } :each(function(i, v)
+        v.enabled = function(self) return demo.txt.tab.options[demo.txt.tab.value // 1] == self.k end
+    end),
     tab = _txt.enc.option {
         x = 2, y = 2, n = 1, margin = 6,
         sens = 0.5,
@@ -372,8 +362,7 @@ demo.arc = nest_ {
             delta = _arc.delta {
                 n = 2,
                 action = function(self, d) print(self.k, d) end
-            },
-            enabled = apage
+            }
         },
         -------------------------------------number
         nest_ {
@@ -396,8 +385,7 @@ demo.arc = nest_ {
                 range = { -math.huge, math.huge },
                 cycle = 20,
                 action = function(self, value) print(self.k, value) end
-            },
-            enabled = apage
+            }
         },
         -------------------------------------control
         nest_ {
@@ -418,8 +406,7 @@ demo.arc = nest_ {
                 sens = 1,
                 level = { 4, 4, 15 },
                 action = function(self, value) print(self.k, value) end
-            },
-            enabled = apage
+            }
         },
         -------------------------------------option
         nest_ {
@@ -455,10 +442,11 @@ demo.arc = nest_ {
                     return r
                 end,
                 action = function(s, v) print(math.floor(v)) end
-            },
-            enabled = apage
+            }
         }
-    },
+    } :each(function(i, v)
+        v.enabled = function(self) return demo.arc.tab.value // 1 == self.k end
+    end),
     tab = _arc.option {
         x = { 42, 24 }, n = 1,
         sens = 1/16,

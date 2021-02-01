@@ -1,7 +1,7 @@
 -- nest_ study 2
 -- the grid & multiples
 --
--- grid:
+--      1-16
 --   1 : page select
 -- 2-6: note/octave
 --   3: gate
