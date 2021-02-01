@@ -1,6 +1,6 @@
 # video
 
-![https://www.youtube.com/watch?v=MagBGbhtZTY](https://www.youtube.com/watch?v=MagBGbhtZTY)
+[https://www.youtube.com/watch?v=MagBGbhtZTY](https://www.youtube.com/watch?v=MagBGbhtZTY)
 
 # continued (but actually it's the end)
 
