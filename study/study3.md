@@ -32,25 +32,39 @@ you've already been doing this with `grid`, but now you have some formality to t
 
 # affordance types
 
-rather than a long list of terms & behaviors, there are 9 affordance types - each utimately with seprate implimentations in every group that uses it - but some similarities overall. 
+rather than a long list of terms & behaviors, there are 10 affordance types - each utimately with seprate implimentations in every group that uses it - but some similarities overall. 
 
 overview:
 
-| type | value | descripton | `_grid` | `_arc` | `_arc.key` | `_txt.enc` | `_txt.key` |
+| type | value | descripton | `_grid` | `_arc` | `_arc.key` | `_txt` | `_txt.enc` | `_txt.key` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `fill` | none | a static display | x | x | | | |
-| `number` | integer or decimal | a point in space | x | x | | x | x |
-| `control` | decimal | a number bound by an internal `controlspec` | x | x | | x | |
-| `option` | decimal | an index in a range of options. should be rounded down before use. | | x | | x | x |
-| `list` | decimal | an option that selects from a list of other affordances | | | | x | x |
-| `range` | two integers | two numbers in a table, denoting a slice of a whole | x | | | | |
-| `trigger` | 0 or 1 | an instantaneous bang, value is used only for display | x | | x | | x |
-| `toggle` | integer | cycles forward through a list of numbers, but usually just 0 and 1 | x | | x | | x |
-| `momentary` | 0 or 1 | becomes 1 on a rising edge, 0 on a falling edge | x | | x | | x |
+| `fill` | none | a static display | x | x | | | | |
+| `label` | string | a static display of text | x | x | | | | |
+| `number` | integer or decimal | a point in space | x | x | | | x | x |
+| `control` | decimal | a number bound by an internal `controlspec` | x | x | | | x | |
+| `option` | decimal | an index in a range of options. should be rounded down before use. | | x | | | x | x |
+| `list` | decimal | an option that selects from a list of other affordances | | | | | x | x |
+| `range` | two integers | two numbers in a table, denoting a slice of a whole | x | | | | | |
+| `trigger` | 0 or 1 | an instantaneous bang, value is used only for display | x | | x | | | x |
+| `toggle` | integer | cycles forward through a list of numbers, but usually just 0 and 1 | x | | x | | | x |
+| `momentary` | 0 or 1 | becomes 1 on a rising edge, 0 on a falling edge | x | | x | | | x |
 
 (note in the case of `_grid`, `_txt.enc`, `_txt.key`, the value may be a table of numbers or a table of table of numbers)
 
+# properties
+
+as much as possible, the names and behaviors of properties are shared throughout a group, and sometimes across groups. I won't list all of the properties here, instead, reference the nest_ docs. the docs contain a complete list of every affordance and meta-affordance in the group, along with a list of properies and what affordances they belong to. while exploring the study script, I encourage you to reference the docs to take in specific information
+
+module docs:
+- [`nest_/grid`](./doc/grid.md)
+- [`nest_/arc`](./doc/arc.md)
+- [`nest_/norns`](./doc/norns.md)
+- [`nest_/txt`](./doc/txt.md)
+- [`nest_/core`](./doc/core.md)
+
 # example
+
+the study 3 script is a demo of all the affordance types and thier unique iterations on grid, arc, and norns. 
 
 ![docs](./img/study3-01.png)
 
