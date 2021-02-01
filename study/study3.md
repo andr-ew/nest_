@@ -32,7 +32,9 @@ you've already been doing this with `grid`, but now you have some formality to t
 
 # affordance types
 
-rather than a long list of terms & behaviors, there are 9 affordance types - each utimately with seprate implimentations in every group - but some similarities overall. overview:
+rather than a long list of terms & behaviors, there are 9 affordance types - each utimately with seprate implimentations in every group - but some similarities overall. 
+
+overview:
 
 | type | value | descripton | `_grid` | `_arc` | `_arc.key` | `_txt.enc` | `_txt.key` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
