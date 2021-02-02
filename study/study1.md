@@ -1,3 +1,7 @@
+# video
+
+[https://www.youtube.com/watch?v=-vYwMogt0gE](https://www.youtube.com/watch?v=-vYwMogt0gE)
+
 # hi
 
 hi! ok. well for starters here let's make a blank script in your `nest_` folder. it's great fun following along. nest is a library, so before digging in we have to include some stuff:
@@ -48,7 +52,7 @@ dave = nest_ {
 
 # affording
 
-affordances live in nests. 
+affordances also live in nests. 
 
 affordances look much like nests like tables, but typically what you fill them with has special meaning. the fillings are called properties. the two universal properties are `value` and `action`.
 ```
@@ -156,60 +160,195 @@ end
 ```
 if we re-run the snippet we'll see those printouts right away.
 
-# example
+# light em up
 
-the study 1 script is just a simple nest structure demonstrating the various techniques outlined. get comfortable changing values and calling `update` in the repl on various affordances and checking out the `parent` and `key` properties!
+well by now you may have noticed that nothing quite that interesting has happened - let's change that... or, well we'll try. things lighting up is a decent shot.
 
+plug in the grid & start a fresh script. we'll add one more module to the stack this time around:
 ```
--- nest_ study 1
--- nested affordances
-
 include 'lib/nest_/core'
 include 'lib/nest_/norns'
+include 'lib/nest_/grid'
+```
+for starters, now that we're actually working with harware we'll need to add an extra step to tell our nest to connect to that harware:
+ ```
+ our_nest:connect {
+    g = grid.connect()
+ }
+ ```
+the keys & values of that connect table are specific to each device & you can connect a single nest to any number of devices - or you can have two nests talking to two different grids.
 
--- a nest structure named dave
-dave = nest_ {
-    dale = _affordance {
-        value = 5,
-        action = function(self, value)
-            print("my name is " .. self.key)
-            print("my value is " .. value)
-        end
-    },
-    elanore = _affordance {
-        value = 6,
-        action = function(self, value)
-            print("my name is " .. self.key)
-            print("my value is " .. value)
-        end
-    },
-    things = nest_ {
-        _affordance {
-            value = 7,
-            action = function(self, value)
-                print("I'm thing number " .. self.key)
-                print("my value is " .. value)
-            end
-        },
-        _affordance {
-            value = 8,
-            action = function(self, value)
-                print("I'm thing number " .. self.key)
-                print("my value is " .. value)
-                print("dale's value is " .. self.parent.parent.dale.value)
-            end
-        }
+lights time!
+```
+n = nest_ {
+    light = _grid.fill {
+        x = 1,
+        y = 1,
+        level = 15
     }
 }
 
-function init()
-    dave:init() -- initialize dave on script load, which updates all of dave's affordances
+n:connect { g = grid.connect() }
+function init() n:init() end
+```
+well, just one light - in the upper left corner - but hey at least something is happening now. we've introduced our first grid affordance, called `fill`, which lives in a handy table for all the grid affordances called `_grid`. each affordance brings along it's own set of properties in addition to the basics. pretty expected stuff so far - `x` and `y` set a position, `level` sets led brightness. change `level` to 4 and you'll get something dimmer. these three properties change the appearence - or output behavior - of the affordance. other affordances will show us properties that configure input behavior as well (some change both!)
+
+# it's me again, numbers
+
+although `fill`, has a value, it doesn't have any particular meaning when it comes to input or output - let's switch it out for a `number`:
+```
+n = nest_ {
+    light = _grid.number {
+        x = { 1, 5 },
+        y = 1,
+        level = 15,
+        action = function(self, value)
+            print(value)
+        end
+    }
+}
+
+n:connect { g = grid.connect() }
+function init() n:init() end
+```
+this time, we're sending a table to `x` because `number` occupies multiple keys - we're telling the affordance to stretch from 1 to 5 on the first row. running the script again you'll also see a light in the top left. as before, you can run:
+```
+n.light.value = 3
+n.light:update()
+```
+in the REPL to update the value. when you run `update` this time, you'll see the light move to the the third key - but the easier way to update value is to interact wiht the grid - each keypress will scoot the light, run the action function, and print to the REPL. 
+
+but printing is boring, let's make sounds ! 
+```
+engine.name = "PolyPerc"
+
+scale = { 0, 2, 4, 7, 9 } -- scale degrees in semitones
+root = 440 * 2^(5/12) -- the d above middle a
+
+function play(deg)
+    local octave = -2
+    local note = scale[deg]
+    local hz = root * 2^octave * 2^(note/12)
+    
+    engine.hz(hz)
+end
+
+n = nest_ {
+    keyboard = _grid.number {
+        x = { 1, 5 },
+        y = 1,
+        level = 15,
+        action = function(self, value)
+            play(value)
+        end
+    }
+}
+
+n:connect { g = grid.connect() }
+function init() n:init() end
+```
+with the addition of an engine & some simple music theory we can use our `number` to index a chosen scale - each keypress pinging the engine with a new note. a teeny tiny keyboard is born!
+
+# example
+
+our first study script is a tiny strummed instrument with locational awareness. each `number` plays a single note based on its `value` and `y` positon before influencing the affordance above it, causing a chain reaction (simple [clock](https://monome.org/docs/norns/clocks/) delays are used to create the strumming effect).
+
+```
+include 'lib/nest_/core'
+include 'lib/nest_/norns'
+include 'lib/nest_/grid'
+
+engine.name = "PolyPerc"
+
+scale = { 0, 2, 4, 7, 9 } -- scale degrees in semitones
+root = 440 * 2^(5/12) -- the d above middle a
+
+function play(deg, oct)
+    local octave = oct - 3
+    local note = scale[deg]
+    local hz = root * 2^octave * 2^(note/12)
+    
+    engine.hz(hz)
+end
+
+strum = nest_ {
+    _grid.number {
+        x = { 1, 5 },
+        y = 1,
+        value = math.random(5),
+        
+        action = function(self, value)
+            play(value, self.y)
+        end
+    },
+    _grid.number {
+        x = { 1, 5 },
+        y = 2,
+        value = math.random(5),
+        
+        action = function(self, value)
+            play(value, self.y)
+            local above = self.parent[self.key - 1]
+            
+            clock.run(function()
+                clock.sleep(0.2)
+                
+                above.value = (above.value == 1) and 5 or (above.value - 1) 
+                above:update()
+            end)
+        end
+    },
+    _grid.number {
+        x = { 1, 5 },
+        y = 3,
+        value = math.random(5),
+        
+        action = function(self, value)
+            play(value, self.y)
+            local above = self.parent[self.key - 1]
+            
+            clock.run(function()
+                clock.sleep(0.15)
+                
+                above.value = math.random(5)
+                above:update()
+            end)
+        end
+    },
+    _grid.number {
+        x = { 1, 5 },
+        y = 4,
+        value = math.random(5),
+        
+        action = function(self, value)
+            play(value, self.y)
+            local above = self.parent[self.key - 1]
+            
+            clock.run(function()
+                clock.sleep(0.1)
+                
+                above.value = above.value % 5 + 1,
+                above:update()
+            end)
+        end
+    }
+}
+
+strum:connect { g = grid.connect() }
+
+function init() 
+    strum:init()
 end
 ```
+
+# challenge:
+
+- add another row, or widen the scale and the affordance widths
+- have row 1 affect row 4, creating an infinite loop
 
 # continued
 
 - part 1: nested affordances
-- part 2: [the grid & multiples](./study2.md)
+- part 2: [multiplicity](./study2.md)
 - part 3: [affordance overview](./study3.md)
 - part 4: [state & meta-affordances](./study4.md)
