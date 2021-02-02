@@ -52,7 +52,7 @@ dave = nest_ {
 
 # affording
 
-affordances live in nests. 
+affordances also live in nests. 
 
 affordances look much like nests like tables, but typically what you fill them with has special meaning. the fillings are called properties. the two universal properties are `value` and `action`.
 ```
