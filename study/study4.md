@@ -2,6 +2,35 @@
 
 [https://www.youtube.com/watch?v=MagBGbhtZTY](https://www.youtube.com/watch?v=MagBGbhtZTY)
 
+# metadata
+
+in the grid demo in the last study script, you might've seen some extra data points being printed beyond. grid action functions receive additional arguments beyond `value` let's touch base on what those are and how they can be used in the case of momentary:
+ ```
+ n = nest_ {
+    keyboard = _grid.momentary {
+        x = { 1, 5 },
+        y = { 1, 4 },
+        level = { 4, 15 },
+        action = function(self, value, time, delta, added, removed, list)
+            print('1. self')
+            print('2. value: ' .. tostring(value))
+            print('3. time: ' .. tostring(time))
+            print('4. delta: ' .. tostring(delta))
+            print('5. added: ' .. tostring(added))
+            print('6. removed: ' .. tostring(removed))
+            print('7. list: ' .. tostring(list))
+        end
+    }
+} :connect { g = grid.connect() }
+```
+
+- `time`: the amount of time in seconds that an affordance is held before releasing.
+- `delta`: may eiter represent the change in `value` or the change in time between sucessive interactions (in the case of momentary it's a change in time).
+- `added`: the index of the last key to go high.
+- `removed`: the index of the last key to go low.
+- `list`: list of high indicies.
+
+
 # remembering
 
 let's jump back to study 2 - it's fun right ? did you make any neat sequences you like ? well if you did they are probably gone forever now, as with most fresh scripts everything is tossed to the ether upon loading another script or powering down. we call that collection of data being tossed the script's **state**. we can easily circumvent such limitations in the nest_.
@@ -26,67 +55,7 @@ persistent = false
 ```
 done & done. `persistent` means "this affordance value will be saved" - it defaults to true for most, but not all, affordances. only persistent affordances will be updated on `init` too.
 
-# finger sounds
-
-one of my favorite uses of the grid is a keyboard, mapping a particular scale to the x-axis and moving up an octave every row. let's start on that that:
-```
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
-
-engine.name = "PolySub" -- polysynth engine
-scale = { 0, 2, 4, 7, 9 } -- scale degrees in semitones
-root = 440 * 2^(5/12) -- the d above middle a
-
-n = nest_ {
-    keyboard = _grid.momentary {
-        x = { 1, #scale },
-        y = { 1, 4 },
-        level = { 4, 15 },
-        action = function(self, value)
-            print(value)
-        end
-    }
-} :connect { g = grid.connect() }
-
-function init() n:init() end
-```
-momentary is like toggle, but high only as long as your finger stays on the key - just right for our keyboard. the value getting printed currently looks much like toggle:
-```
-{
-    { 0, 0, 0, 0, },
-    { 0, 0, 1, 0, },
-    { 0, 0, 0, 0, },
-    { 0, 1, 0, 0, },
-    { 0, 0, 0, 0, },
-}
-```
-however, for our engine we need to send note on & off messages, not the held state of every key. fortunately, the grid action functions are provided with more info, should you need it. the full argument list looks like this:
-```
-action = function(self, value, time, delta, added, removed, list)
-```
-- `time`: the amount of time in seconds that an affordance is held before releasing.
-- `delta`: may eiter represent the change in `value` or the change in time between sucessive interactions (in the case of momentary it's a change in time).
-- `added`: the index of the last key to go high.
-- `removed`: the index of the last key to go low.
-- `list`: list of high indicies.
-
-`add` and `rem` are what's needed for the keyboard - when `added` is sent we know to add a note, when `removed` is sent we remove one. we can generate the needed note ID & frequency requested by the engine using the `x` and `y` coordinates of `added or removed` and our specified root note & scale - the rest is just math. all together that looks like this:
-```
-action = function(self, value, t, d, added, removed)
-    local key = added or removed
-    
-    local id = key.y * 7 + key.x -- a unique integer for this grid key
-
-    local octave = key.y - 5
-    local note = scale[key.x]
-    local hz = root * 2^octave * 2^(note/12)
-
-    if added then engine.start(id, hz)
-    elseif removed then engine.stop(id) end
-end
-```
-hit run & you've got yourself a little pentatonic player (oh, and if pentatonics aren't your thing you can go ahead and switch up that scale).
+# patterns of space
 
 # patterns of time
 
