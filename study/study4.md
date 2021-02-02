@@ -26,7 +26,7 @@ persistent = false
 ```
 done & done. `persistent` means "this affordance value will be saved" - it defaults to true for most, but not all, affordances. only persistent affordances will be updated on `init` too.
 
-# playing the ivories
+# finger sounds
 
 one of my favorite uses of the grid is a keyboard, mapping a particular scale to the x-axis and moving up an octave every row. let's start on that that:
 ```
@@ -87,6 +87,10 @@ action = function(self, value, t, d, added, removed)
 end
 ```
 hit run & you've got yourself a little pentatonic player (oh, and if pentatonics aren't your thing you can go ahead and switch up that scale).
+
+# patterns of time
+
+
 
 # continued (but actually it's the end now)
 
