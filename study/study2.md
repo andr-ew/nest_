@@ -76,6 +76,7 @@ now we're cycling forward from 0 to 3, with a different brightness level shown f
 { 0, 1, 1, 0, 1, }
 ```
 and stretching out to a plane we get a table of tables:
+
 ```
 { 
     { 0, 0, 1, 0, 0, },
