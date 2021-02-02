@@ -21,25 +21,20 @@ polysub = include 'we/lib/polysub'
 delay = include 'awake/lib/halfsecond'
 local cs = require 'controlspec'
 
-scale = { 0, 2, 4, 7, 9 } -- scale degrees in semitones (you can add more than 5)
+scale = { 0, 2, 4, 7, 9 }
 root = 440 * 2^(5/12) -- the d above middle a
 
 engine.name = 'PolySub'
 
 synth = nest_ {
     grid = nest_ {
-        
-        -- keyboard & meta-affordances
         pattern_group = nest_ {
             keyboard = _grid.momentary {
-                
                 x = { 1, #scale }, -- notes on the x axis
                 y = { 2, 8 },-- octaves on the y axis
                 
                 action = function(self, value, t, d, added, removed)
-                    
-                    local key = added or removed -- the key that was pressed or released
-                    
+                    local key = added or removed
                     local id = key.y * 7 + key.x -- a unique integer for this grid key
                     
                     local octave = key.y - 5
@@ -50,16 +45,14 @@ synth = nest_ {
                     elseif removed then engine.stop(id) end
                 end
             },
-            control_preset = _grid.preset { -- preset selector for the faders
+            control_preset = _grid.preset {
                 y = 1, x = { 9, 16 },
                 target = function(self) return synth.grid.controls end
             }
         },
-        pattern = _grid.pattern { -- pattern recorder for the keyboard + preset selector
+        pattern = _grid.pattern {
             y = 1, x = { 1, 8 },
             target = function(self) return synth.grid.pattern_group end,
-            
-            -- clear out held notes when a pattern stops
             stop = function()
                 synth.grid.pattern_group.keyboard:clear()
                 engine.stopAll()
