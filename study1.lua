@@ -30,7 +30,6 @@ strum = nest_ {
         value = math.random(5),
         
         action = function(self, value)
-            -- play a note
             play(value, self.y)
         end
     },
@@ -41,7 +40,7 @@ strum = nest_ {
         
         action = function(self, value)
             play(value, self.y)
-            local above = strum[self.key - 1]
+            local above = self.parent[self.key - 1]
             
             clock.run(function()
                 clock.sleep(0.2)
@@ -58,7 +57,7 @@ strum = nest_ {
         
         action = function(self, value)
             play(value, self.y)
-            local above = strum[self.key - 1]
+            local above = self.parent[self.key - 1]
             
             clock.run(function()
                 clock.sleep(0.15)
@@ -75,7 +74,7 @@ strum = nest_ {
         
         action = function(self, value)
             play(value, self.y)
-            local above = strum[self.key - 1]
+            local above = self.parent[self.key - 1]
             
             clock.run(function()
                 clock.sleep(0.1)
