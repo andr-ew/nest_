@@ -1,6 +1,6 @@
-`{.:}`
-
 # nest_
+
+![logo](study/img/nest_.png)
 
 nest is a language of touch for objects by monome
 
