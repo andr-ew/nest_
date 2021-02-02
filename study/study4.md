@@ -36,17 +36,13 @@ in the grid demo in the last study script, you might've seen some extra data poi
 if time > 0.2 then
     --clear a loop
 else
-    --do the normall thing
+    --do the normal thing
 end
 ```
 delta, which will measure the time between sucsessive downstrokes, can be used as a tap tempo control.
 
 `added`, `removed`, and `list` are only meaningful when `momentary` occupies more than one key. they provide an alternave view into `value`. `list` is a table of high indicies within `value`. `added` and `removed` show the most recent index that has been added or removed from `list`. this is useful in the case of polysynth engines or midi, which need note on & off messages rather than the full state of a keyboard. using these arguments, we can extend the example above into a simple polyphonic keyboard:
 ```
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
-
 engine.name = "PolySub"
 scale = { 0, 2, 4, 7, 9 }
 root = 440 * 2^(5/12) -- the d above middle a
@@ -54,15 +50,14 @@ root = 440 * 2^(5/12) -- the d above middle a
 n = nest_ {
     keyboard = _grid.momentary {
         x = { 1, #scale },
-        y = { 1, 4 },
+        y = 1,
         level = { 4, 15 },
-        action = function(self, value)
+        action = function(self, value, time, delta, added, removed)
             local key = added or removed
-    
-            local id = key.y * 7 + key.x -- a unique integer for this grid key
+            local id = key -- a unique integer for this grid key
 
-            local octave = key.y - 5
-            local note = scale[key.x]
+            local octave = -2
+            local note = scale[key]
             local hz = root * 2^octave * 2^(note/12)
 
             if added then engine.start(id, hz)
@@ -70,10 +65,7 @@ n = nest_ {
         end
     }
 } :connect { g = grid.connect() }
-
-function init() n:init() end
 ```
-
 
 # remembering
 
@@ -97,13 +89,272 @@ one thing that's kinda wierd: the `step` value is saved in our sequencer. this m
 ```
 persistent = false
 ```
-done & done. `persistent` means "this affordance value will be saved" - it defaults to true for most, but not all, affordances. only persistent affordances will be updated on `init` too.
+done & done. `persistent` means "this affordance value will be saved" - it defaults to true for most, but not all, affordances. only persistent affordances will be updated on `init`.
 
-# patterns of space
+# patterns in space
 
-# patterns of time
+we can use these state saving functions within a script as wel - there's two affordance-wide functions for this, let's try it out with a `toggle`:
+```
+n = nest_ {
+    t = _grid.toggle {
+        x = { 1, 5 },
+        y = 1,
+        level = { 4, 15 },
+        action = function(self, value)
+            print(value)
+        end
+    }
+} :connect { g = grid.connect() }
+```
+create a pattern of lights - to save it for later, run `past = n.t:get()` in the REPL. create a new pattern, then run `n.t:set(past)` to return to the past.
 
+we can use these two functions inside another affordance as the foundation of a touchable preset system. the `grid` module comes with a shortcut for this:
+```
+n = nest_ {
+    t = _grid.toggle {
+        x = { 1, 5 },
+        y = 1,
+        level = { 4, 15 },
+        action = function(self, value)
+            print(value)
+        end
+    },
+    preset = _grid.preset {
+        x = { 1, 5 },
+        y = 2,
+        target = function() return n.t end
+    }
+} :connect { g = grid.connect() }
+```
+`preset` is like `number` but each value represents a preset slot - hitting a key either opens up a new slot for modification or recalls a preset. try creating a unique toggle pattern in every preset slot & play around with preset recall.
 
+we call `preset` a **meta-affordance** because unlike other other affordances, the `action` function comes predefined - it's just used to observe and modify other affordances. `target` is the state to observe - it can be an affordance or a nest of affordances (all of their values will be pulled into preset storage). if we don't want a partuclar affordance or nest to be affected by meta-affordances, we can set `observable = false`. in the snippet above, it seems like `target = n.t` would be sensible, but in practice, lua creates nested tables from the inside out so we get an error saying `n` is nil. a function returning our desired object is a simple workaround.
+
+# patterns in time
+
+there is one other meta-affordance bundled in `grid`. `pattern` records input on a target and plays it back in a loop - one of the defining features of apps like earthsea and mlr. let's give it a whirl with the poly keyboard example:
+```
+engine.name = "PolySub"
+scale = { 0, 2, 4, 7, 9 }
+root = 440 * 2^(5/12) -- the d above middle a
+
+n = nest_ {
+    keyboard = _grid.momentary {
+        x = { 1, #scale },
+        y = 1,
+        level = { 4, 15 },
+        action = function(self, value, time, delta, added, removed)
+            local key = added or removed
+            local id = key -- a unique integer for this grid key
+            
+            local octave = -2
+            local note = scale[key]
+            local hz = root * 2^octave * 2^(note/12)
+
+            if added then engine.start(id, hz)
+            elseif removed then engine.stop(id) end
+        end
+    },
+    pattern = _grid.pattern {
+        x = { 1, 5 },
+        y = 2,
+        target = function() return n.keyboard end
+    }
+} :connect { g = grid.connect() }
+```
+`pattern` is like a toggle with many states & all five keys are unique record/playback buttons. the first press initiates recording (dim blinking state), then once playback is happening it turns into a play/pause toggle. play around with creating a few asycnronous loops on your tiny keyboard. holding and releasing a loop key will clear it - you can also double tap to overdub on top of a playing pattern.
+
+five patterns playing at once might be a lot to handle for this smol synthesizer, so we might consider using a param to limit the polyphony of playback in the `pattern` affordance:
+```
+count = 1
+```
+now only one pattern will play at a time (all of the grid afforances have a `count` property, by the way). this is useful for creating a few alternating musical measures that can be switched out by hand. 
+
+along the way you might've noticed that some hung notes might be happening when switching patterns or pausing. we can use the `stop` function in our `pattern` to clear things out in these cases (`clear` is handy reset function specific to `momentary`):
+```
+stop = function()
+    n.keyboard:clear()
+    engine.stopAll()
+end
+```
+
+oh and if you weren't already wondering, you can absolutely pattern record preset recall, and store patterns in presets. both are also `persistent` by default and fully compatible with the `load`/`save` feature.
+
+# example
+
+our fourth & final study script is a pretty complete and playable synth with a grid keyboard, a delay, pattern recorders, and presets. we're using the `control` affordance on both the grid and norns (using `_txt.control`) to map values to `PolySub` and `halfsecond` - it works a lot like the params version of control, and we've referenced `polysub.lua` and `halfsecond.lua` to configure things the same as the are in the params. things are grouped so that the pattern recorders can target both the keyboard and preset recall.
+```
+include 'lib/nest_/core'
+include 'lib/nest_/norns'
+include 'lib/nest_/grid'
+include 'lib/nest_/txt'
+
+polysub = include 'we/lib/polysub'
+delay = include 'awake/lib/halfsecond'
+local cs = require 'controlspec'
+
+scale = { 0, 2, 4, 7, 9 }
+root = 440 * 2^(5/12) -- the d above middle a
+
+engine.name = 'PolySub'
+
+synth = nest_ {
+    grid = nest_ {
+        pattern_group = nest_ {
+            keyboard = _grid.momentary {
+                x = { 1, #scale }, -- notes on the x axis
+                y = { 2, 8 },-- octaves on the y axis
+                
+                action = function(self, value, t, d, added, removed)
+                    local key = added or removed
+                    local id = key.y * 7 + key.x -- a unique integer for this grid key
+                    
+                    local octave = key.y - 5
+                    local note = scale[key.x]
+                    local hz = root * 2^octave * 2^(note/12)
+                    
+                    if added then engine.start(id, hz)
+                    elseif removed then engine.stop(id) end
+                end
+            },
+            control_preset = _grid.preset {
+                y = 1, x = { 9, 16 },
+                target = function(self) return synth.grid.controls end
+            }
+        },
+        pattern = _grid.pattern {
+            y = 1, x = { 1, 8 },
+            target = function(self) return synth.grid.pattern_group end,
+            stop = function()
+                synth.grid.pattern_group.keyboard:clear()
+                engine.stopAll()
+            end
+        },
+    
+        -- synth controls
+        controls = nest_ {
+            shape = _grid.control {
+                x = 9, y = { 2, 8 },
+                action = function(self, value) engine.shape(value) end
+            },
+            timbre = _grid.control {
+                x = 10, y = { 2, 8 },
+                v = 0.5,
+                action = function(self, value) engine.timbre(value) end
+            },
+            noise = _grid.control {
+                x = 11, y = { 2, 8 },
+                action = function(self, value) engine.noise(value) end
+            },
+            hzlag = _grid.control {
+                x = 12, y = { 2, 8 },
+                range = { 0, 10 },
+                action = function(self, value) engine.hzLag(value) end
+            },
+            cut = _grid.control {
+                x = 13, y = { 2, 8 },
+                range = { 1.5, 8 },
+                value = 8,
+                action = function(self, value) engine.cut(value) end
+            },
+            attack = _grid.control {
+                x = 14, y = { 2, 8 },
+                range = { 0.01, 10 },
+                value = 0.01,
+                action = function(self, value)
+                    engine.cutAtk(value)
+                    engine.ampAtk(value)
+                end
+            },
+            sustain = _grid.control {
+                x = 15, y = { 2, 8 },
+                value = 1,
+                action = function(self, value)
+                    engine.cutSus(value)
+                    engine.ampSus(value)
+                end
+            },
+            release = _grid.control {
+                x = 16, y = { 2, 8 },
+                range = { 0.01, 10 },
+                value = 0.01,
+                action = function(self, value)
+                    engine.cutDec(value)
+                    engine.ampDec(value)
+                    engine.cutRel(value)
+                    engine.ampRel(value)
+                end
+            }
+        }
+    },
+    
+    -- delay controls
+    screen = nest_ {
+        delay = _txt.enc.control {
+            x = 2, y = 8,
+            value = 0.5,
+            n = 1,
+            action = function(self, value) softcut.level(1, value) end
+        },
+        rate = _txt.enc.control {
+            x = 2, y = 30,
+            range = { 0.5, 2 },
+            warp = 'exp',
+            value = 0.5,
+            n = 2,
+            action = function(self, value) 
+                local dir = (self.parent.reverse.value == 1) and -1 or 1
+                softcut.rate(1, value * dir) 
+                print("rate", value * dir)
+            end
+        },
+        feedback = _txt.enc.control {
+            x = 64, y = 30,
+            n = 3,
+            value = 0.75,
+            action = function(self, value) softcut.pre_level(1, value) end
+        },
+        reverse = _txt.key.toggle {
+            x = 2, y = 50,
+            n = 2,
+            action = function(self, value) 
+                local dir = (value == 1) and -1 or 1
+                local rate = self.parent.rate.value
+                softcut.rate(1, rate * dir)
+                print("rate", rate * dir)
+            end
+        }
+    }
+}
+
+synth.grid:connect {
+    g = grid.connect()
+}
+
+synth.screen:connect {
+    screen = screen,
+    key = key,
+    enc = enc
+}
+
+function init()
+    delay.init()
+    polysub.params()
+    
+    synth:load()
+    synth:init()
+end
+
+function cleanup()
+    synth:save()
+end
+```
+
+# challenge
+
+- reference `polysub.lua` to map alternate synth controls based on your tastes
+- rearrange things to have preset control over patterns rather than pattern control over presets (I think I like this variant better)
+- limit `pattern.count` to one and add another pattern recorder to record pattern switching (like a meta-sequencer)
 
 # continued (but actually it's the end now)
 
