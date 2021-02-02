@@ -352,6 +352,16 @@ function init()
 end
 ```
 
+# challenge
+
+- add another toggle in the top right to reverse sequence playback
+- change the transposition of the octave page to fifths rather than octaves.
+- add a `number` to control the tempo on `y = 1, x = { 3, 14 }` (we're using the global clock, so map it to the [global tempo param](https://monome.org/docs/norns/clocks/#parameters).
+- disable the playhead jumping input on `step` and add an output-disabled `length` control (so hitting a key detirmines the length of the sequence).
+- modify pages 1 & 2 to have thier own independent `step` and `length` affordances, incrimenting & wrapping them independently in the clock. you'll be left with something a bit like awake, with transposition patterns phasing against notes !
+- connect to crow, midi, etc.
+- do many, many other things that can be done with sequencers. if this is your thing you don't even need to read the rest of these studies!
+
 # continued
 
 - part 1: [nested affordances](./study1.md)
