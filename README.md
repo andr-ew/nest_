@@ -38,7 +38,7 @@ get the study scripts by installing `nest_` in the maiden project manager. feel 
 
 1. [nested affordances](./study/study1.md)
 
-2. [the grid & multiples](./study/study2.md)
+2. [multiplicity](./study/study2.md)
 
 3. [affordance overview](./study/study3.md)
 
