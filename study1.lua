@@ -27,7 +27,6 @@ strum = nest_ {
     a = _grid.number {
         x = { 1, 5 },
         y = 1,
-        level = { 4, 15 },
         value = math.random(5),
         
         action = function(self, value)
@@ -38,7 +37,6 @@ strum = nest_ {
     b = _grid.number {
         x = { 1, 5 },
         y = 2,
-        level = { 4, 15 },
         value = math.random(5),
         
         action = function(self, value)
@@ -56,7 +54,6 @@ strum = nest_ {
     c = _grid.number {
         x = { 1, 5 },
         y = 3,
-        level = { 4, 15 },
         value = math.random(5),
         
         action = function(self, value)
@@ -74,7 +71,6 @@ strum = nest_ {
     d = _grid.number {
         x = { 1, 5 },
         y = 4,
-        level = { 4, 15 },
         value = math.random(5),
         
         action = function(self, value)
