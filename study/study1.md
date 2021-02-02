@@ -247,7 +247,7 @@ with the addition of an engine & some simple music theory we can use our `number
 
 # example
 
-our first study script is a tiny strummed instrument with contextual awareness. each `number` plays a single note based on its `value` and `y` positon before influencing the affordance above it, causing a chain reaction (simple [clock](https://monome.org/docs/norns/clocks/) delays are used to create the strumming effect).
+our first study script is a tiny strummed instrument with locational awareness. each `number` plays a single note based on its `value` and `y` positon before influencing the affordance above it, causing a chain reaction (simple [clock](https://monome.org/docs/norns/clocks/) delays are used to create the strumming effect).
 
 ```
 include 'lib/nest_/core'
@@ -268,60 +268,63 @@ function play(deg, oct)
 end
 
 strum = nest_ {
-    a = _grid.number {
+    _grid.number {
         x = { 1, 5 },
         y = 1,
         value = math.random(5),
+        
         action = function(self, value)
-            -- play a note
             play(value, self.y)
         end
     },
-    b = _grid.number {
+    _grid.number {
         x = { 1, 5 },
         y = 2,
         value = math.random(5),
+        
         action = function(self, value)
             play(value, self.y)
+            local above = strum[self.key - 1]
             
-            -- decriment & wrap a
             clock.run(function()
                 clock.sleep(0.2)
                 
-                strum.a.value = (strum.a.value == 1) and 5 or (strum.a.value - 1) 
-                strum.a:update()
+                above.value = (above.value == 1) and 5 or (above.value - 1) 
+                above:update()
             end)
         end
     },
-    c = _grid.number {
+    _grid.number {
         x = { 1, 5 },
         y = 3,
         value = math.random(5),
+        
         action = function(self, value)
             play(value, self.y)
+            local above = strum[self.key - 1]
             
-            -- randomize b
             clock.run(function()
                 clock.sleep(0.15)
                 
-                strum.b.value = math.random(5)
-                strum.b:update()
+                above.value = math.random(5)
+                above:update()
             end)
         end
     },
-    d = _grid.number {
+    _grid.number {
         x = { 1, 5 },
         y = 4,
         value = math.random(5),
+        
         action = function(self, value)
             play(value, self.y)
+            local above = strum[self.key - 1]
             
-            -- incriment & wrap c
             clock.run(function()
                 clock.sleep(0.1)
                 
-                strum.c.value = strum.c.value % 5 + 1,
-                strum.c:update()
+                above.value = above.value % 5 + 1,
+                above:update()
             end)
         end
     }
