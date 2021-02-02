@@ -52,7 +52,7 @@ level = { 4, 15 },
 ```
 sending two numbers to `level` specifies that high and low values that are drawn to the grid, giving our affordance the effect of a background. useful in many circumstances!
 
-# a friend
+# one to many
 
 for perspecive, let's try out how the size veriants affect `toggle`:
 ```
@@ -91,7 +91,7 @@ you'll notice that the 1's and 0's are rotated 90 degrees from what's actually l
 
 # decoupling
 
-both `toggle` and `number` have inputs and outputs, unlike `fill` which is simply a display. but what if we just want the latter? add a new propery:
+both `toggle` and `number` have inputs and outputs, unlike `fill` which is simply a display. but what if we just want the output for those? add a new propery:
 ```
 input = false,
 ```
@@ -170,7 +170,7 @@ n = nest_ {
     }
 }
 ```
-there you have it, `tab` up top switches between two affordance pages ( though it makes more sense to do this once you've filled up the grid). but check it out - enabled _is a function_. every time `switch` is drawn, this function checks the state of tab and returns `true` or `false` accordingly. by setting a unique equlity condition for each affordance, we get pagination. 
+there you have it, `tab` up top switches between two affordance pages (though it makes more sense to do this once you've filled up the grid). but check it out - enabled _is a function_. every time `switch` is drawn, this function checks the state of tab and returns `true` or `false` accordingly. by setting a unique equlity condition for each affordance, we get pagination. 
 
 believe it or not, you can send a function to most properties - try subsitituting:
 ```
@@ -218,12 +218,12 @@ end)
 running this, we get a unique vertical number on each grid column. [look at all those functions !](https://www.youtube.com/watch?v=F-X4SLhorvw) let's take this apart:
 
 1. `nest_(16)` creates a nest with 16 bank slots, numbered `n[1]` to `n[16]`
-2. the `each` is a function that runs another function for each item in a nest. 
-3. the function sent to `each` gets two arguments, the current key (numeric or string) and the current item
+2. `each` is a function that runs another function for each item in a nest. 
+3. the function sent to `each` recieves two arguments, the current key (numeric or string) and the current item
 4. within our function we return something, this gets placed in the current slot.
-5. we're returning a number affordance. the `x` coordinate is set to the key, `i`, which counts up to 16
+5. we're returning a `number` affordance. the `x` coordinate is set to the key, `i`, which counts up to 16
 
-phew! if that's a lot to remember, it's easy to just copy and paste the snippet above, adjusting as needed. but having all of these seperate tools at your desposal opens up some handy shortcuts beyond simple repetition. for example, we can consolidate the repeated function in the last pagination example:
+phew! if that's a lot to remember, it's easy to just copy and paste the snippet above, adjusting as needed. but having all of these seperate tools at your desposal opens up some handy shortcuts beyond simple repetition. for example, using `each`, we can consolidate the repeated function in the last pagination example:
 ```
 pages = nest_ {
     nest_ {
