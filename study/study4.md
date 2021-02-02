@@ -4,12 +4,12 @@
 
 # metadata
 
-in the grid demo in the last study script, you might've seen some extra data points being printed beyond. grid action functions receive additional arguments beyond `value` let's touch base on what those are and how they can be used in the case of momentary:
+in the grid demo in the last study script, you might've seen some extra data points being printed beyond `value`. grid action functions receive additional arguments - let's touch base on what those are and how they can be used in the case of `momentary`:
  ```
  n = nest_ {
     keyboard = _grid.momentary {
         x = { 1, 5 },
-        y = { 1, 4 },
+        y = 1,
         level = { 4, 15 },
         action = function(self, value, time, delta, added, removed, list)
             print('1. self')
@@ -23,12 +23,56 @@ in the grid demo in the last study script, you might've seen some extra data poi
     }
 } :connect { g = grid.connect() }
 ```
+`value` should look pretty familiar coming in from `toggle`: a table of 1's and 0's, this time only high as long as keys are held. here's a quick overview of the rest of the arguments:
 
 - `time`: the amount of time in seconds that an affordance is held before releasing.
-- `delta`: may eiter represent the change in `value` or the change in time between sucessive interactions (in the case of momentary it's a change in time).
+- `delta`: may eiter represent the change in `value` or the change in time between sucessive interactions (in the case of momentary, it's a change in time).
 - `added`: the index of the last key to go high.
 - `removed`: the index of the last key to go low.
 - `list`: list of high indicies.
+
+`time` can be useful for imparting useful dynamics into keypresses (such as control of a slew setting), even with the grid's lack of velocity input. it can also be used with a bit of logic to create an alernate hold function, like this:
+```
+if time > 0.2 then
+    --clear a loop
+else
+    --do the normall thing
+end
+```
+delta, which will measure the time between sucsessive downstrokes, can be used as a tap tempo control.
+
+`added`, `removed`, and `list` are only meaningful when `momentary` occupies more than one key. they provide an alternave view into `value`. `list` is a table of high indicies within `value`. `added` and `removed` show the most recent index that has been added or removed from `list`. this is useful in the case of polysynth engines or midi, which need note on & off messages rather than the full state of a keyboard. using these arguments, we can extend the example above into a simple polyphonic keyboard:
+```
+include 'lib/nest_/core'
+include 'lib/nest_/norns'
+include 'lib/nest_/grid'
+
+engine.name = "PolySub"
+scale = { 0, 2, 4, 7, 9 }
+root = 440 * 2^(5/12) -- the d above middle a
+
+n = nest_ {
+    keyboard = _grid.momentary {
+        x = { 1, #scale },
+        y = { 1, 4 },
+        level = { 4, 15 },
+        action = function(self, value)
+            local key = added or removed
+    
+            local id = key.y * 7 + key.x -- a unique integer for this grid key
+
+            local octave = key.y - 5
+            local note = scale[key.x]
+            local hz = root * 2^octave * 2^(note/12)
+
+            if added then engine.start(id, hz)
+            elseif removed then engine.stop(id) end
+        end
+    }
+} :connect { g = grid.connect() }
+
+function init() n:init() end
+```
 
 
 # remembering
