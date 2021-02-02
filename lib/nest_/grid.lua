@@ -201,6 +201,7 @@ _grid.binary.input.muxhandler = _obj_:new {
             table.insert(s.list, i)
             if wrap and #s.list > wrap then rem = table.remove(s.list, 1) end
         else
+            rem = i
             local k = tab.key(s.list, i)
             if k then
                 rem = table.remove(s.list, k)
