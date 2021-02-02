@@ -343,7 +343,8 @@ end
 
 # challenge:
 
-- add another row, or widen the scale and the affordance widths
+- change to a different scale
+- add another row, or widen the scale table and the affordance widths
 - have row 1 affect row 4, creating an infinite loop
 
 # continued
