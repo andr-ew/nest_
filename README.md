@@ -20,10 +20,6 @@ nest_ {
 }
 ```
 
-# a video
-
-[https://www.youtube.com/watch?v=MagBGbhtZTY](https://www.youtube.com/watch?v=MagBGbhtZTY)
-
 # compatibility
 
 nest is a tool for the [monome norns](https://monome.org/) ecosystem
