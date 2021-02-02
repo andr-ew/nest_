@@ -187,7 +187,7 @@ n = nest_ {
 n:connect { g = grid.connect() }
 function init() n:init() end
 ```
-well, just one light - in the upper left corner - but hey at least something is happening now. we've introduced our first grid affordance, called `fill`, which lives in a handy table for all the grid affordances called `_grid`. each affordance brings along it's own set of properties in addition to the basics (often the property names are shared throughout the module, so you don't have to memorize a long list of terms & definitions for each inddividual affordance). pretty expected stuff so far - `x` and `y` set a position, `level` sets led brightness. change `level` to 4 and you'll get something dimmer. these three properties change the appearence - or output behavior - of the affordance. other affordances will show us properties that configure input behavior as well (some change both!)
+well, just one light - in the upper left corner - but hey at least something is happening now. we've introduced our first grid affordance, called `fill`, which lives in a handy table for all the grid affordances called `_grid`. each affordance brings along it's own set of properties in addition to the basics. pretty expected stuff so far - `x` and `y` set a position, `level` sets led brightness. change `level` to 4 and you'll get something dimmer. these three properties change the appearence - or output behavior - of the affordance. other affordances will show us properties that configure input behavior as well (some change both!)
 
 # it's me again, numbers
 
@@ -212,7 +212,9 @@ this time, we're sending a table to `x` because `number` occupies multiple keys 
 n.light.value = 3
 n.light:update()
 ```
-in the REPL to update the value. when you run `update` this time, you'll see the light move to the the third key - but the easier way to update value is to interact wiht the grid - each keypress will scoot the light, run the action function, and print to the REPL. but printing is boring, let's make sounds ! 
+in the REPL to update the value. when you run `update` this time, you'll see the light move to the the third key - but the easier way to update value is to interact wiht the grid - each keypress will scoot the light, run the action function, and print to the REPL. 
+
+but printing is boring, let's make sounds ! 
 ```
 engine.name = "PolyPerc"
 
@@ -245,7 +247,7 @@ with the addition of an engine & some simple music theory we can use our `number
 
 # example
 
-our first study script is a tiny strummed instrument with locational awareness. each `number` plays a single note before influencing the affordance above it, causing a chain reaction (simple [clock](https://monome.org/docs/norns/clocks/) delays are used to create the strumming effect).
+our first study script is a tiny strummed instrument with contextual awareness. each `number` plays a single note based on it's value and `y` positon before influencing the affordance above it, causing a chain reaction (simple [clock](https://monome.org/docs/norns/clocks/) delays are used to create the strumming effect).
 
 ```
 include 'lib/nest_/core'
