@@ -274,7 +274,6 @@ strum = nest_ {
         value = math.random(5),
         
         action = function(self, value)
-            -- play a note
             play(value, self.y)
         end
     },
