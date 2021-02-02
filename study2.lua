@@ -2,7 +2,7 @@
 -- the grid & multiples
 --
 --      1-16
---   1 : page select
+--   1 : page select/play
 -- 2-6: note/octave
 --   3: gate
 --   4: step
@@ -21,6 +21,12 @@ seq = nest_ {
         x = { 1, 2 },
         y = 1,
         level = { 4, 15 },
+    },
+    play = _grid.toggle {
+      x = 16,
+      y = 1,
+      level = { 4, 15 },
+      value = 1,
     },
     pages = nest_ {
         nest_ {
@@ -75,21 +81,23 @@ seq = nest_ {
 -- sequencer counter
 count = function()
     while true do -- loop forever
+        if seq.play.value == 1 then -- if playing
         
-        local step = seq.step.value -- the current step
-        
-        if seq.gates.value[step] == 1 then -- if the current gate is high
+            local step = seq.step.value -- the current step
             
-            -- find note frequency
-            local note = scale[seq.pages[1].notes[step].value]
-            local octave = seq.pages[2].octaves[step].value - 4
-            local hz = root * 2^octave * 2^(note/12)
+            if seq.play.value == 1 and seq.gates.value[step] == 1 then -- if the current gate is high
+                
+                -- find note frequency
+                local note = scale[seq.pages[1].notes[step].value]
+                local octave = seq.pages[2].octaves[step].value - 4
+                local hz = root * 2^octave * 2^(note/12)
+                
+                engine.hz(hz) -- send a note to the engine
+            end
             
-            engine.hz(hz) -- send a note to the engine
+            seq.step.value = step % 16 + 1 -- incriment & wrap step
+            seq.step:update()
         end
-        
-        seq.step.value = step % 16 + 1 -- incriment & wrap step
-        seq.step:update()
         
         clock.sync(1/4) -- wait for the next quarter note
     end
