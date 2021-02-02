@@ -247,7 +247,7 @@ with the addition of an engine & some simple music theory we can use our `number
 
 # example
 
-our first study script is a tiny strummed instrument with contextual awareness. each `number` plays a single note based on it's value and `y` positon before influencing the affordance above it, causing a chain reaction (simple [clock](https://monome.org/docs/norns/clocks/) delays are used to create the strumming effect).
+our first study script is a tiny strummed instrument with contextual awareness. each `number` plays a single note based on its `value` and `y` positon before influencing the affordance above it, causing a chain reaction (simple [clock](https://monome.org/docs/norns/clocks/) delays are used to create the strumming effect).
 
 ```
 include 'lib/nest_/core'
