@@ -16,7 +16,7 @@ in review:
 ```
 include "lib/nest_/<module>"
 ```
-- hardware is connected to a nest like this (you can connect key-value pairs to one nest):
+- hardware is connected to a nest like this (you can connect multiple key-value pairs to one nest):
 ```
 my_nest:connect {
     <key-value pairs>
@@ -32,13 +32,13 @@ you've already been doing this with `grid`, but now you have some formality to t
 
 # affordance types
 
-rather than a long list of terms & behaviors, there are 10 affordance types - each utimately with seprate implimentations in every group that uses it - but some similarities overall. 
+rather than a long list of terms & behaviors, there are 10 affordance types - each utimately with seperate implimentations in every group that uses it - but some similarities overall. 
 
 overview:
 
 | type | value | descripton | `_grid` | `_arc` | `_arc.key` | `_txt` | `_txt.enc` | `_txt.key` |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `fill` | none | a static display | x | x | | | | |
+| `fill` | none | a static display of light | x | x | | | | |
 | `label` | string | a static display of text | | | | x | | |
 | `number` | integer or decimal | a point in space | x | x | | | x | x |
 | `control` | decimal | a number bound by an internal `controlspec` | x | x | | | x | |
@@ -49,17 +49,17 @@ overview:
 | `toggle` | integer | cycles forward through a list of numbers, but usually just 0 and 1 | x | | x | | | x |
 | `momentary` | 0 or 1 | becomes 1 on a rising edge, 0 on a falling edge | x | | x | | | x |
 
-(note in the case of `_grid`, `_txt.enc`, `_txt.key`, the value may be a table of numbers or a table of table of numbers)
+note in the case of `_grid`, `_txt`, `_txt.enc`, `_txt.key`, the value may be a table or nested tables of numbers or string. `_arc.key` is only for the 2011 edition arcs that had pushbuttons. I happen to have one of them :)
 
 # properties
 
 as much as possible, the names and behaviors of properties are shared throughout a group, and sometimes across groups. I won't list all of the properties here, instead, reference the module docs. the docs contain a complete list of every affordance and meta-affordance in the module, along with a list of properies and what affordances they belong to. while exploring the study script, I encourage you to reference the docs to take in specific information:
 
-- [`nest_/grid`](./doc/grid.md)
-- [`nest_/arc`](./doc/arc.md)
-- [`nest_/norns`](./doc/norns.md)
-- [`nest_/txt`](./doc/txt.md)
-- [`nest_/core`](./doc/core.md)
+- [`nest_/grid`](../doc/grid.md)
+- [`nest_/arc`](../doc/arc.md)
+- [`nest_/norns`](../doc/norns.md)
+- [`nest_/txt`](../doc/txt.md)
+- [`nest_/core`](../doc/core.md)
 
 # example
 
