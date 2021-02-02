@@ -370,6 +370,6 @@ end
 # continued
 
 - part 1: [nested affordances](./study1.md)
-- part 2: the grid & multiples
+- part 2: multiplicity
 - part 3: [affordance overview](./study3.md)
 - part 4: [state & meta-affordances](./study4.md)
