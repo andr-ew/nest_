@@ -1,3 +1,7 @@
+# video
+
+[https://www.youtube.com/watch?v=-vYwMogt0gE](https://www.youtube.com/watch?v=-vYwMogt0gE)
+
 # hi
 
 hi! ok. well for starters here let's make a blank script in your `nest_` folder. it's great fun following along. nest is a library, so before digging in we have to include some stuff:
@@ -336,6 +340,11 @@ function init()
     strum:init()
 end
 ```
+
+# challenge:
+
+- add another row, or widen the scale and the affordance widths
+- have row 1 affect row 4, creating an infinite loop
 
 # continued
 
