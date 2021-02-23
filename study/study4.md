@@ -164,7 +164,7 @@ n = nest_ {
 ```
 `pattern` is like a toggle with many states & all five keys are unique record/playback buttons. the first press initiates recording (dim blinking state), then once playback is happening it turns into a play/pause toggle. play around with creating a few asycnronous loops on your tiny keyboard. holding and releasing a loop key will clear it - you can also double tap to overdub on top of a playing pattern.
 
-five patterns playing at once might be a lot to handle for this smol synthesizer, so we might consider using a param to limit the polyphony of playback in the `pattern` affordance:
+five patterns playing at once might be a lot to handle for this smol synthesizer, so we might consider using a property to limit the polyphony of playback in the `pattern` affordance:
 ```
 count = 1
 ```
