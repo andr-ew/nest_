@@ -56,7 +56,7 @@ the various types and interface buidling blocks of nestworld are split up into a
 
 ## including
 
-typically, it will make the most sense to include nest by copying the required module files into your script's `/lib/nest_` folder, including them like so:
+typically, it will make the most sense to include nest by copying the required module files into your script's `/lib/nest` folder, including them like so:
 
 ```
 include 'lib/nest/core'
