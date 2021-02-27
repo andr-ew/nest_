@@ -12,10 +12,10 @@
 -- e3: feedback
 -- k2: reverse
 
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
-include 'lib/nest_/txt'
+include 'lib/nest/core'
+include 'lib/nest/norns'
+include 'lib/nest/grid'
+include 'lib/nest/txt'
 
 polysub = include 'we/lib/polysub'
 delay = include 'awake/lib/halfsecond'

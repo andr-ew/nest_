@@ -184,10 +184,10 @@ oh and if you weren't already wondering, you can absolutely pattern record prese
 
 our fourth & final study script is a pretty complete and playable synth with a grid keyboard, a delay, pattern recorders, and presets. we're using the `control` affordance on both the grid and norns (using `_txt.control`) to map values to `PolySub` and `halfsecond` - it works a lot like the params version of control, and we've referenced `polysub.lua` and `halfsecond.lua` to configure things the same as the are in the params. things are grouped so that the pattern recorders can target both the keyboard and preset recall.
 ```
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
-include 'lib/nest_/txt'
+include 'lib/nest/core'
+include 'lib/nest/norns'
+include 'lib/nest/grid'
+include 'lib/nest/txt'
 
 polysub = include 'we/lib/polysub'
 delay = include 'awake/lib/halfsecond'

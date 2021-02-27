@@ -3,11 +3,11 @@
 --
 -- (docs on github)
 
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
-include 'lib/nest_/txt'
-include 'lib/nest_/arc'
+include 'lib/nest/core'
+include 'lib/nest/norns'
+include 'lib/nest/grid'
+include 'lib/nest/txt'
+include 'lib/nest/arc'
 
 -------------------------------------------------utility functions
 
