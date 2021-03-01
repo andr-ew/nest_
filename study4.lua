@@ -76,18 +76,18 @@ synth = nest_ {
             },
             hzlag = _grid.control {
                 x = 12, y = { 2, 8 },
-                range = { 0, 10 },
+                min = 0, max = 10,
                 action = function(self, value) engine.hzLag(value) end
             },
             cut = _grid.control {
                 x = 13, y = { 2, 8 },
-                range = { 1.5, 8 },
+                min = 1.5, max = 8,
                 value = 8,
                 action = function(self, value) engine.cut(value) end
             },
             attack = _grid.control {
                 x = 14, y = { 2, 8 },
-                range = { 0.01, 10 },
+                min = 0.01, max = 10,
                 value = 0.01,
                 action = function(self, value)
                     engine.cutAtk(value)
@@ -104,7 +104,7 @@ synth = nest_ {
             },
             release = _grid.control {
                 x = 16, y = { 2, 8 },
-                range = { 0.01, 10 },
+                min = 0.01, max = 10,
                 value = 0.01,
                 action = function(self, value)
                     engine.cutDec(value)
@@ -126,7 +126,7 @@ synth = nest_ {
         },
         rate = _txt.enc.control {
             x = 2, y = 30,
-            range = { 0.5, 2 },
+            min = 0.5, max = 2,
             warp = 'exp',
             value = 0.5,
             n = 2,

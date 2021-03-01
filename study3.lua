@@ -86,13 +86,13 @@ demo.grid = nest_ {
             control_1d = _grid.control {
                 x = { 1, 7 },
                 y = 5,
-                range = { 0, 1 },
+                min = 0, max = 1,
                 action = gridaction
             }, 
             control_2d = _grid.control {
                 x = { 9, 15 },
                 y = { 2, 8 },
-                range = { -1, 1 },
+                min = -1, max = 1,
                 action = gridaction
             }
         },
@@ -203,7 +203,7 @@ demo.txt = nest_ {
             number = _txt.enc.number {
                 x = 2, y = 38,
                 n = 2,
-                range = { 1, 8 },
+                min = 0, max = 8,
                 wrap = true,
                 align = { 'left', 'bottom' },
                 action = function(self, value) print(self.k, value) end
@@ -375,14 +375,15 @@ demo.arc = nest_ {
                 n = 3,
                 sens = 1/6,
                 value = 0.2,
-                range = { 0.2, 0.4 },
+                min = 0.2, max = 0.4,
                 wrap = true,
                 action = function(self, value) print(self.k, value) end
             },
             number3 = _arc.number {
                 n = 4,
                 sens = 2,
-                range = { -math.huge, math.huge },
+                min = -math.huge, 
+                max = math.huge,
                 cycle = 20,
                 action = function(self, value) print(self.k, value) end
             }
@@ -397,7 +398,7 @@ demo.arc = nest_ {
             control2 = _arc.control {
                 n = 3,
                 sens = 1/4,
-                range = { -1, 1 },
+                min = -1, max = 1,
                 action = function(self, value) print(self.k, value) end
             },
             control3 = _arc.control {
@@ -414,7 +415,7 @@ demo.arc = nest_ {
                 x = { 42, 24 },
                 n = 2,
                 sens = 1/16,
-                range = { 1, 4 },
+                min = 1, max = 4,
                 size = { 1, 2, 4, 8, 16 },
                 margin = 1,
                 level = { 0, 4, 15 },
