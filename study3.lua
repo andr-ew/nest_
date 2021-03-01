@@ -203,7 +203,8 @@ demo.txt = nest_ {
             number = _txt.enc.number {
                 x = 2, y = 38,
                 n = 2,
-                min = 0, max = 8,
+                min = 1, max = 8, value = 1,
+                inc = 1, step = 1,
                 wrap = true,
                 align = { 'left', 'bottom' },
                 action = function(self, value) print(self.k, value) end
