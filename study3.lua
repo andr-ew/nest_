@@ -178,7 +178,8 @@ demo.grid = nest_ {
             }
         }
     } :each(function(i, v)
-        v.enabled = function(self) return demo.grid.tab.value == self.k end
+        v.enabled = function(self) 
+            return demo.grid.tab.value == self.k end
     end),
     tab = _grid.number {
         x = { 1, 7 },
