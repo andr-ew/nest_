@@ -66,28 +66,28 @@ synth = nest_ {
         controls = nest_ {
             shape = _grid.control {
                 x = 9, y = { 2, 8 },
-            } :link('shape'),
+            } :param('shape'),
             timbre = _grid.control {
                 x = 10, y = { 2, 8 },
-            } :link('timbre'),
+            } :param('timbre'),
             noise = _grid.control {
                 x = 11, y = { 2, 8 },
-            } :link('sub'),
+            } :param('sub'),
             hzlag = _grid.control {
                 x = 12, y = { 2, 8 },
-            } :link('noise'),
+            } :param('noise'),
             cut = _grid.control {
                 x = 13, y = { 2, 8 },
-            } :link('cut'),
+            } :param('cut'),
             attack = _grid.control {
                 x = 14, y = { 2, 8 },
-            } :link('ampatk'),
+            } :param('ampatk'),
             sustain = _grid.control {
                 x = 15, y = { 2, 8 },
-            } :link('ampsus'),
+            } :param('ampsus'),
             release = _grid.control {
                 x = 16, y = { 2, 8 },
-            } :link('amprel')
+            } :param('amprel')
         }
     },
     
@@ -96,15 +96,15 @@ synth = nest_ {
         delay = _txt.enc.control {
             x = 2, y = 16, 
             n = 1,
-        } :link('delay'),
+        } :param('delay'),
         rate = _txt.enc.control {
             x = 2, y = 44, 
             n = 2
-        } :link('delay_rate'),
+        } :param('delay_rate'),
         feedback = _txt.enc.control {
             x = 64, y = 44,
             n = 3,
-        } :link('delay_feedback'),
+        } :param('delay_feedback'),
     }
 }
 

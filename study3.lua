@@ -178,8 +178,7 @@ demo.grid = nest_ {
             }
         }
     } :each(function(i, v)
-        v.enabled = function(self) 
-            return demo.grid.tab.value == self.k end
+        v.enabled = function(self) return demo.grid.tab.value == self.k end
     end),
     tab = _grid.number {
         x = { 1, 7 },
@@ -229,7 +228,7 @@ demo.txt = nest_ {
                 level = { 15, 0 },
                 fill = { 0, 15 },
                 border = 15,
-                edge = 0,
+                edge = 'falling',
                 action = function(self, value) print(self.k, value) end
             }
         },
