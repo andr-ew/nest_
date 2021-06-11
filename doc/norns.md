@@ -79,6 +79,8 @@
   
 }
 
+[_screen](#screen) {}
+
 # affordances
 
 ### affordance
@@ -108,6 +110,10 @@ a "held" button where `value` goes high where a key is depressed, low where a ke
 ### toggle
 
 a button where `value` toggles between high and low on a keypress. if `lvl` has a table length greater than two, a `toggle` button will cycle forward through those brightness values.
+
+### screen
+
+the empty screen drawing affordance. define your own `redraw` handler for custom screen drawing. add `input = _screen.input{ redraw = function() end }` to an affordance for a custom screen UI.
 
 # properties
 
