@@ -89,7 +89,7 @@ one thing that's kinda wierd: the `step` value is saved in our sequencer. this m
 ```
 persistent = false
 ```
-done & done. `persistent` means "this affordance value will be saved" - it defaults to true for most, but not all, affordances. only persistent affordances will be updated on `init`.
+`persistent` means "this affordance value will be saved" - it defaults to true for most, but not all, affordances. only persistent affordances will be updated on `init`.
 
 # patterns in space
 
