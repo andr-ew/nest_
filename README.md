@@ -38,7 +38,7 @@ get the study scripts by installing `nest_` in the maiden project manager. feel 
 
 3. [affordance overview](./study/study3.md)
 
-4. [value, state, & meta-affordances](./study/study4.md)
+4. [state, & meta-affordances](./study/study4.md)
 
 # docs
 
