@@ -180,9 +180,67 @@ end
 
 oh and if you weren't already wondering, you can absolutely pattern record preset recall, and store patterns in presets. both are also `persistent` by default and fully compatible with the `load`/`save` feature.
 
+# value of a value
+
+so far we've been thinking about affordances as tables with internal data (`value`) and a function that runs whenever the data changes (`action`). that's been a useful model for our small study scripts thus far, but generally when working on a full script you'll have data all over the place, not just in your nest. maybe you have a variable:
+```
+foo = 10
+```
+if you need a `_grid.number` to update `foo`, that's easy enough:
+```
+n = nest_ {
+    foo_controller = _grid.number {
+        x = { 1, 16 }, 
+        y = 1,
+        action = function(s, v) foo = v end
+    }
+} :connect { g = grid.connect() }
+```
+but what if something else, somewhere else, changes the value of `foo` ? nothing will neccesarily explode or malfunction, but the `value` shown on the grid won't be updated to its true value - `foo` (even if you call `grid_redraw()`, which forces `nest_` to refresh the grid). 
+
+you could make another function to update `foo_contoller` manually:
+```
+function call_this_when_foo_changes()
+    n.foo_controller.value = foo
+    n.foo_controller:update()
+end
+```
+but this gets pretty circular & difficult to mainatin (imagine having 30 different foos & affordances). of course, there's a better way ! remember how any property can be a function ? the same goes for `value`:
+```
+n = nest_ {
+    foo_controller = _grid.number {
+        x = { 1, 16 }, 
+        y = 1,
+        value = function() return foo end,
+        action = function(s, v) foo = v end
+    }
+} :connect { g = grid.connect() }
+```
+this time, we've assigned `value` to a function which retrieves external data and returns it. so whenever the grid is drawn, it'll look straight to `foo` rather than storing a separate internal state.
+
+in norns scripts, it's very common to use the `params` sytem to store data & actions. so, if we want a grid affordance that's _bound_ to a "foo" parameter, we can use a value function:
+```
+foo_controller = _grid.control {
+    x = { 1, 16 }, 
+    y = 1,
+    controlspec = params:lookup_param('foo').controlspec,
+    value = function() return params:get('foo') end,
+    action = function(s, v) params:set('foo', v) end
+}
+```
+since `_grid.control` takes a `controlspec` property we can steal that from the param as well. now any changes on the grid will update the param and any changes in the param will update the grid (note the param action will need to call `grid_redraw()` for changes to be instantly visible). the above snippet tends to be so useful that nest ships with a shortcut _binder method_ called `param`. we can rewrite the above lines as:
+```
+foo_controller = _grid.control {
+    x = { 1, 16 }, 
+    y = 1
+} :param('foo')
+```
+every affordance type has set param types it can bind to automatically. `_grid.control` natually can only bind to control params. just like before, `action` will be overwritten by param binding - instead, actions should occur in the `'foo'` param action function. also note that bound afforcances are non-persistent. again, you should do things the params way with `params:read()` / `params:write()`.
+
 # example
 
-our fourth & final study script is a pretty complete and playable synth with a grid keyboard, a delay, pattern recorders, and presets. we're using the `control` affordance on both the grid and norns (using `_txt.control`) to map values to `PolySub` and `halfsecond` - it works a lot like the params version of control, and we've referenced `polysub.lua` and `halfsecond.lua` to configure things the same as the are in the params. things are grouped so that the pattern recorders can target both the keyboard and preset recall.
+our fourth & final study script is a pretty complete and playable synth with a grid keyboard, a delay, pattern recorders, and presets. we're using the `control` affordance on both grid and norns and binding them to existing `PolySub` and `halfsecond` params. things are grouped so that the pattern recorders can target both the keyboard and preset recall.
+
 ```
 include 'lib/nest/core'
 include 'lib/nest/norns'
@@ -198,6 +256,9 @@ root = 440 * 2^(5/12) -- the d above middle a
 
 engine.name = 'PolySub'
 
+polysub.params()
+delay.init()
+    
 synth = nest_ {
     grid = nest_ {
         pattern_group = nest_ {
@@ -235,95 +296,45 @@ synth = nest_ {
         controls = nest_ {
             shape = _grid.control {
                 x = 9, y = { 2, 8 },
-                action = function(self, value) engine.shape(value) end
-            },
+            } :param('shape'),
             timbre = _grid.control {
                 x = 10, y = { 2, 8 },
-                v = 0.5,
-                action = function(self, value) engine.timbre(value) end
-            },
+            } :param('timbre'),
             noise = _grid.control {
                 x = 11, y = { 2, 8 },
-                action = function(self, value) engine.noise(value) end
-            },
+            } :param('sub'),
             hzlag = _grid.control {
                 x = 12, y = { 2, 8 },
-                range = { 0, 10 },
-                action = function(self, value) engine.hzLag(value) end
-            },
+            } :param('noise'),
             cut = _grid.control {
                 x = 13, y = { 2, 8 },
-                range = { 1.5, 8 },
-                value = 8,
-                action = function(self, value) engine.cut(value) end
-            },
+            } :param('cut'),
             attack = _grid.control {
                 x = 14, y = { 2, 8 },
-                range = { 0.01, 10 },
-                value = 0.01,
-                action = function(self, value)
-                    engine.cutAtk(value)
-                    engine.ampAtk(value)
-                end
-            },
+            } :param('ampatk'),
             sustain = _grid.control {
                 x = 15, y = { 2, 8 },
-                value = 1,
-                action = function(self, value)
-                    engine.cutSus(value)
-                    engine.ampSus(value)
-                end
-            },
+            } :param('ampsus'),
             release = _grid.control {
                 x = 16, y = { 2, 8 },
-                range = { 0.01, 10 },
-                value = 0.01,
-                action = function(self, value)
-                    engine.cutDec(value)
-                    engine.ampDec(value)
-                    engine.cutRel(value)
-                    engine.ampRel(value)
-                end
-            }
+            } :param('amprel')
         }
     },
     
     -- delay controls
     screen = nest_ {
         delay = _txt.enc.control {
-            x = 2, y = 8,
-            value = 0.5,
+            x = 2, y = 16, 
             n = 1,
-            action = function(self, value) softcut.level(1, value) end
-        },
+        } :param('delay'),
         rate = _txt.enc.control {
-            x = 2, y = 30,
-            range = { 0.5, 2 },
-            warp = 'exp',
-            value = 0.5,
-            n = 2,
-            action = function(self, value) 
-                local dir = (self.parent.reverse.value == 1) and -1 or 1
-                softcut.rate(1, value * dir) 
-                print("rate", value * dir)
-            end
-        },
+            x = 2, y = 44, 
+            n = 2
+        } :param('delay_rate'),
         feedback = _txt.enc.control {
-            x = 64, y = 30,
+            x = 64, y = 44,
             n = 3,
-            value = 0.75,
-            action = function(self, value) softcut.pre_level(1, value) end
-        },
-        reverse = _txt.key.toggle {
-            x = 2, y = 50,
-            n = 2,
-            action = function(self, value) 
-                local dir = (value == 1) and -1 or 1
-                local rate = self.parent.rate.value
-                softcut.rate(1, rate * dir)
-                print("rate", rate * dir)
-            end
-        }
+        } :param('delay_feedback'),
     }
 }
 
@@ -338,15 +349,15 @@ synth.screen:connect {
 }
 
 function init()
-    delay.init()
-    polysub.params()
-    
     synth:load()
+    params:read()
     synth:init()
+    params:bang()
 end
 
 function cleanup()
     synth:save()
+    params:write()
 end
 ```
 
