@@ -148,7 +148,7 @@ maximum output `value`.
 
 ### edge
 
-an integer that sets whether to respond to the rising edge of an input (1), falling edge (0), or both edges (2). will sometimes affect the behavior of the `time` argument.
+sets whether to respond to the rising edge of an input (`'rising'`), falling edge (`'falling'`), or both edges (`'both'`). will sometimes affect the behavior of the `time` argument.
 
 ### count
 
