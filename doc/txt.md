@@ -4,6 +4,7 @@
   - [x](#x)
   - [y](#y)
   - [label](#label)
+  - [step](#step)
   - [lvl](#lvl)
   - [border](#border)
   - [fill](#fill)
@@ -181,6 +182,10 @@ the y component of the text position. this may be:
 ### label
 
 a label to be displayed for input types. defaults to [`k`](../doc/core.md#k). set `label = false` to remove the label.
+
+### step
+
+displayed number values are rounded down to this division (default is 0.01)
 
 ### lvl
 
