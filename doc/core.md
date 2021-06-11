@@ -15,7 +15,13 @@
   - [read](#read)
   - [write](#write)
   
-}
+} 
+ - [:connect()](#connect)
+ - [:get()](#get)
+ - [:set()](#set)
+ - [:each()](#each)
+ - [:merge()](#merge)
+ - [:param()](#param)
 
 [_affordance](#_affordance) {
   - [p](#p)
@@ -70,14 +76,14 @@
 [_pattern](#_pattern) {
    - [target](#target)
    - [capture](#capture)
-   - [rec_start](#rec_start)
-   - [rec_stop](#rec_start)
-   - [start](#start)
-   - [resume](#resume)
-   - [set_overdub](#set_overdub)
-   - [set_time_factor](#set_time_factor)
-
+   - 
 }
+   - [:rec_start()](#rec_start)
+   - [:rec_stop()](#rec_start)
+   - [:start()](#start)
+   - [:resume()](#resume)
+   - [:set_overdub()](#set_overdub)
+   - [:set_time_factor()](#set_time_factor)
 
 # core types
 
@@ -223,11 +229,21 @@ end
 
 ### get
 
-### put
+### each
+
+see study 2
+
+### merge(nest)
+
+recursively sum this nest with `nest`
 
 ### write
 
 ### read
+
+### param(id)
+
+bind affordance to param id of `id`
 
 ### store
 
