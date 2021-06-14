@@ -4,6 +4,8 @@
   - [x](#x)
   - [y](#y)
   - [label](#label)
+  - [formatter](#formatter)
+  - [step](#step)
   - [lvl](#lvl)
   - [border](#border)
   - [fill](#fill)
@@ -29,8 +31,10 @@
 [_txt.enc.number](#number) {
   - ...
   - [n](../doc/norns.md#n)
-  - [range](../doc/norns.md#range)
+  - [min](../doc/norns.md#min)
+  - [max](../doc/norns.md#max)
   - [wrap](../doc/norns.md#wrap)
+  - [inc](../doc/norns.md#inc)
   
 }
 
@@ -38,7 +42,8 @@
   - ...
   - [n](#n)
   - [controlspec](../doc/norns.md#controlspec)
-  - [range](../doc/norns.md#range)
+  - [min](../doc/norns.md#min)
+  - [max](../doc/norns.md#max)
   - [step](../doc/norns.md#step)
   - [units](../doc/norns.md#units)
   - [quantum](../doc/norns.md#quantum)
@@ -66,7 +71,8 @@
   - ...
   - [n](../doc/norns.md#n)
   - [edge](../doc/grid.md#edge)
-  - [range](../doc/norns.md#range)
+  - [min](../doc/norns.md#min)
+  - [max](../doc/norns.md#max)
   - [wrap](../doc/norns.md#wrap)
   - [inc](../doc/norns.md#inc)
   
@@ -128,7 +134,7 @@ an output only text type, `value` is displayed and may be a string, a table of s
 
 ### number
 
-like the `paramset` "number" type, an integer number. [`label`](#label) defaults to [`k`](../doc/core.md#k).
+an integer or fractional number. [`label`](#label) defaults to [`k`](../doc/core.md#k).
 
 ### control
 
@@ -181,6 +187,14 @@ the y component of the text position. this may be:
 ### label
 
 a label to be displayed for input types. defaults to [`k`](../doc/core.md#k). set `label = false` to remove the label.
+
+### formatter
+
+a function that takes text as an argument & returns transformed text.
+
+### step
+
+displayed number values are rounded down to this division (default is 0.01)
 
 ### lvl
 

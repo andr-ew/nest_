@@ -12,10 +12,10 @@
 -- e3: feedback
 -- k2: reverse
 
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
-include 'lib/nest_/txt'
+include 'lib/nest/core'
+include 'lib/nest/norns'
+include 'lib/nest/grid'
+include 'lib/nest/txt'
 
 polysub = include 'we/lib/polysub'
 delay = include 'awake/lib/halfsecond'
@@ -26,6 +26,9 @@ root = 440 * 2^(5/12) -- the d above middle a
 
 engine.name = 'PolySub'
 
+polysub.params()
+delay.init()
+    
 synth = nest_ {
     grid = nest_ {
         pattern_group = nest_ {
@@ -63,95 +66,45 @@ synth = nest_ {
         controls = nest_ {
             shape = _grid.control {
                 x = 9, y = { 2, 8 },
-                action = function(self, value) engine.shape(value) end
-            },
+            } :param('shape'),
             timbre = _grid.control {
                 x = 10, y = { 2, 8 },
-                v = 0.5,
-                action = function(self, value) engine.timbre(value) end
-            },
+            } :param('timbre'),
             noise = _grid.control {
                 x = 11, y = { 2, 8 },
-                action = function(self, value) engine.noise(value) end
-            },
+            } :param('sub'),
             hzlag = _grid.control {
                 x = 12, y = { 2, 8 },
-                range = { 0, 10 },
-                action = function(self, value) engine.hzLag(value) end
-            },
+            } :param('noise'),
             cut = _grid.control {
                 x = 13, y = { 2, 8 },
-                range = { 1.5, 8 },
-                value = 8,
-                action = function(self, value) engine.cut(value) end
-            },
+            } :param('cut'),
             attack = _grid.control {
                 x = 14, y = { 2, 8 },
-                range = { 0.01, 10 },
-                value = 0.01,
-                action = function(self, value)
-                    engine.cutAtk(value)
-                    engine.ampAtk(value)
-                end
-            },
+            } :param('ampatk'),
             sustain = _grid.control {
                 x = 15, y = { 2, 8 },
-                value = 1,
-                action = function(self, value)
-                    engine.cutSus(value)
-                    engine.ampSus(value)
-                end
-            },
+            } :param('ampsus'),
             release = _grid.control {
                 x = 16, y = { 2, 8 },
-                range = { 0.01, 10 },
-                value = 0.01,
-                action = function(self, value)
-                    engine.cutDec(value)
-                    engine.ampDec(value)
-                    engine.cutRel(value)
-                    engine.ampRel(value)
-                end
-            }
+            } :param('amprel')
         }
     },
     
     -- delay controls
     screen = nest_ {
         delay = _txt.enc.control {
-            x = 2, y = 8,
-            value = 0.5,
+            x = 2, y = 16, 
             n = 1,
-            action = function(self, value) softcut.level(1, value) end
-        },
+        } :param('delay'),
         rate = _txt.enc.control {
-            x = 2, y = 30,
-            range = { 0.5, 2 },
-            warp = 'exp',
-            value = 0.5,
-            n = 2,
-            action = function(self, value) 
-                local dir = (self.parent.reverse.value == 1) and -1 or 1
-                softcut.rate(1, value * dir) 
-                print("rate", value * dir)
-            end
-        },
+            x = 2, y = 44, 
+            n = 2
+        } :param('delay_rate'),
         feedback = _txt.enc.control {
-            x = 64, y = 30,
+            x = 64, y = 44,
             n = 3,
-            value = 0.75,
-            action = function(self, value) softcut.pre_level(1, value) end
-        },
-        reverse = _txt.key.toggle {
-            x = 2, y = 50,
-            n = 2,
-            action = function(self, value) 
-                local dir = (value == 1) and -1 or 1
-                local rate = self.parent.rate.value
-                softcut.rate(1, rate * dir)
-                print("rate", rate * dir)
-            end
-        }
+        } :param('delay_feedback'),
     }
 }
 
@@ -166,13 +119,13 @@ synth.screen:connect {
 }
 
 function init()
-    delay.init()
-    polysub.params()
-    
     synth:load()
+    params:read()
     synth:init()
+    params:bang()
 end
 
 function cleanup()
     synth:save()
+    params:write()
 end

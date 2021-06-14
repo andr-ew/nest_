@@ -7,9 +7,9 @@
 --   3: gate
 --   4: step
 
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
+include 'lib/nest/core'
+include 'lib/nest/norns'
+include 'lib/nest/grid'
 
 engine.name = "PolyPerc"
 

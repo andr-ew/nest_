@@ -49,22 +49,22 @@ get the study scripts by installing `nest_` in the maiden project manager. feel 
 the various types and interface buidling blocks of nestworld are split up into a collection files/modules. at the very least, the `core` and `norns` modules are required for use with norns. click the links to read up on the full details of each module and the affordances contained.
 
 
-- [`nest_/grid`](./doc/grid.md)
-- [`nest_/arc`](./doc/arc.md)
-- [`nest_/norns`](./doc/norns.md)
-- [`nest_/txt`](./doc/txt.md)
-- [`nest_/core`](./doc/core.md)
+- [`nest/grid`](./doc/grid.md)
+- [`nest/arc`](./doc/arc.md)
+- [`nest/norns`](./doc/norns.md)
+- [`nest/txt`](./doc/txt.md)
+- [`nest/core`](./doc/core.md)
 
 
 ## including
 
-typically, it will make the most sense to include nest by copying the required module files into your script's `/lib/nest_` folder, including them like so:
+typically, it will make the most sense to include nest by copying the required module files into your script's `/lib/nest` folder, including them like so:
 
 ```
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
-include 'lib/nest_/txt'
+include 'lib/nest/core'
+include 'lib/nest/norns'
+include 'lib/nest/grid'
+include 'lib/nest/txt'
 ```
 
-alternatively, you can incude modules externally (other users will need to install nest first): `include 'nest_/lib/nest_/core'`
+alternatively, you can incude modules externally (other users will need to install nest first): `include 'nest_/lib/nest/core'` (watch those underscores!)

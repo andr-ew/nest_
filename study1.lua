@@ -6,9 +6,9 @@
 -- 2: strum 2
 -- 3: strum 3
 -- 4: strum 4
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
+include 'lib/nest/core'
+include 'lib/nest/norns'
+include 'lib/nest/grid'
 
 engine.name = "PolyPerc"
 

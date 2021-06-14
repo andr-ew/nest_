@@ -7,8 +7,8 @@
 hi! ok. well for starters here let's make a blank script in your `nest_` folder. it's great fun following along. nest is a library, so before digging in we have to include some stuff:
 
 ```
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
+include 'lib/nest/core'
+include 'lib/nest/norns'
 ```
 
 nest is a folder of lua files, we call the lua files modules. `core` & `norns` are the modules that are required at minimum. ~ cool ~
@@ -166,9 +166,9 @@ well by now you may have noticed that nothing quite that interesting has happene
 
 plug in the grid & start a fresh script. we'll add one more module to the stack this time around:
 ```
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
+include 'lib/nest/core'
+include 'lib/nest/norns'
+include 'lib/nest/grid'
 ```
 for starters, now that we're actually working with harware we'll need to add an extra step to tell our nest to connect to that harware:
  ```
@@ -254,9 +254,9 @@ with the addition of an engine & some simple music theory we can use our `number
 our first study script is a tiny strummed instrument with locational awareness. each `number` plays a single note based on its `value` and `y` positon before influencing the affordance above it, causing a chain reaction (simple [clock](https://monome.org/docs/norns/clocks/) delays are used to create the strumming effect).
 
 ```
-include 'lib/nest_/core'
-include 'lib/nest_/norns'
-include 'lib/nest_/grid'
+include 'lib/nest/core'
+include 'lib/nest/norns'
+include 'lib/nest/grid'
 
 engine.name = "PolyPerc"
 

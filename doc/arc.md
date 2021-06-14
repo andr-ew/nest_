@@ -3,7 +3,8 @@
   - [x](#x)
   - value
   - [lvl](#lvl)
-  - [range](#range)
+  - [min](#min)
+  - [max](#max)
   - [sens](#sens)
   - [wrap](#wrap)
 
@@ -19,7 +20,8 @@
 [_arc.control](#control) {
   - ...
   - [controlspec](#controlspec)
-  - [range](#range)
+  - [min](#min)
+  - [max](#max)
   - [step](#step)
   - [units](#units)
   - [quantum](#quantum)
@@ -30,7 +32,8 @@
 [_arc.option](#option) {
   - ...
   - [options](#options)
-  - [range](#range)
+  - [min](#min)
+  - [max](#max)
   - [include](#include)
   - [size](#size)
   - [margin](#margin)
@@ -86,9 +89,13 @@ sets the brightness levels for the affordance. may be a single value, or a table
 
 fraction specifing input sensitivity. the lower the number, the slower the change in `value`.
 
-### range
+### min
 
-a table in the format `{ min, max }` to specify the range of `value`.
+minimum output value.
+
+### max
+
+maximum output value.
 
 ### wrap
 

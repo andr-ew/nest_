@@ -5,15 +5,18 @@
 
 [_enc.number](#number) {
   - [n](#n)
-  - [range](#range)
+  - [min](#min)
+  - [max](#max)
   - [wrap](#wrap)
+  - [inc](#inc)
   
 }
 
 [_enc.control](#control) {
   - [n](#n)
   - [controlspec](#controlspec)
-  - [range](#range)
+  - [min](#min)
+  - [max](#max)
   - [step](#step)
   - [units](#units)
   - [quantum](#quantum)
@@ -38,7 +41,8 @@
 [_key.number](#number) {
   - [n](#n)
   - [edge](../doc/grid.md#edge)
-  - [range](#range)
+  - [min](#min)
+  - [max](#max)
   - [wrap](#wrap)
   - [inc](#inc)
   
@@ -75,6 +79,8 @@
   
 }
 
+[_screen](#screen) {}
+
 # affordances
 
 ### affordance
@@ -83,7 +89,7 @@ a base affordance type for the `_enc` and `_key` groups - all other affordances 
 
 ### number
 
-like the `paramset` "number" type, an integer number
+an integer or fractional number.
 
 ### control
 
@@ -105,27 +111,35 @@ a "held" button where `value` goes high where a key is depressed, low where a ke
 
 a button where `value` toggles between high and low on a keypress. if `lvl` has a table length greater than two, a `toggle` button will cycle forward through those brightness values.
 
+### screen
+
+the empty screen drawing affordance. define your own `redraw` handler for custom screen drawing. add `input = _screen.input{ redraw = function() end }` to an affordance for a custom screen UI.
+
 # properties
 
 ### n
 
 the index of the encoder or key to which an affordance will be mapped. assigning a table value to `n` will map to multiple inputs, either assigning a table to `value` or altering behavior (see [options](#options) and [inc](#inc))
 
-### range
+### max
 
-a table in the format `{ min, max }` to specify the range of `value`.
+max limit of `value`. use `math.huge` for no limit.
+
+### min
+
+min limit of `value`. use `-math.huge` for no limit.
 
 ### wrap
 
-a boolean value to specify whether to wrap back over the `range` boundaries
+a boolean value to specify whether to wrap back over the `mix`/`max` boundaries
 
 ### inc
 
-when n is a single value for a `_key` affordance, inc is a positive or negative number to specify by how much `value` is incrimented on a keypress. when `n` is a table, keys one and two specify an incriment of -1 and +1 which is multiplied by `inc`
+specify how much `value` is incrimented on tick (delta/keypress). when `n` is a table, one and two specify an incriment of -1 and +1 which is multiplied by `inc`
 
 ### controlspec
 
-a [`controlspec`](http://norns.local/doc/classes/controlspec.html#controlspec:new) instance which may be provided in place of `range`, `step`, `units`, `quantum`, `warp`. 
+a [`controlspec`](http://norns.local/doc/classes/controlspec.html#controlspec:new) instance which may be provided in place of `min`, `max`, `step`, `units`, `quantum`, `warp`. 
 
 ### step
 
