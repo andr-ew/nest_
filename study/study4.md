@@ -85,15 +85,16 @@ end
 ```
 bloop up a nice sequence, rerun the script, aaaaaand ... bloop conitiued. easy. what happenind? check your `data/nest_/study2` folder. there's a lua file there, and in the file there's a big table (you can edit it, by the way). the `save` function called in the global cleanup function (which runs whenever the script ends) makes a big table with all the values from the `seq` nest and writes out a lua file for that table in the script's dedicated data folder. then `load` checks for that script, runs it if it's there, and plops those values into back into the nest. you'll want to make sure to load _before_ calling `seq:init()`, so the newly recalled values are pushed to the action functions. the first argument to both `load` and `save` is an integer specifying a file number to save or load, that way multiple files may be stored and used as a preset syetem (note this is entirelly seperate from the `pset` system reserved for `params`). if no arguments are present the number chosen is 0 - it's useful to use 0 as kind of a persistent state between script runs. 
 
-one thing that's kinda wierd: the `step` value is saved in our sequencer. this means that even the sequence picks off where it left off, but for musical effectiveness you'll propbably want to load up start off on the first note every session. add this property to `step`:
+one thing that's kinda wierd: the `step` value is saved in our sequencer. this means that even the sequence picks off where it left off, but for musical effectiveness you'll propbably want to start off on the first step every fresh session. add this property to `step`:
 ```
 persistent = false
 ```
 `persistent` means "this affordance value will be saved" - it defaults to true for most, but not all, affordances. only persistent affordances will be updated on `init`.
 
+
 # patterns in space
 
-we can use these state saving functions within a script as wel - there's two affordance-wide functions for this, let's try it out with a `toggle`:
+we can use these state saving functions within a script as well - there's two affordance-wide functions for this, let's try it out with a `toggle`:
 ```
 n = nest_ {
     t = _grid.toggle {
@@ -164,7 +165,7 @@ n = nest_ {
 ```
 `pattern` is like a toggle with many states & all five keys are unique record/playback buttons. the first press initiates recording (dim blinking state), then once playback is happening it turns into a play/pause toggle. play around with creating a few asycnronous loops on your tiny keyboard. holding and releasing a loop key will clear it - you can also double tap to overdub on top of a playing pattern.
 
-five patterns playing at once might be a lot to handle for this smol synthesizer, so we might consider using a param to limit the polyphony of playback in the `pattern` affordance:
+five patterns playing at once might be a lot to handle for this smol synthesizer, so we might consider using a property to limit the polyphony of playback in the `pattern` affordance:
 ```
 count = 1
 ```

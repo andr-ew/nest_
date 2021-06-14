@@ -4,7 +4,7 @@ studies 1 & 2 covered the essential basic techniques of nest_ structures. we mea
 
 the library affordances are split into three optional modules, each operating on specific hardware. here is an overview of each:
 
-| module       | hardware | output domain | hardware key-value pairs | groups |
+| module       | hardware | output type | hardware key-value pairs | groups |
 | ---          | ---      | ---    |---             | ---
 | `grid` | grid | light | `g = grid.connect(n)` | `_grid` |
 | `arc` | arc | light |`a = arc.connect(n)` | `_arc`, `_arc.key` |
