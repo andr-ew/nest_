@@ -67,7 +67,7 @@ n = nest_ {
     }
 }
 ```
-the point variant actually get's us somewhere useful - a single toggle button, `value` switching between 0 and 1. but `level` actually lets us extend that range:
+the point variant actually get's us somewhere useful - a single toggle button, `value` switching between 0 and 1. in nest, triggers are non-binary - `level` lets us extend the range of output:
 ```
 level = { 0, 4, 8, 15 },
 ```
