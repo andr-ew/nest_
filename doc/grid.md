@@ -152,7 +152,7 @@ sets whether to respond to the rising edge of an input (`'rising'`), falling edg
 
 ### count
 
-when `value` is a table, restricts the number of simultaneous 1 values to the range given by `count = { min, max }`
+when `value` is a table, restricts the number of simultaneous high values to the range given by `count = { min, max }`
 
 ### fingers
 
