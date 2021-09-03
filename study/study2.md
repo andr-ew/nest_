@@ -170,7 +170,7 @@ n = nest_ {
     }
 }
 ```
-there you have it, `tab` up top switches between two affordance pages (though it makes more sense to do this once you've filled up the grid). but check it out - enabled _is a function_. every time `switch` is drawn, this function checks the state of tab and returns `true` or `false` accordingly. by setting a unique equlity condition for each affordance, we get pagination. 
+there you have it, `tab` up top switches between two affordance pages (though it makes more sense to do this once you've filled up the grid). but check it out - enabled _is a function_. every time `switch` is drawn, this function checks what the value of tab is and returns a `true` or `false` accordingly. by setting a unique equlity condition for each affordance, we get pagination. 
 
 believe it or not, you can send a function to most properties - try subsitituting:
 ```
