@@ -131,7 +131,7 @@ the key of a child object
 
 ### z
 
-the order of children within a `nest_` when drawn or updated by a device input. higher z values will be drawn or updated first, default = 0
+the order of children within a `nest_` when drawn or updated by a device input. higher z values will be drawn or updated first, default = 0. [here's](https://gist.github.com/andr-ew/1c8bc88e260eace46e69615c3874513e) an example of usage!
 
 ### enabled
 
