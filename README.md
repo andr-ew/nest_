@@ -67,4 +67,4 @@ include 'lib/nest/grid'
 include 'lib/nest/txt'
 ```
 
-alternatively, you can incude modules externally (other users will need to install nest first): `include 'nest_/lib/nest/core'` (watch those underscores!)
+alternatively, you can incude modules externally (you & other users will need to install nest_ from maiden): `include 'nest_/lib/nest/core'` (watch those underscores!)
