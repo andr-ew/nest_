@@ -54,7 +54,7 @@ sending two numbers to `level` specifies that high and low values that are drawn
 
 # one to many
 
-for perspecive, let's try out how the size veriants affect `toggle`:
+for perspecive, let's try out how the size variants affect `toggle`:
 ```
 n = nest_ {
     switch = _grid.toggle {
@@ -67,11 +67,7 @@ n = nest_ {
     }
 }
 ```
-the point variant actually get's us somewhere useful - a single toggle button, `value` switching between 0 and 1. in nest, triggers are non-binary - `level` lets us extend the range of output:
-```
-level = { 0, 4, 8, 15 },
-```
-now we're cycling forward from 0 to 3, with a different brightness level shown for each state. try out the different stretching values. this time, we end up with  multiple independent toggles all bound to the same action function. for a line, the value printed out is a table of toggle values:
+the point variant actually get's us somewhere useful - a single toggle button, `value` switching between 0 and 1. let's try out the different stretching values. this time, we end up with  multiple independent toggles all bound to the same action function. for a line, the value printed out is a table of toggle values:
 ```
 { 0, 1, 1, 0, 1, }
 ```
@@ -87,7 +83,11 @@ and stretching out to a plane we get a table of tables:
 ```
 you'll notice that the 1's and 0's are rotated 90 degrees from what's actually lit on the grid - that lets you index the value like this: `value[x][y]` rather than this: `value[y][x]`.
 
-(but wait, how are all these tables printing like this??? magic!)
+sidenote: in nest, triggers are non-binary - `level` lets us extend the range of output:
+```
+level = { 0, 4, 8, 15 },
+```
+now we're cycling forward from 0 to 3, with a different brightness level shown for each state.
 
 # decoupling
 
