@@ -72,6 +72,6 @@ or, you can incude modules straight from your `code/nest_` folder that holds the
 include 'nest_/lib/nest/core'
 ...
 ```
-in this scenario, you & other users will need to install nest_ from maiden
+(in this scenario, you & other users will need to install nest_ from maiden)
 
 the likely best path will probably be to include the files externally while your project is in development, then copy module files into your own project before sharing a script with other users
