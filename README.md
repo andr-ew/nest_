@@ -67,7 +67,7 @@ include 'lib/nest/grid'
 include 'lib/nest/txt'
 ```
 
-or, you can incude modules straight from your `code/nest_` folder that holds the studies (watch those underscores!):
+or, you can include modules straight from your `code/nest_` folder that holds the studies (watch those underscores!):
 ```
 include 'nest_/lib/nest/core'
 ...
