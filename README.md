@@ -58,7 +58,7 @@ the various types and interface buidling blocks of nestworld are split up into a
 
 ## including
 
-typically, it will make the most sense to include nest by copying the required module files into your script's `/lib/nest` folder, including them like so:
+you can pull in nest either by copying the required module files into your script's `/lib/nest` folder, including them like so:
 
 ```
 include 'lib/nest/core'
@@ -67,11 +67,11 @@ include 'lib/nest/grid'
 include 'lib/nest/txt'
 ```
 
-alternatively, you can incude modules externally (watch those underscores!):
+or, you can incude modules straight from your `code/nest_` folder that holds the studies (watch those underscores!):
 ```
 include 'nest_/lib/nest/core'
 ...
 ```
 you & other users will need to install nest_ from maiden
 
-the likely best path will probably be to include the files externally while your project is id development, then copy module files into your own project before sharing a script with other users
+the likely best path will probably be to include the files externally while your project is in development, then copy module files into your own project before sharing a script with other users
