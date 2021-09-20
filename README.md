@@ -73,3 +73,5 @@ include 'nest_/lib/nest/core'
 ...
 ```
 you & other users will need to install nest_ from maiden
+
+the likely best path will probably be to include the files externally while your project is id development, then copy module files into your own project before sharing a script with other users
