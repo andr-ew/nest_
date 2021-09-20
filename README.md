@@ -58,7 +58,7 @@ the various types and interface buidling blocks of nestworld are split up into a
 
 ## including
 
-you can pull in nest either by copying the required module files into your script's `/lib/nest` folder, including them like so:
+you can integrate the lib either by copying the required module files into your script's `/lib/nest` folder, including them like so:
 
 ```
 include 'lib/nest/core'
