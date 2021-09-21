@@ -13,7 +13,11 @@
 
 [_grid.fill](#fill) { ... }
 
-[_grid.number](#number) { ... }
+[_grid.number](#number) { 
+  - ... 
+  - [min](#min)
+ 
+}
 
 [_grid.control](#control) {
   - ...
