@@ -2,7 +2,7 @@
 
 ![logo](study/img/nest_.png)
 
-nest is a language of touch for objects by monome
+nest is an experimental language of touch for objects by monome
 
 **discussion thread: [https://llllllll.co/t/nest](https://llllllll.co/t/nest)**
 
