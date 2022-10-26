@@ -248,7 +248,7 @@ include 'lib/nest/norns'
 include 'lib/nest/grid'
 include 'lib/nest/txt'
 
-polysub = include 'we/lib/polysub'
+polysub = require 'engine/polysub'
 delay = include 'awake/lib/halfsecond'
 local cs = require 'controlspec'
 
