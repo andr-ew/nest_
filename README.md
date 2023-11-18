@@ -1,4 +1,4 @@
-this project is no longer maintained, original readme follows
+this project is no longer maintained, original readme follows. [crops](https://github.com/andr-ew/crops) is a follow-up to this idea.
 
 -----------
 
